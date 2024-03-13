@@ -24,12 +24,12 @@ contract TicketMarket {
        listPrice[id] = 0;
   }
 
-    // get price of dice
+    // get price of ticket
     function checkPrice(uint256 id) public view returns (uint256) {
        return listPrice[id];
  }
 
-    // Buy the dice at the requested price
+    // Buy the ticket at the requested price
     function buy(uint256 id) public payable {
        require(listPrice[id] != 0); //is listed
        require(msg.value >= listPrice[id]);
