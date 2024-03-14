@@ -42,37 +42,44 @@ contract Ticket {
     event TicketBought(uint256 indexed ticketId, address indexed buyer, uint256 price);
     event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
-function purchaseTicket(
-        uint256 _concertId,
-        string memory _concertName,
-        string memory _concertVenue,
-        uint256 _concertDate,
-        string memory _ticketCategory,
-        uint256 _ticketSectionNo,
-        uint256 _ticketSeatNo,
-        uint256 _price
-    ) external {
-        require(ticketToken.balanceOf(msg.sender) >= _price, "Insufficient TicketToken balance");
 
-        ticketCounter++;
-        tickets[ticketCounter] = ticket({
-            ticketId: ticketCounter,
-            concertId: _concertId,
-            concertName: _concertName,
-            concertVenue: _concertVenue,
-            concertDate: _concertDate,
-            ticketCategory: _ticketCategory,
-            ticketSectionNo: _ticketSectionNo,
-            ticketSeatNo: _ticketSeatNo,
-            ticketState: TicketState.Active,
-            owner: msg.sender,
-            prevOwner: msg.sender,
-            price: _price
-        });
-        ownedTickets[msg.sender][ticketCounter] = true;
-        //ticketToken.transferFrom(msg.sender, address(this), _price); // Transfer TicketToken from buyer to Ticket contract
-        emit TicketPurchased(msg.sender, ticketCounter, _price);
+    constructor(address _ticketToken) {
+    organizer = msg.sender;
+    ticketToken = TicketToken(_ticketToken);
+    ticketState = TicketState.Active; // Initialize ticketState
     }
+
+    function purchaseTicket(
+            uint256 _concertId,
+            string memory _concertName,
+            string memory _concertVenue,
+            uint256 _concertDate,
+            string memory _ticketCategory,
+            uint256 _ticketSectionNo,
+            uint256 _ticketSeatNo,
+            uint256 _price
+        ) external {
+            require(ticketToken.balanceOf(msg.sender) >= _price, "Insufficient TicketToken balance");
+
+            ticketCounter++;
+            tickets[ticketCounter] = ticket({
+                ticketId: ticketCounter,
+                concertId: _concertId,
+                concertName: _concertName,
+                concertVenue: _concertVenue,
+                concertDate: _concertDate,
+                ticketCategory: _ticketCategory,
+                ticketSectionNo: _ticketSectionNo,
+                ticketSeatNo: _ticketSeatNo,
+                ticketState: TicketState.Active,
+                owner: msg.sender,
+                prevOwner: msg.sender,
+                price: _price
+            });
+            ownedTickets[msg.sender][ticketCounter] = true;
+            //ticketToken.transferFrom(msg.sender, address(this), _price); // Transfer TicketToken from buyer to Ticket contract
+            emit TicketPurchased(msg.sender, ticketCounter, _price);
+        }
 
     // Function Modifiers
 
