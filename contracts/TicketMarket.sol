@@ -8,12 +8,13 @@ contract TicketMarket {
     uint256 public commissionFee;
     address _owner = msg.sender;
     mapping(uint256 => uint256) listPrice;
-     constructor(Ticket ticketAddress, uint256 fee) {
+
+    constructor(Ticket ticketAddress, uint256 fee) {
         ticketContract = ticketAddress;
         commissionFee = fee;
     }
 
-    //list a ticket for sale. Price needs to be >= value + fee
+    // List a ticket for sale. Price needs to be >= value + fee
     function list(uint256 id, uint256 price) public {
        require(price >= (ticketContract.getPrice(id) + commissionFee));
        require(msg.sender == ticketContract.getPrevOwner(id));
