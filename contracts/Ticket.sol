@@ -4,7 +4,7 @@ import "./ERC20.sol";
 
 contract Ticket {
     enum ticketStates {
-        New,
+        Active,
         Redeemed,
         Frozen
     }
