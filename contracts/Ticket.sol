@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./ERC20.sol";
+import "./TicketToken.sol";
 
 contract Ticket {
 
@@ -30,6 +31,7 @@ contract Ticket {
     mapping(uint256 => ticket) public tickets;
     mapping(address => mapping(uint256 => bool)) public ownedTickets;
 
+    TicketToken public ticketToken;
     TicketState public ticketState;
     uint256 public ticketCounter = 0;
     address public organizer;
@@ -40,12 +42,7 @@ contract Ticket {
     event TicketBought(uint256 indexed ticketId, address indexed buyer, uint256 price);
     event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
-    constructor(address _detToken) {
-        organizer = msg.sender;
-        detToken = ERC20(_detToken);
-    }
-
-    function purchaseTicket(
+function purchaseTicket(
         uint256 _concertId,
         string memory _concertName,
         string memory _concertVenue,
@@ -55,6 +52,8 @@ contract Ticket {
         uint256 _ticketSeatNo,
         uint256 _price
     ) external {
+        require(ticketToken.balanceOf(msg.sender) >= _price, "Insufficient TicketToken balance");
+
         ticketCounter++;
         tickets[ticketCounter] = ticket({
             ticketId: ticketCounter,
@@ -71,6 +70,7 @@ contract Ticket {
             price: _price
         });
         ownedTickets[msg.sender][ticketCounter] = true;
+        //ticketToken.transferFrom(msg.sender, address(this), _price); // Transfer TicketToken from buyer to Ticket contract
         emit TicketPurchased(msg.sender, ticketCounter, _price);
     }
 
