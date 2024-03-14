@@ -77,7 +77,7 @@ contract Ticket {
             ticketCategory: _ticketCategory,
             ticketSectionNo: _ticketSectionNo,
             ticketSeatNo: _ticketSeatNo,
-            ticketState: TicketState.New,
+            ticketState: TicketState.Active,
             owner: msg.sender,
             price: _price
         });
@@ -102,17 +102,17 @@ contract Ticket {
             "You don't own this ticket"
         );
         require(
-            tickets[_ticketId].ticketState == TicketState.New,
+            tickets[_ticketId].ticketState == TicketState.Active,
             "Ticket is not eligible for resale"
         );
         tickets[_ticketId].price = _price;
         emit TicketListedForSale(_ticketId, _price);
     }
 
-    function buyTicket(uint256 _ticketId) atState(TicketState.new) external payable {
+    function buyTicket(uint256 _ticketId) atState(TicketState.Active) external payable {
         Ticket storage ticket = tickets[_ticketId];
         require(
-            ticket.ticketState == TicketState.New,
+            ticket.ticketState == TicketState.Active,
             "Ticket is not available for purchase"
         );
         require(msg.value >= ticket.price, "Insufficient funds");
@@ -124,7 +124,7 @@ contract Ticket {
         emit TicketBought(_ticketId, msg.sender, ticket.price);
     }
 
-    function redeemTicket(uint256 _ticketId) atState(TicketState.new) external {
+    function redeemTicket(uint256 _ticketId) atState(TicketState.Active) external {
         require(
             ownedTickets[msg.sender][_ticketId],
             "You don't own this ticket"
@@ -152,7 +152,37 @@ contract Ticket {
 
     // Getter Functions for Ticket attributes
 
-    function getTicket
+    function getTicketId(uint256 ticketId) public view validTicketId(ticketId) returns (uint256) {
+        return tickets[ticketId].ticketId;
+    }
+
+    function getConcertId(uint256 ticketId) public view validTicketId(ticketId) returns (uint256) {
+        return tickets[ticketId].concertId;
+    }
+
+    function getConcertName(uint256 ticketId) public view validTicketId(ticketId) returns (string memory) {
+        return tickets[ticketId].concertName;
+    }
+
+    function getConcertVenue(uint256 ticketId) public view validTicketId(ticketId) returns (string memory) {
+        return tickets[ticketId].concertVenue;
+    }
+
+    function getConcertDate(uint256 ticketId) public view validTicketId(ticketId) returns (uint256) {
+        return tickets[ticketId].concertDate;
+    }
+
+    function getTicketCategory(uint256 ticketId) public view validTicketId(ticketId) returns (string memory) {
+        return tickets[ticketId].ticketCategory;
+    }
+
+    function getTicketSectionNo(uint256 ticketId) public view validTicketId(ticketId) returns (uint256) {
+        return tickets[ticketId].ticketSectionNo;
+    }
+
+    function getTicketSeatNo(uint256 ticketId) public view validTicketId(ticketId) returns (uint256) {
+        return tickets[ticketId].ticketSeatNo;
+    }
 
     function getTicketState(uint256 diceId) public view validTicketId(ticketId) returns (uint256) {
         return tickets[ticketId].ticketState;
@@ -164,5 +194,9 @@ contract Ticket {
 
     function getPrevOwner(uint256 ticketId) public view validTicketId(ticketId) returns (address) {
         return tickets[ticketId].prevOwner;
+    }
+
+    function getPrice(uint256 ticketId) public view validTicketId(ticketId) returns (uint256) {
+        return tickets[ticketId].price;
     }
 }
