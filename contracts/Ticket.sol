@@ -101,25 +101,25 @@ contract Ticket {
     }
 
     function buyTicket(uint256 _ticketId) atState(TicketState.Active) external payable {
-        ticket storage ticket = tickets[_ticketId]; // Correct variable declaration
+        ticket storage ticketBuy = tickets[_ticketId]; // Correct variable declaration
 
-        require(ticket.ticketState == TicketState.Active, "Ticket is not available for purchase");
-        require(msg.value >= ticket.price, "Insufficient funds");
-        require(ticket.owner != msg.sender, "You already own this ticket");
-        payable(ticket.owner).transfer(ticket.price); // Transfer funds to seller using payable address
-        ticket.owner = msg.sender;
-        ticket.ticketState = TicketState.Redeemed;
+        require(ticketBuy.ticketState == TicketState.Active, "Ticket is not available for purchase");
+        require(msg.value >= ticketBuy.price, "Insufficient funds");
+        require(ticketBuy.owner != msg.sender, "You already own this ticket");
+        payable(ticketBuy.owner).transfer(ticketBuy.price); // Transfer funds to seller using payable address
+        ticketBuy.owner = msg.sender;
+        ticketBuy.ticketState = TicketState.Redeemed;
         ownedTickets[msg.sender][_ticketId] = true;
-        emit TicketBought(_ticketId, msg.sender, ticket.price);
+        emit TicketBought(_ticketId, msg.sender, ticketBuy.price);
     }
 
     function redeemTicket(uint256 _ticketId) atState(TicketState.Active) external {
         require(ownedTickets[msg.sender][_ticketId], "You don't own this ticket");
-        ticket storage ticket = tickets[_ticketId]; // Correct variable declaration
+        ticket storage ticketRedeem = tickets[_ticketId]; // Correct variable declaration
 
         // Once the ticket is redeemed, the ticketState is then set to "Redeemed"
-        ticket.ticketState = TicketState.Redeemed;
-        detToken.transfer(msg.sender, calculateDETSReward(ticket.ticketCategory)); // Transfer tokens using ERC20 contract instance
+        ticketRedeem.ticketState = TicketState.Redeemed;
+        detToken.transfer(msg.sender, calculateDETSReward(ticketRedeem.ticketCategory)); // Transfer tokens using ERC20 contract instance
         emit TicketRedeemed(_ticketId, msg.sender);
     }
 

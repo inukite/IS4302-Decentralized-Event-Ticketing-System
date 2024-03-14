@@ -8,7 +8,7 @@ contract TicketMarket {
     uint256 public commissionFee;
     address _owner = msg.sender;
     mapping(uint256 => uint256) listPrice;
-     constructor(Ticket ticketAddress, uint256 fee) public {
+     constructor(Ticket ticketAddress, uint256 fee) {
         ticketContract = ticketAddress;
         commissionFee = fee;
     }
