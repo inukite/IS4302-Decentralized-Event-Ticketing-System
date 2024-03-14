@@ -81,20 +81,26 @@ contract Ticket {
         _;
     }
 
+    // Modifier to ensure and check the ticketState
+    modifier atState(TicketState _state) {
+        require(ticketState == _state, "Ticket at wrong state, action not performed");
+        _;
+    }
+
     // Modifier to ensure that the ticketId is valid doesn't exceed count of total tickets (ticketCounter) 
     modifier validTicketId(uint256 ticketId) {
         require(ticketId < ticketCounter);
         _;
     }
 
-    function listTicketForSale(uint256 _ticketId, uint256 _price) external {
+    function listTicketForSale(uint256 _ticketId, uint256 _price) atState(TicketState.Active) external {
         require(ownedTickets[msg.sender][_ticketId], "You don't own this ticket");
         require(tickets[_ticketId].ticketState == TicketState.Active, "Ticket is not eligible for resale");
         tickets[_ticketId].price = _price;
         emit TicketListedForSale(_ticketId, _price);
     }
 
-    function buyTicket(uint256 _ticketId) external payable {
+    function buyTicket(uint256 _ticketId) atState(TicketState.Active) external payable {
         ticket storage ticket = tickets[_ticketId]; // Correct variable declaration
 
         require(ticket.ticketState == TicketState.Active, "Ticket is not available for purchase");
@@ -107,7 +113,7 @@ contract Ticket {
         emit TicketBought(_ticketId, msg.sender, ticket.price);
     }
 
-    function redeemTicket(uint256 _ticketId) external {
+    function redeemTicket(uint256 _ticketId) atState(TicketState.Active) external {
         require(ownedTickets[msg.sender][_ticketId], "You don't own this ticket");
         ticket storage ticket = tickets[_ticketId]; // Correct variable declaration
 
@@ -115,7 +121,7 @@ contract Ticket {
         ticket.ticketState = TicketState.Redeemed;
         detToken.transfer(msg.sender, calculateDETSReward(ticket.ticketCategory)); // Transfer tokens using ERC20 contract instance
         emit TicketRedeemed(_ticketId, msg.sender);
-}
+    }
 
     function calculateDETSReward(
         string memory _ticketCategory
@@ -125,7 +131,6 @@ contract Ticket {
         uint256 reward = 100; // Arbitrary value, you should adjust it according to your requirement
         return reward;
     }
-
 
     // Getter Functions for Ticket attributes
 
