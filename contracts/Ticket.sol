@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./ERC20.sol";
+import "./TicketToken.sol";
 
 contract Ticket {
 
@@ -30,6 +31,7 @@ contract Ticket {
     mapping(uint256 => ticket) public tickets;
     mapping(address => mapping(uint256 => bool)) public ownedTickets;
 
+    TicketToken public ticketToken;
     TicketState public ticketState;
     uint256 public ticketCounter = 0;
     address public organizer;
@@ -40,39 +42,44 @@ contract Ticket {
     event TicketBought(uint256 indexed ticketId, address indexed buyer, uint256 price);
     event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
-    constructor(address _detToken) {
-        organizer = msg.sender;
-        detToken = ERC20(_detToken);
+
+    constructor(address _ticketToken) {
+    organizer = msg.sender;
+    ticketToken = TicketToken(_ticketToken);
+    ticketState = TicketState.Active; // Initialize ticketState
     }
 
     function purchaseTicket(
-        uint256 _concertId,
-        string memory _concertName,
-        string memory _concertVenue,
-        uint256 _concertDate,
-        string memory _ticketCategory,
-        uint256 _ticketSectionNo,
-        uint256 _ticketSeatNo,
-        uint256 _price
-    ) external {
-        ticketCounter++;
-        tickets[ticketCounter] = ticket({
-            ticketId: ticketCounter,
-            concertId: _concertId,
-            concertName: _concertName,
-            concertVenue: _concertVenue,
-            concertDate: _concertDate,
-            ticketCategory: _ticketCategory,
-            ticketSectionNo: _ticketSectionNo,
-            ticketSeatNo: _ticketSeatNo,
-            ticketState: TicketState.Active,
-            owner: msg.sender,
-            prevOwner: msg.sender,
-            price: _price
-        });
-        ownedTickets[msg.sender][ticketCounter] = true;
-        emit TicketPurchased(msg.sender, ticketCounter, _price);
-    }
+            uint256 _concertId,
+            string memory _concertName,
+            string memory _concertVenue,
+            uint256 _concertDate,
+            string memory _ticketCategory,
+            uint256 _ticketSectionNo,
+            uint256 _ticketSeatNo,
+            uint256 _price
+        ) external {
+            require(ticketToken.balanceOf(msg.sender) >= _price, "Insufficient TicketToken balance");
+
+            ticketCounter++;
+            tickets[ticketCounter] = ticket({
+                ticketId: ticketCounter,
+                concertId: _concertId,
+                concertName: _concertName,
+                concertVenue: _concertVenue,
+                concertDate: _concertDate,
+                ticketCategory: _ticketCategory,
+                ticketSectionNo: _ticketSectionNo,
+                ticketSeatNo: _ticketSeatNo,
+                ticketState: TicketState.Active,
+                owner: msg.sender,
+                prevOwner: msg.sender,
+                price: _price
+            });
+            ownedTickets[msg.sender][ticketCounter] = true;
+            //ticketToken.transferFrom(msg.sender, address(this), _price); // Transfer TicketToken from buyer to Ticket contract
+            emit TicketPurchased(msg.sender, ticketCounter, _price);
+        }
 
     // Function Modifiers
 

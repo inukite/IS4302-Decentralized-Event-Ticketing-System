@@ -23,4 +23,8 @@ contract TicketToken {
         return erc20Contract.balanceOf(msg.sender);
     }
 
+    function balanceOf(address account) public view returns (uint256) {
+        return erc20Contract.balanceOf(account);
+    }
+
 }
