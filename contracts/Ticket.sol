@@ -181,4 +181,10 @@ contract Ticket {
     function getPrice(uint256 ticketId) public view validTicketId(ticketId) returns (uint256) {
         return tickets[ticketId].price;
     }
+
+    function transfer(uint256 ticketId, address newOwner, uint256 price) payable public {
+        ticket storage ticketTrans = tickets[ticketId];
+        ticketTrans.owner = newOwner;
+        emit TicketBought(ticketId, newOwner, price);
+    }
 }
