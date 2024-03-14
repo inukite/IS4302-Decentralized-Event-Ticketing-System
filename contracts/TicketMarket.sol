@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.0;
 
+import "./Ticket.sol";
+
 contract TicketMarket {
 
     Ticket ticketContract;
     uint256 public commissionFee;
     address _owner = msg.sender;
     mapping(uint256 => uint256) listPrice;
-     constructor(Ticket ticketAddress, uint256 fee) public {
+
+    constructor(Ticket ticketAddress, uint256 fee) {
         ticketContract = ticketAddress;
         commissionFee = fee;
     }
@@ -22,18 +25,18 @@ contract TicketMarket {
     function unlist(uint256 id) public {
        require(msg.sender == ticketContract.getPrevOwner(id));
        listPrice[id] = 0;
-  }
+    }
 
     // get price of ticket
     function checkPrice(uint256 id) public view returns (uint256) {
        return listPrice[id];
- }
+    }
 
     // Buy the ticket at the requested price
     function buy(uint256 id) public payable {
        require(listPrice[id] != 0); //is listed
        require(msg.value >= listPrice[id]);
-       address payable recipient = address(uint160(ticketContract.getPrevOwner(id)));
+       address payable recipient = payable(address(uint160(ticketContract.getPrevOwner(id))));
        recipient.transfer(msg.value - commissionFee);    //transfer (price-commissionFee) to real owner
        ticketContract.transfer(id, msg.sender);
     }
