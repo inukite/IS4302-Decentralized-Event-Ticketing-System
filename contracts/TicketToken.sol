@@ -7,7 +7,7 @@ contract TicketToken {
     uint256 currentSupply;
     address owner;
     
-    constructor() {
+    constructor() public {
         ERC20 e = new ERC20();
         erc20Contract = e;
         owner = msg.sender;
@@ -23,4 +23,8 @@ contract TicketToken {
         return erc20Contract.balanceOf(msg.sender);
     }
 
+    function balanceOf(address account) public view returns (uint256) {
+        return erc20Contract.balanceOf(account);
+    }
+    
 }
