@@ -1,4 +1,4 @@
-const _deploy_contracts = require("../migrations/deploy_contracts");
+const _deploy_contracts = require("../migrations/2_deploy_contracts");
 const truffleAssert = require("truffle-assertions"); // npm truffle-assertions
 const BigNumber = require("bignumber.js"); // npm install bignumber.js
 const { time, expectRevert } = require('@openzeppelin/test-helpers'); // npm install @openzeppelin/test-helpers

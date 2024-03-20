@@ -120,7 +120,7 @@ contract Ticket {
         emit TicketBought(_ticketId, msg.sender, ticketBuy.price);
     }
 
-    function redeemTicket(uint256 _ticketId) atState(TicketState.Active) external {
+    /*function redeemTicket(uint256 _ticketId) atState(TicketState.Active) external {
         require(ownedTickets[msg.sender][_ticketId], "You don't own this ticket");
         ticket storage ticketRedeem = tickets[_ticketId]; // Correct variable declaration
 
@@ -128,16 +128,16 @@ contract Ticket {
         ticketRedeem.ticketState = TicketState.Redeemed;
         detToken.transfer(msg.sender, calculateDETSReward(ticketRedeem.ticketCategory)); // Transfer tokens using ERC20 contract instance
         emit TicketRedeemed(_ticketId, msg.sender);
-    }
+    }*/
 
-    function calculateDETSReward(
+    /*function calculateDETSReward(
         string memory _ticketCategory
     ) internal view returns (uint256) {
         // You can implement your logic for calculating DETS reward based on ticket category here
         // For demonstration purposes, let's assume a fixed reward for simplicity
         uint256 reward = 100; // Arbitrary value, you should adjust it according to your requirement
         return reward;
-    }
+    }*/
 
     // Getter Functions for Ticket attributes
 
