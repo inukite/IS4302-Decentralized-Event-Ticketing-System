@@ -42,7 +42,6 @@ contract Ticket {
     event TicketBought(uint256 indexed ticketId, address indexed buyer, uint256 price);
     event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
-
     constructor(address _ticketToken) {
     organizer = msg.sender;
     ticketToken = TicketToken(_ticketToken);

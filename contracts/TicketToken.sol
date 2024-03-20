@@ -26,5 +26,4 @@ contract TicketToken {
     function balanceOf(address account) public view returns (uint256) {
         return erc20Contract.balanceOf(account);
     }
-
 }
