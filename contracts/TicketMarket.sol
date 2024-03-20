@@ -148,4 +148,9 @@ contract TicketMarket {
         }
         return availableTickets > 0;
     }
+
+    // get price of ticket
+    function checkPrice(uint256 id) public view returns (uint256) {
+        return listPrice[id];
+    }
 }

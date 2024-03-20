@@ -6187,12 +6187,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x50B7570f3daEbbB4964DB7a67Ce57b1F1DDF7BDE",
-      "transactionHash": "0xee4498afe6fa284b3901afbaaf5fd50c9f4b8afdf412e214d476a122675fc676"
+      "address": "0x89E452d135120e45923b51b6dc89E0d20877472c",
+      "transactionHash": "0xccabdf766a7d0fcbb8fa3eaa6f29ebca96e7af1f6034b39d186d7dff678adada"
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-03-20T16:59:39.561Z",
+  "updatedAt": "2024-03-20T17:33:31.524Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
