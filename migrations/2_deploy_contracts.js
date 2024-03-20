@@ -16,6 +16,7 @@ const ERC20 = artifacts.require('ERC20');
 const TicketToken = artifacts.require('TicketToken');
 const TicketMarket = artifacts.require('TicketMarket');
 const LoyaltyPoints = artifacts.require('LoyaltyPoints');
+const PriorityQueue = artifacts.require('PriorityQueue');
 
 module.exports = function (deployer, network, accounts) {
   // Define the commission fee for the TicketMarket
@@ -23,11 +24,12 @@ module.exports = function (deployer, network, accounts) {
 
   deployer.deploy(ERC20).then(() => {
     return deployer.deploy(TicketToken).then((ticketTokenInstance) => {
-      return deployer
-        .deploy(TicketMarket, ticketTokenInstance.address, commissionFee)
-        .then(() => {
-          return deployer.deploy(LoyaltyPoints);
+      return deployer.deploy(PriorityQueue).then(() => {
+        return deployer.deploy(LoyaltyPoints).then((loyaltyPointsInstance) => {
+          return deployer.deploy(TicketMarket, ticketTokenInstance.address, commissionFee, loyaltyPointsInstance.address);
         });
+      });
     });
   });
 };
+

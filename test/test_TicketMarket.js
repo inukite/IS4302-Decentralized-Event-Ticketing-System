@@ -9,7 +9,8 @@ contract("TicketMarket", function (accounts) {
 
     beforeEach(async () => {
         ticketTokenInstance = await TicketToken.new();
-        ticketMarketInstance = await TicketMarket.new(ticketTokenInstance.address, 0); // let the commission fee be 0
+        // Deploy TicketMarket contract with commission fee and address of LoyaltyPoints
+        ticketMarketInstance = await TicketMarket.new(ticketTokenInstance.address, web3.utils.toWei('0.01', 'ether'), accounts[0]); 
     });
 
     it("should allow buying a ticket with enough TicketToken", async () => {
