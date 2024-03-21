@@ -9,7 +9,6 @@ import "./LoyaltyPoints.sol";
 
 interface ITicket {
     function getPrice(uint256 ticketId) external view returns (uint256);
-    function getOrganizer(uint256 ticketId) external view returns (address);
     function getPrevOwner(uint256 ticketId) external view returns (address);
     function getOwner(uint256 ticketId) external view returns (address);
     function getTicketState(
@@ -48,8 +47,8 @@ contract TicketMarket {
     constructor(
         address _ticketContract,
         uint256 fee
-        //address _loyaltyPointsAddress
-    ) {
+    ) //address _loyaltyPointsAddress
+    {
         ticketContract = ITicket(_ticketContract);
         commissionFee = fee;
         owner = msg.sender;
