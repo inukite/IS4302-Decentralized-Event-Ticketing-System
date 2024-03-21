@@ -17,8 +17,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     },
     {
       "inputs": [
@@ -62,8 +61,7 @@
         }
       ],
       "stateMutability": "view",
-      "type": "function",
-      "constant": true
+      "type": "function"
     }
   ],
   "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"dequeue\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_addr\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_priority\",\"type\":\"uint256\"}],\"name\":\"enqueue\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"isEmpty\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"size\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/PriorityQueue.sol\":\"PriorityQueue\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/PriorityQueue.sol\":{\"keccak256\":\"0x22a7146a054ccc5cb7595af6681fefd2c7c658d263a847a954f4296b650e00bf\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://18afec1dc0d3225e8787b6ca00cf61827bd018c033353d61733a1969a52d1b17\",\"dweb:/ipfs/QmV4gsD7dMZj2roMj5FmpWvkMXharSdkiasas7KTitcb7P\"]}},\"version\":1}",
@@ -6192,8 +6190,7 @@
     }
   },
   "schemaVersion": "3.4.16",
-  "updatedAt": "2024-03-21T06:59:51.315Z",
-  "networkType": "ethereum",
+  "updatedAt": "2024-03-21T14:55:36.250Z",
   "devdoc": {
     "kind": "dev",
     "methods": {},

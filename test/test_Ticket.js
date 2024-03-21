@@ -12,7 +12,8 @@ contract("Ticket", function (accounts) {
 
     const organizer = accounts[0];
     const attendee1 = accounts[1];
-    
+    const attendee2 = accounts[2];
+
     it("should deploy the contracts correctly", async () => {
         assert(ticketInstance.address, "Ticket contract was not deployed");
     });
@@ -32,7 +33,7 @@ contract("Ticket", function (accounts) {
         const ticketCategory = "CAT1"
         const ticketSectionNo = 2
         const ticketSeatNo = 300
-        const price = 200
+        const price = web3.utils.toWei("0.1", "ether");
 
         const result = await ticketInstance.createTicket(
             concertId,
@@ -48,10 +49,8 @@ contract("Ticket", function (accounts) {
         assert.equal(ticketCreatedEvent.owner, organizer, 'Owner is not set correctly.');
     });
 
-
     //Test that the redeem ticket function works
     it('redeems a ticket', async () => {
-
         const concertId = 2;
         const concertName = "Taylor Swift";
         const concertVenue = "Singapore Indoor Sports Hall"
@@ -59,7 +58,8 @@ contract("Ticket", function (accounts) {
         const ticketCategory = "CAT1"
         const ticketSectionNo = 2
         const ticketSeatNo = 300
-        const price = 200
+        const price = web3.utils.toWei("0.1", "ether");
+
         await ticketInstance.createTicket(
             concertId,
             concertName,
@@ -84,7 +84,7 @@ contract("Ticket", function (accounts) {
         const ticketCategory = "CAT1"
         const ticketSectionNo = 2
         const ticketSeatNo = 300
-        const price = 200
+        const price = web3.utils.toWei("0.1", "ether");
 
         await ticketInstance.createTicket(
             concertId,
@@ -103,7 +103,6 @@ contract("Ticket", function (accounts) {
 
     //Test that the transfer ownership function works
     it('transfers ticket ownership', async () => {
-
         const concertId = 4;
         const concertName = "Taylor Swift";
         const concertVenue = "Singapore Indoor Sports Hall"

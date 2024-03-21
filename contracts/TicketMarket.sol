@@ -1,29 +1,48 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./ERC20.sol";
 import "./Ticket.sol";
+import "./TicketToken.sol";
 import "./PriorityQueue.sol";
 import "./LoyaltyPoints.sol";
 
+interface ITicket {
+    function getPrevOwner(uint256 ticketId) external view returns (address);
+    function getOwner(uint256 ticketId) external view returns (address);
+    function getTicketState(
+        uint256 ticketId
+    ) external view returns (Ticket.TicketState);
+    function transfer(uint256 ticketId, address newOwner) external;
+}
+
 contract TicketMarket {
-    Ticket ticketContract;
-    uint256 public commissionFee;
     address public owner;
+    ITicket public ticketContract;
+    TicketToken public ticketTokenContract;
+    uint256 public commissionFee = 0.01 ether;
+
     PriorityQueue public buyerQueue;
     LoyaltyPoints public loyaltyPoints;
 
+    // Mapping from ticket ID to listing price
     mapping(uint256 => uint256) public listPrice;
 
     uint256[] private listedTickets; // To track listed ticket IDs
 
     // Event emitted when a ticket is listed for sale
-    event TicketListed(uint256 indexed id, uint256 price);
+    event TicketListed(uint256 ticketId, uint256 price);
+    event TicketUnlisted(uint256 ticketId);
+    event TicketSold(uint256 ticketId, address buyer, uint256 price);
 
-    // Event emitted when a ticket is unlisted
-    event TicketUnlisted(uint256 indexed id);
-
-    // Event emitted when a ticket is bought
-    event TicketBought(uint256 indexed id, address buyer, uint256 price);
+    // Modifier to check if the caller is the ticket owner
+    modifier onlyTicketOwner(uint256 ticketId) {
+        require(
+            ticketContract.getOwner(ticketId) == msg.sender,
+            "Caller is not the ticket owner"
+        );
+        _;
+    }
 
     // Event emitted when a ticket is transferred
     event TicketTransferred(
@@ -34,11 +53,11 @@ contract TicketMarket {
     );
 
     constructor(
-        Ticket ticketAddress,
+        address _ticketContract,
         uint256 fee,
         address _loyaltyPointsAddress
     ) {
-        ticketContract = ticketAddress;
+        ticketContract = ITicket(_ticketContract);
         commissionFee = fee;
         owner = msg.sender;
         loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
@@ -46,31 +65,23 @@ contract TicketMarket {
     }
 
     // List a ticket for sale. Price needs to be >= value + fee
-    function list(uint256 id, uint256 price) public {
-        require(
-            price >= ticketContract.getPrice(id) + commissionFee,
-            "Price must cover the ticket price and commission fee"
-        );
-        require(
-            msg.sender == ticketContract.getPrevOwner(id),
-            "Only the previous owner can list the ticket"
-        );
-        listPrice[id] = price;
-        listedTickets.push(id); // Add ticket ID to the list of listed tickets
-        emit TicketListed(id, price); // Emit event for ticket listing
+    function list(
+        uint256 ticketId,
+        uint256 price
+    ) public onlyTicketOwner(ticketId) {
+        // Set the listing price for the ticket
+        emit TicketListed(ticketId, price);
+        listPrice[ticketId] = price;
+        listedTickets.push(ticketId); // Add ticket ID to the list of listed tickets
     }
 
-    function unlist(uint256 id) public {
-        require(
-            msg.sender == ticketContract.getPrevOwner(id),
-            "Only the previous owner can unlist the ticket"
-        );
-        listPrice[id] = 0;
-        emit TicketUnlisted(id); // Emit event for ticket unlisting
+    function unlist(uint256 ticketId) public onlyTicketOwner(ticketId) {
+        listPrice[ticketId] = 0;
+        emit TicketUnlisted(ticketId); // Emit event for ticket unlisting
 
         // Remove the ticket ID from listedTickets
         for (uint256 i = 0; i < listedTickets.length; i++) {
-            if (listedTickets[i] == id) {
+            if (listedTickets[i] == ticketId) {
                 listedTickets[i] = listedTickets[listedTickets.length - 1]; // Move the last element to the current index
                 listedTickets.pop(); // Remove the last element
                 break; // Exit the loop once the ticket ID is removed
@@ -79,8 +90,8 @@ contract TicketMarket {
     }
 
     // Get price of ticket
-    function getTicketPrice(uint256 id) public view returns (uint256) {
-        return listPrice[id];
+    function getTicketPrice(uint256 ticketId) public view returns (uint256) {
+        return listPrice[ticketId];
     }
 
     //Addition of PriorityQueue
@@ -103,7 +114,7 @@ contract TicketMarket {
 
             // Transfer the ticket and emit an event.
             ticketContract.transfer(ticketId, buyer);
-            emit TicketBought(ticketId, buyer, ticketPrice);
+            emit TicketSold(ticketId, buyer, ticketPrice);
 
             // Remove the ticket from the listing.
             unlist(ticketId);
@@ -111,33 +122,36 @@ contract TicketMarket {
     }
 
     // Buy the ticket at the requested price
-    function buy(uint256 id) public payable {
+    function buy(uint256 ticketId) public payable {
         // Check if the ticket is listed for sale
-        require(listPrice[id] != 0, "Ticket must be listed for sale");
+        require(listPrice[ticketId] != 0, "Ticket must be listed for sale");
         // Check if payment is enough
-        require(msg.value >= listPrice[id], "Insufficient payment");
+        require(msg.value >= listPrice[ticketId], "Insufficient payment");
 
-        address payable recipient = payable(ticketContract.getPrevOwner(id));
+        address ticketOwner = ticketContract.getOwner(ticketId);
+        require(msg.sender != ticketOwner, "Buyer already owns the ticket");
+
+        address payable recipient = payable(
+            ticketContract.getPrevOwner(ticketId)
+        );
 
         // Calculate the amount to transfer to the ticket owner after deducting the commission fee
-        uint256 amountToTransfer = listPrice[id] - commissionFee;
+        uint256 amountToTransfer = listPrice[ticketId] - commissionFee;
         // Transfer payment to the ticket owner after deducting the commission fee
         recipient.transfer(amountToTransfer);
 
+        // Transfer ownership in the Ticket contract
+        ticketContract.transfer(ticketId, msg.sender);
+
         // Emit event for ticket purchase
-        emit TicketBought(id, msg.sender, listPrice[id]);
+        emit TicketSold(ticketId, msg.sender, listPrice[ticketId]);
 
         // Transfer ownership of the ticket
-        ticketContract.transfer(id, msg.sender);
+        ticketContract.transfer(ticketId, msg.sender);
 
         // Remove the ticket from the listing after purchase
-        listPrice[id] = 0;
+        listPrice[ticketId] = 0;
     }
-
-    /*function withdraw() public {
-        require(msg.sender == owner, "Only the owner can withdraw funds");
-        payable(owner).transfer(address(this).balance);
-    }*/
 
     function thereAreTicketsAvailable() public view returns (bool) {
         uint256 availableTickets = 0;
