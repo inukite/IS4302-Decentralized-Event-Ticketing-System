@@ -102,7 +102,7 @@ contract TicketMarket {
             uint256 ticketPrice = listPrice[ticketId];
 
             // Transfer the ticket and emit an event.
-            ticketContract.transfer(ticketId, buyer, ticketPrice);
+            ticketContract.transfer(ticketId, buyer);
             emit TicketBought(ticketId, buyer, ticketPrice);
 
             // Remove the ticket from the listing.
@@ -128,7 +128,7 @@ contract TicketMarket {
         emit TicketBought(id, msg.sender, listPrice[id]);
 
         // Transfer ownership of the ticket
-        ticketContract.transfer(id, msg.sender, listPrice[id]);
+        ticketContract.transfer(id, msg.sender);
 
         // Remove the ticket from the listing after purchase
         listPrice[id] = 0;
