@@ -47,14 +47,14 @@ contract TicketMarket {
 
     constructor(
         address _ticketContract,
-        uint256 fee,
-        address _loyaltyPointsAddress
+        uint256 fee
+        //address _loyaltyPointsAddress
     ) {
         ticketContract = ITicket(_ticketContract);
         commissionFee = fee;
         owner = msg.sender;
-        loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
-        buyerQueue = new PriorityQueue();
+        //loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
+        //buyerQueue = new PriorityQueue();
     }
 
     // List a ticket for sale. Price needs to be >= value + fee

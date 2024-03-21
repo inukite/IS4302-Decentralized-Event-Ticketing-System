@@ -33,4 +33,3 @@ module.exports = async function (deployer, network, accounts) {
   // Deploy TicketMarket with the necessary addresses and commission fee
   await deployer.deploy(TicketMarket, ticketInstance.address, commissionFee, loyaltyPointsInstance.address);
 };
-

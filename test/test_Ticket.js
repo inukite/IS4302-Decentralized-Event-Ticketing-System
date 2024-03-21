@@ -10,7 +10,7 @@ contract("Ticket", function (accounts) {
         ticketInstance = await Ticket.new(ticketTokenInstance.address);
     });
 
-    const organizer = accounts[0];
+    const owner = accounts[0];
     const attendee1 = accounts[1];
     const attendee2 = accounts[2];
 
@@ -19,9 +19,9 @@ contract("Ticket", function (accounts) {
     });
 
     //Test that the organizer is correctly set for the ticket
-    it('deploys successfully and sets the organizer', async () => {
-        const organizerAddress = await ticketInstance.organizer();
-        assert.equal(organizerAddress, organizer, 'The organizer is not set correctly.');
+    it('deploys successfully and sets the owner', async () => {
+        const ownerAddress = await ticketInstance.owner();
+        assert.equal(ownerAddress, owner, 'The owner is not set correctly.');
     });
 
     //Check that the ticket was corrected correctly
@@ -43,10 +43,10 @@ contract("Ticket", function (accounts) {
             ticketCategory,
             ticketSectionNo,
             ticketSeatNo,
-            price, { from: organizer });
+            price, { from: owner });
         const ticketCreatedEvent = result.logs[0].args;
         assert.equal(ticketCreatedEvent.ticketId.toNumber(), 0, 'Ticket ID is not correct.');
-        assert.equal(ticketCreatedEvent.owner, organizer, 'Owner is not set correctly.');
+        assert.equal(ticketCreatedEvent.owner, owner, 'Owner is not set correctly.');
     });
 
     //Test that the redeem ticket function works
@@ -68,9 +68,9 @@ contract("Ticket", function (accounts) {
             ticketCategory,
             ticketSectionNo,
             ticketSeatNo,
-            price, { from: organizer });
+            price, { from: owner });
 
-        await ticketInstance.redeemTicket(0, { from: organizer });
+        await ticketInstance.redeemTicket(0, { from: owner });
         const ticketState = await ticketInstance.getTicketState(0);
         assert.equal(ticketState.toNumber(), 1, 'Ticket state is not Redeemed.');
     });
@@ -94,9 +94,9 @@ contract("Ticket", function (accounts) {
             ticketCategory,
             ticketSectionNo,
             ticketSeatNo,
-            price, { from: organizer });
+            price, { from: owner });
 
-        await ticketInstance.freezeTicket(0, { from: organizer });
+        await ticketInstance.freezeTicket(0, { from: owner });
         const ticketState = await ticketInstance.getTicketState(0);
         assert.equal(ticketState.toNumber(), 2, 'Ticket state is not Frozen.');
     });
@@ -120,9 +120,9 @@ contract("Ticket", function (accounts) {
             ticketCategory,
             ticketSectionNo,
             ticketSeatNo,
-            price, { from: organizer });
+            price, { from: accounts[0] });
 
-        await ticketInstance.transfer(0, attendee1, { from: organizer });
+        await ticketInstance.transfer(0, attendee1, { from: accounts[0] });
         const owner = await ticketInstance.getOwner(0);
         assert.equal(owner, attendee1, 'Ownership was not transferred correctly.');
     });
@@ -145,7 +145,7 @@ contract("Ticket", function (accounts) {
                 ticketCategory,
                 ticketSectionNo,
                 ticketSeatNo,
-                price, { from: attendee1 });
+                price, { from: accounts[2] });
             assert.fail('The transaction should have thrown an error.');
         } catch (err) {
             assert.include(err.message, 'revert', 'The error message should contain "revert".');

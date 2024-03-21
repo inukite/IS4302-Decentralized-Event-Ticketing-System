@@ -6,7 +6,7 @@ const BigNumber = require("bignumber.js");
 
 contract("TicketMarket", function (accounts) {
     let ticketTokenInstance, ticketMarketInstance, ticketInstance;
-    const organizer = accounts[0];
+    const owner = accounts[0];
     const buyer = accounts[1];
 
 
@@ -14,7 +14,7 @@ contract("TicketMarket", function (accounts) {
         ticketTokenInstance = await TicketToken.new();
         ticketInstance = await Ticket.new(ticketTokenInstance.address);
         // Deploy TicketMarket contract with commission fee and address of LoyaltyPoints
-        ticketMarketInstance = await TicketMarket.new(ticketTokenInstance.address, web3.utils.toWei('0.01', 'ether'), organizer);
+        ticketMarketInstance = await TicketMarket.new(ticketTokenInstance.address, web3.utils.toWei('0.01', 'ether'), owner);
     });
 
 
@@ -34,28 +34,28 @@ contract("TicketMarket", function (accounts) {
         const ticketSectionNo = 2;
         const ticketSeatNo = 300;
         const price = web3.utils.toWei("0.1", "ether");
-    
+
         // Create a ticket and capture the event
         await ticketInstance.createTicket(
             concertId, concertName, concertVenue, concertDate,
-            ticketCategory, ticketSectionNo, ticketSeatNo, price, { from: organizer }
+            ticketCategory, ticketSectionNo, ticketSeatNo, price, { from: owner }
         );
-    
-        const ticketId = await ticketInstance.getTicketId(0); 
+
+        const ticketId = await ticketInstance.getTicketId(0);
         const ownerAddress = await ticketInstance.getOwner(ticketId);
-    
-        // Corrected assertion: Check if the returned owner address matches the organizer's address
-        assert.equal(ownerAddress, organizer, "Organizer must be the owner of the ticket");
+
+        // Corrected assertion: Check if the returned owner address matches the owner's address
+        assert.equal(ownerAddress, owner, "Organizer must be the owner of the ticket");
     });
-    
+
     // Test that a ticket cannot be listed if the price is less than creation value + commission
     it("Ticket cannot be listed if the price is less than creation value + commission", async () => {
         // no ether
-        await truffleAssert.fails(ticketMarketInstance.list(0, 0, { from: organizer }));
+        await truffleAssert.fails(ticketMarketInstance.list(0, 0, { from: owner }));
     });
 
     // Test that a ticket can be listed
-    it("should allow a ticket owner to list a ticket for sale", async () => {
+    it("Ticket can be listed for sale", async () => {
         // Details for creating a ticket
         const concertId = 4;
         const concertName = "Taylor Swift";
@@ -69,14 +69,15 @@ contract("TicketMarket", function (accounts) {
         // Create a ticket and capture the event
         await ticketInstance.createTicket(
             concertId, concertName, concertVenue, concertDate,
-            ticketCategory, ticketSectionNo, ticketSeatNo, price, { from: organizer }
+            ticketCategory, ticketSectionNo, ticketSeatNo, price, { from: owner }
         );
 
         //console.log("Ticket creation transaction:", createTx);
 
         // List the ticket for sale
+        const ticketId = await ticketInstance.getTicketId(0);
         const listingPrice = web3.utils.toWei("0.11", "ether"); // commission fee was 0.01 ether
-        await ticketMarketInstance.list(0, listingPrice, { from: accounts[0] });
+        await ticketMarketInstance.list(0, listingPrice, { from: owner });
 
         //const isListed = await ticketMarketInstance.list(0, listingPrice);
         //console.log("Is ticket listed:", isListed);
@@ -91,4 +92,4 @@ contract("TicketMarket", function (accounts) {
         truffleAssert.strictEqual(finalPrice.toString(), expectedFinalPrice.toString(), "The ticket was not listed at the correct price");
 
     });
-});    
+});

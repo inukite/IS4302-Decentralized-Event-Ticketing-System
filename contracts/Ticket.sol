@@ -37,19 +37,11 @@ contract Ticket {
 
     TicketToken public ticketToken;
     uint256 public ticketCounter = 0;
-    address public organizer;
+    address public owner;
 
     constructor(address _ticketToken) {
-        organizer = msg.sender;
+        owner = msg.sender;
         ticketToken = TicketToken(_ticketToken);
-    }
-
-    modifier onlyOrganizer() {
-        require(
-            msg.sender == organizer,
-            "Only the concert organizer can call this function"
-        );
-        _;
     }
 
     modifier atState(uint256 _ticketId, TicketState _state) {
@@ -74,7 +66,8 @@ contract Ticket {
         uint256 ticketSectionNo,
         uint256 ticketSeatNo,
         uint256 price
-    ) external onlyOrganizer {
+    ) external {
+        require(msg.sender == owner);
         tickets.push(
             TicketDetail({
                 ticketId: ticketCounter,
@@ -86,12 +79,12 @@ contract Ticket {
                 ticketSectionNo: ticketSectionNo,
                 ticketSeatNo: ticketSeatNo,
                 ticketState: TicketState.Active,
-                owner: organizer,
+                owner: owner,
                 prevOwner: address(0),
                 price: price
             })
         );
-        emit TicketCreated(ticketCounter, organizer);
+        emit TicketCreated(ticketCounter, owner);
         ticketCounter++;
     }
 
