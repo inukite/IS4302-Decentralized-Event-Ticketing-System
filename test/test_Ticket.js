@@ -12,12 +12,10 @@ contract("Ticket", function (accounts) {
 
     const organizer = accounts[0];
     const attendee1 = accounts[1];
-    const attendee2 = accounts[2];
-
+    
     it("should deploy the contracts correctly", async () => {
         assert(ticketInstance.address, "Ticket contract was not deployed");
     });
-
 
     //Test that the organizer is correctly set for the ticket
     it('deploys successfully and sets the organizer', async () => {

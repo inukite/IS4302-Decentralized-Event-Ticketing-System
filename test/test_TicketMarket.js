@@ -29,16 +29,40 @@ contract("TicketMarket", function (accounts) {
 
     // Test that Ticket can be listed
     it("Ticket can be listed", async () => {
-        // Calculate the price including commission fee
-        let value = await ticketInstance.getPrice(0);
-        let commissionFee = await ticketMarketInstance.commissionFee();
-        let price = value.add(commissionFee);
-        await ticketInstance.listTicketForSale(0, price, { from: owner });
-        let listedPrice = await ticketMarketInstance.checkPrice(0);
+        const concertId = 4;
+        const concertName = "Taylor Swift";
+        const concertVenue = "Singapore Indoor Sports Hall"
+        const concertDate = 1
+        const ticketCategory = "CAT1"
+        const ticketSectionNo = 2
+        const ticketSeatNo = 300
+        const price = 200
 
-        // if listed, listedPrice will be non-zero
-        assert.notStrictEqual(listedPrice.toString(), "0", "Ticket not listed");
+        // Assuming createTicket emits an event with the ticket ID
+        const createTx = await ticketInstance.createTicket(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            ticketCategory,
+            ticketSectionNo,
+            ticketSeatNo,
+            price, { from: accounts[0] });
+    
+        // Retrieve the ticket ID from the createTicket transaction receipt
+        const ticketId = createTx.logs[0].args.ticketId.toNumber();
+    
+        // Calculate the listing price including the commission
+        const listingPrice = new web3.utils.BN(price).add(new web3.utils.BN(await ticketMarketInstance.commissionFee()));
+    
+        // List the ticket on the market
+        await ticketMarketInstance.list(ticketId, listingPrice.toString(), { from: accounts[0] });
+    
+        // Verify the ticket is now listed at the correct price
+        const listedPrice = await ticketMarketInstance.getTicketPrice(ticketId);
+        assert.equal(listedPrice.toString(), listingPrice.toString(), "Ticket was not listed at the correct price.");
     });
+    
 
     it("should allow buying a ticket with enough TicketToken", async () => {
         let ticketId = 1;
