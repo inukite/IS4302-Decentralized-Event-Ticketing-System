@@ -8,6 +8,8 @@ import "./PriorityQueue.sol";
 import "./LoyaltyPoints.sol";
 
 interface ITicket {
+    function getPrice(uint256 ticketId) external view returns (uint256);
+    function getOrganizer(uint256 ticketId) external view returns (address);
     function getPrevOwner(uint256 ticketId) external view returns (address);
     function getOwner(uint256 ticketId) external view returns (address);
     function getTicketState(
@@ -35,15 +37,6 @@ contract TicketMarket {
     event TicketUnlisted(uint256 ticketId);
     event TicketSold(uint256 ticketId, address buyer, uint256 price);
 
-    // Modifier to check if the caller is the ticket owner
-    modifier onlyTicketOwner(uint256 ticketId) {
-        require(
-            ticketContract.getOwner(ticketId) == msg.sender,
-            "Caller is not the ticket owner"
-        );
-        _;
-    }
-
     // Event emitted when a ticket is transferred
     event TicketTransferred(
         uint256 indexed id,
@@ -65,25 +58,25 @@ contract TicketMarket {
     }
 
     // List a ticket for sale. Price needs to be >= value + fee
-    function list(
-        uint256 ticketId,
-        uint256 price
-    ) public onlyTicketOwner(ticketId) {
-        // Set the listing price for the ticket
+    function list(uint256 ticketId, uint256 price) public {
+        require(msg.sender == ticketContract.getOwner(ticketId));
         emit TicketListed(ticketId, price);
         listPrice[ticketId] = price;
         listedTickets.push(ticketId); // Add ticket ID to the list of listed tickets
     }
 
-    function unlist(uint256 ticketId) public onlyTicketOwner(ticketId) {
+    function unlist(uint256 ticketId) public {
+        require(msg.sender == ticketContract.getOwner(ticketId));
         listPrice[ticketId] = 0;
         emit TicketUnlisted(ticketId); // Emit event for ticket unlisting
 
-        // Remove the ticket ID from listedTickets
+        // Find and remove the ticket ID from listedTickets array
         for (uint256 i = 0; i < listedTickets.length; i++) {
             if (listedTickets[i] == ticketId) {
-                listedTickets[i] = listedTickets[listedTickets.length - 1]; // Move the last element to the current index
-                listedTickets.pop(); // Remove the last element
+                // Move the last element to the current index
+                listedTickets[i] = listedTickets[listedTickets.length - 1];
+                // Remove the last element
+                listedTickets.pop();
                 break; // Exit the loop once the ticket ID is removed
             }
         }
@@ -92,6 +85,11 @@ contract TicketMarket {
     // Get price of ticket
     function getTicketPrice(uint256 ticketId) public view returns (uint256) {
         return listPrice[ticketId];
+    }
+
+    // Get the commission fee
+    function getCommission() public view returns (uint256) {
+        return commissionFee;
     }
 
     //Addition of PriorityQueue
