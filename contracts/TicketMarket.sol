@@ -59,6 +59,7 @@ contract TicketMarket {
 
     // List a ticket for sale. Price needs to be >= value + fee
     function list(uint256 ticketId, uint256 price) public {
+        require(price >= ticketContract.getPrice(ticketId) + commissionFee);
         require(msg.sender == ticketContract.getOwner(ticketId));
         emit TicketListed(ticketId, price);
         listPrice[ticketId] = price;
