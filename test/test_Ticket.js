@@ -50,6 +50,8 @@ contract("Ticket", function (accounts) {
         assert.equal(ticketCreatedEvent.owner, organizer, 'Owner is not set correctly.');
     });
 
+
+    //Test that the redeem ticket function works
     it('redeems a ticket', async () => {
 
         const concertId = 2;
@@ -73,5 +75,83 @@ contract("Ticket", function (accounts) {
         await ticketInstance.redeemTicket(0, { from: organizer });
         const ticketState = await ticketInstance.getTicketState(0);
         assert.equal(ticketState.toNumber(), 1, 'Ticket state is not Redeemed.');
+    });
+
+    //Test that the freeze ticket function works
+    it('freezes a ticket after the event', async () => {
+        const concertId = 3;
+        const concertName = "Taylor Swift";
+        const concertVenue = "Singapore Indoor Sports Hall"
+        const concertDate = 1
+        const ticketCategory = "CAT1"
+        const ticketSectionNo = 2
+        const ticketSeatNo = 300
+        const price = 200
+
+        await ticketInstance.createTicket(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            ticketCategory,
+            ticketSectionNo,
+            ticketSeatNo,
+            price, { from: organizer });
+
+        await ticketInstance.freezeTicket(0, { from: organizer });
+        const ticketState = await ticketInstance.getTicketState(0);
+        assert.equal(ticketState.toNumber(), 2, 'Ticket state is not Frozen.');
+    });
+
+    //Test that the transfer ownership function works
+    it('transfers ticket ownership', async () => {
+
+        const concertId = 4;
+        const concertName = "Taylor Swift";
+        const concertVenue = "Singapore Indoor Sports Hall"
+        const concertDate = 1
+        const ticketCategory = "CAT1"
+        const ticketSectionNo = 2
+        const ticketSeatNo = 300
+        const price = 20
+
+        await ticketInstance.createTicket(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            ticketCategory,
+            ticketSectionNo,
+            ticketSeatNo,
+            price, { from: organizer });
+
+        await ticketInstance.transfer(0, attendee1, { from: organizer });
+        const owner = await ticketInstance.getOwner(0);
+        assert.equal(owner, attendee1, 'Ownership was not transferred correctly.');
+    });
+
+    it('prevents unauthorized ticket creation', async () => {
+        const concertId = 4;
+        const concertName = "Taylor Swift";
+        const concertVenue = "Singapore Indoor Sports Hall"
+        const concertDate = 1
+        const ticketCategory = "CAT1"
+        const ticketSectionNo = 2
+        const ticketSeatNo = 300
+        const price = 200
+        try {
+            await ticketInstance.createTicket(
+                concertId,
+                concertName,
+                concertVenue,
+                concertDate,
+                ticketCategory,
+                ticketSectionNo,
+                ticketSeatNo,
+                price, { from: attendee1 });
+            assert.fail('The transaction should have thrown an error.');
+        } catch (err) {
+            assert.include(err.message, 'revert', 'The error message should contain "revert".');
+        }
     });
 });
