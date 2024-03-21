@@ -27,10 +27,9 @@ contract("Ticket", function (accounts) {
 
     //Check that the ticket was corrected correctly
     it('creates a ticket and assigns it to an owner', async () => {
-
         const concertId = 1;
         const concertName = "Taylor Swift";
-        const concertVenue = "Esplanade"
+        const concertVenue = "Singapore Indoor Sports Hall"
         const concertDate = 1
         const ticketCategory = "CAT1"
         const ticketSectionNo = 2
@@ -52,10 +51,27 @@ contract("Ticket", function (accounts) {
     });
 
     it('redeems a ticket', async () => {
-        await ticketInstance.createTicket(2, { from: organizer });
-        await ticketInstance.redeemTicket(2, { from: organizer });
-        const ticketState = await ticketInstance.getTicketState(2);
+
+        const concertId = 2;
+        const concertName = "Taylor Swift";
+        const concertVenue = "Singapore Indoor Sports Hall"
+        const concertDate = 1
+        const ticketCategory = "CAT1"
+        const ticketSectionNo = 2
+        const ticketSeatNo = 300
+        const price = 200
+        await ticketInstance.createTicket(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            ticketCategory,
+            ticketSectionNo,
+            ticketSeatNo,
+            price, { from: organizer });
+
+        await ticketInstance.redeemTicket(0, { from: organizer });
+        const ticketState = await ticketInstance.getTicketState(0);
         assert.equal(ticketState.toNumber(), 1, 'Ticket state is not Redeemed.');
     });
-
 });

@@ -95,10 +95,20 @@ contract Ticket {
         ticketCounter++;
     }
 
-    function redeemTicket(
-        uint256 _ticketId
-    ) external atState(_ticketId, TicketState.Active) validTicketId(_ticketId) {
-        tickets[_ticketId].ticketState = TicketState.Redeemed;
+    function redeemTicket(uint256 _ticketId) public {
+        require(_ticketId < tickets.length, "Ticket does not exist.");
+        TicketDetail storage ticket = tickets[_ticketId];
+
+        // Ensure the ticket is active
+        require(
+            ticket.ticketState == TicketState.Active,
+            "Ticket is not active."
+        );
+
+        // Update the ticket state to Redeemed
+        ticket.ticketState = TicketState.Redeemed;
+
+        // Emit the redemption event
         emit TicketRedeemed(_ticketId);
     }
 
