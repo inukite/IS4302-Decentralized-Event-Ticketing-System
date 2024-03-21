@@ -36,11 +36,11 @@ contract TicketMarket {
     constructor(
         Ticket ticketAddress,
         uint256 fee,
-        address _loyaltyPointsAddress
+        LoyaltyPoints _loyaltyPointsAddress
     ) {
         ticketContract = ticketAddress;
         commissionFee = fee;
-        loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
+        loyaltyPoints = _loyaltyPointsAddress;
         buyerQueue = new PriorityQueue();
     }
 
@@ -60,7 +60,7 @@ contract TicketMarket {
     }
 
     function unlist(uint256 ticketId) public {
-        require(msg.sender == ticketContract.getPrevOwner(ticketId));
+        require(msg.sender == ticketContract.getOwner(ticketId));
         listPrice[ticketId] = 0;
         emit TicketUnlisted(ticketId); // Emit event for ticket unlisting
 
