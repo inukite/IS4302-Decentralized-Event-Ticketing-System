@@ -7,21 +7,10 @@ import "./TicketToken.sol";
 import "./PriorityQueue.sol";
 import "./LoyaltyPoints.sol";
 
-interface ITicket {
-    function getPrice(uint256 ticketId) external view returns (uint256);
-    function getPrevOwner(uint256 ticketId) external view returns (address);
-    function getOwner(uint256 ticketId) external view returns (address);
-    function getTicketState(
-        uint256 ticketId
-    ) external view returns (Ticket.TicketState);
-    function transfer(uint256 ticketId, address newOwner) external;
-}
-
 contract TicketMarket {
-    address public owner;
-    ITicket public ticketContract;
-    TicketToken public ticketTokenContract;
-    uint256 public commissionFee = 0.01 ether;
+    address _owner = msg.sender;
+    uint256 public commissionFee;
+    Ticket public ticketContract;
 
     PriorityQueue public buyerQueue;
     LoyaltyPoints public loyaltyPoints;
@@ -45,28 +34,33 @@ contract TicketMarket {
     );
 
     constructor(
-        address _ticketContract,
-        uint256 fee
-    ) //address _loyaltyPointsAddress
-    {
-        ticketContract = ITicket(_ticketContract);
+        Ticket ticketAddress,
+        uint256 fee,
+        address _loyaltyPointsAddress
+    ) {
+        ticketContract = ticketAddress;
         commissionFee = fee;
-        owner = msg.sender;
-        //loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
-        //buyerQueue = new PriorityQueue();
+        loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
+        buyerQueue = new PriorityQueue();
     }
 
     // List a ticket for sale. Price needs to be >= value + fee
     function list(uint256 ticketId, uint256 price) public {
-        require(price >= ticketContract.getPrice(ticketId) + commissionFee);
-        require(msg.sender == ticketContract.getOwner(ticketId));
+        require(
+            price >= (ticketContract.getPrice(ticketId) + commissionFee),
+            "Price must be at least ticket price plus commission fee"
+        );
+        require(
+            msg.sender == ticketContract.getOwner(ticketId),
+            "Caller is not ticket owner"
+        );
         emit TicketListed(ticketId, price);
         listPrice[ticketId] = price;
         listedTickets.push(ticketId); // Add ticket ID to the list of listed tickets
     }
 
     function unlist(uint256 ticketId) public {
-        require(msg.sender == ticketContract.getOwner(ticketId));
+        require(msg.sender == ticketContract.getPrevOwner(ticketId));
         listPrice[ticketId] = 0;
         emit TicketUnlisted(ticketId); // Emit event for ticket unlisting
 
@@ -99,8 +93,11 @@ contract TicketMarket {
         buyerQueue.enqueue(buyer, points);
     }
 
-    function processTicketPurchases() public {
-        require(msg.sender == owner, "Only the owner can process purchases");
+    function processTicketPurchases(uint256 ticketId) public {
+        require(
+            msg.sender == ticketContract.getOwner(ticketId),
+            "Only the owner can process purchases"
+        );
 
         while (!buyerQueue.isEmpty() && thereAreTicketsAvailable()) {
             address buyer = buyerQueue.dequeue();

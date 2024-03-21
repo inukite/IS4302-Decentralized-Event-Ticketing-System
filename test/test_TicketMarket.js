@@ -67,29 +67,19 @@ contract("TicketMarket", function (accounts) {
         const price = web3.utils.toWei("0.1", "ether");
 
         // Create a ticket and capture the event
-        await ticketInstance.createTicket(
+        let transaction = await ticketInstance.createTicket(
             concertId, concertName, concertVenue, concertDate,
             ticketCategory, ticketSectionNo, ticketSeatNo, price, { from: owner }
         );
-
-        //console.log("Ticket creation transaction:", createTx);
+        const listingPrice = web3.utils.toWei("0.5", "ether") // Listing price must be >= ticketPrice + commissionFee
 
         // List the ticket for sale
-        const ticketId = await ticketInstance.getTicketId(0);
-        const listingPrice = web3.utils.toWei("0.11", "ether"); // commission fee was 0.01 ether
-        await ticketMarketInstance.list(0, listingPrice, { from: owner });
-
-        //const isListed = await ticketMarketInstance.list(0, listingPrice);
-        //console.log("Is ticket listed:", isListed);
+        await ticketMarketInstance.list(1, listingPrice, { from: owner });
 
         // Verify listing
-        const finalPrice = await ticketMarketInstance.getTicketPrice(0);
+        const finalPrice = await ticketMarketInstance.getTicketPrice(1);
 
-        // Calculate expected final price considering commission
-        const commission = await ticketMarketInstance.getCommission();
-        const expectedFinalPrice = web3.utils.toBN(price).add(web3.utils.toBN(commission));
-
-        truffleAssert.strictEqual(finalPrice.toString(), expectedFinalPrice.toString(), "The ticket was not listed at the correct price");
+        truffleAssert.strictEqual(finalPrice.toString(), listingPrice.toString(), "The ticket was not listed at the correct price");
 
     });
 });

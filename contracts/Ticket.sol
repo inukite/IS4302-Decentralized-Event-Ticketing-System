@@ -11,7 +11,7 @@ contract Ticket {
         Frozen
     }
 
-    struct TicketDetail {
+    struct ticket {
         uint256 ticketId;
         uint256 concertId;
         string concertName;
@@ -26,11 +26,9 @@ contract Ticket {
         uint256 price;
     }
 
-    TicketDetail[] public tickets;
-    mapping(uint256 => address) public ticketToOwner;
-    mapping(address => uint256) ownerTicketCount;
+    mapping(uint256 => ticket) public tickets;
 
-    event TicketCreated(uint256 ticketId, address owner);
+    event TicketCreated(uint256 indexed ticketId, address owner);
     event TicketRedeemed(uint256 ticketId);
     event TicketFrozen(uint256 ticketId);
     event TicketBought(uint256 ticketId, address newOwner, uint256 price);
@@ -57,6 +55,7 @@ contract Ticket {
         _;
     }
 
+    // function to create a new ticket and add to the tickets map
     function createTicket(
         uint256 concertId,
         string memory concertName,
@@ -66,42 +65,50 @@ contract Ticket {
         uint256 ticketSectionNo,
         uint256 ticketSeatNo,
         uint256 price
-    ) external {
-        require(msg.sender == owner);
-        tickets.push(
-            TicketDetail({
-                ticketId: ticketCounter,
-                concertId: concertId,
-                concertName: concertName,
-                concertVenue: concertVenue,
-                concertDate: concertDate,
-                ticketCategory: ticketCategory,
-                ticketSectionNo: ticketSectionNo,
-                ticketSeatNo: ticketSeatNo,
-                ticketState: TicketState.Active,
-                owner: owner,
-                prevOwner: address(0),
-                price: price
-            })
+    ) public returns (uint256) {
+        require(
+            msg.sender == owner,
+            "Only the owner (organizer) can create a new ticket"
         );
-        emit TicketCreated(ticketCounter, owner);
-        ticketCounter++;
+
+        ticket memory newTicket = ticket({
+            ticketId: ticketCounter,
+            concertId: concertId,
+            concertName: concertName,
+            concertVenue: concertVenue,
+            concertDate: concertDate,
+            ticketCategory: ticketCategory,
+            ticketSectionNo: ticketSectionNo,
+            ticketSeatNo: ticketSeatNo,
+            ticketState: TicketState.Active,
+            owner: msg.sender, // Assuming the owner creates the ticket
+            prevOwner: address(0),
+            price: price
+        });
+
+        uint256 newTicketId = ticketCounter++;
+        tickets[newTicketId] = newTicket;
+        emit TicketCreated(ticketCounter, msg.sender);
+        return newTicketId; // Return the ID of the newly created ticket
     }
 
-    function redeemTicket(uint256 _ticketId) public {
-        require(_ticketId < tickets.length, "Ticket does not exist.");
-        TicketDetail storage ticket = tickets[_ticketId];
+    //modifier to ensure a function is callable only by its owner
+    modifier ownerOnly(uint256 ticketId) {
+        require(tickets[ticketId].owner == msg.sender);
+        _;
+    }
+
+    function redeemTicket(uint256 _ticketId) public validTicketId(_ticketId) {
+        ticket storage myTicket = tickets[_ticketId];
 
         // Ensure the ticket is active
         require(
-            ticket.ticketState == TicketState.Active,
+            myTicket.ticketState == TicketState.Active,
             "Ticket is not active."
         );
 
         // Update the ticket state to Redeemed
-        ticket.ticketState = TicketState.Redeemed;
-
-        // Emit the redemption event
+        myTicket.ticketState = TicketState.Redeemed;
         emit TicketRedeemed(_ticketId);
     }
 

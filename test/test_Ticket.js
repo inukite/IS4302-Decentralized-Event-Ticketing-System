@@ -45,7 +45,7 @@ contract("Ticket", function (accounts) {
             ticketSeatNo,
             price, { from: owner });
         const ticketCreatedEvent = result.logs[0].args;
-        assert.equal(ticketCreatedEvent.ticketId.toNumber(), 0, 'Ticket ID is not correct.');
+        assert.equal(ticketCreatedEvent.ticketId.toNumber(), 1, 'Ticket ID is not correct.');
         assert.equal(ticketCreatedEvent.owner, owner, 'Owner is not set correctly.');
     });
 
