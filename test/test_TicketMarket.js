@@ -187,7 +187,7 @@ contract("TicketMarket", function (accounts) {
 
     // Test Case: Listing and Unlisting a Ticket
     it("should allow listing and then unlisting a ticket", async () => {
-        const ticketId = 3;
+        const ticketId = 2;
         const listingPrice = web3.utils.toWei("0.5", "ether");
 
         // List the ticket for sale
