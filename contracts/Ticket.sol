@@ -124,10 +124,6 @@ contract Ticket {
         address newOwner
     ) external validTicketId(ticketId) {
         require(
-            msg.sender == tickets[ticketId].owner,
-            "Only the ticket owner can transfer"
-        );
-        require(
             tickets[ticketId].ticketState == TicketState.Active,
             "Ticket cannot be transferred in its current state"
         );
