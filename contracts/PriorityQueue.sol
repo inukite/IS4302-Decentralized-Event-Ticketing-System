@@ -7,12 +7,14 @@ contract PriorityQueue {
     struct QueueElement {
         address addr;
         uint256 priority;
+        uint256 insertionOrder; // To maintain stability among equal priorities.
     }
 
     QueueElement[] private heapArray;
     uint256 public size;
     address private organizer; // Added for access control
     LoyaltyPoints loyaltyPointsContract;
+    uint256 private insertionCounter = 0;
 
     function setLoyaltyPointsContractAddress(
         address _addr
@@ -28,7 +30,9 @@ contract PriorityQueue {
     constructor(address loyaltyPointsAddress) {
         organizer = msg.sender;
         loyaltyPointsContract = LoyaltyPoints(loyaltyPointsAddress);
-        heapArray.push(QueueElement({addr: address(0), priority: 0}));
+        heapArray.push(
+            QueueElement({addr: address(0), priority: 0, insertionOrder: 0})
+        );
         size = 0;
     }
 
@@ -37,12 +41,17 @@ contract PriorityQueue {
 
     function enqueue(address _addr) public onlyOrganizer {
         uint256 loyaltyPoints = loyaltyPointsContract.getPoints(_addr);
-        heapArray.push(QueueElement({addr: _addr, priority: loyaltyPoints}));
+        heapArray.push(
+            QueueElement({
+                addr: _addr,
+                priority: loyaltyPoints,
+                insertionOrder: insertionCounter++
+            })
+        );
         size++;
         _bubbleUp(size);
         emit ElementEnqueued(_addr);
     }
-
     function dequeue() public onlyOrganizer returns (address) {
         require(size > 0, "Queue is empty");
         address highestPriorityAddress = heapArray[1].addr;
@@ -103,46 +112,67 @@ contract PriorityQueue {
     }
 
     function _bubbleUp(uint256 index) private {
-        while (
-            index > 1 &&
-            heapArray[index / 2].priority < heapArray[index].priority
-        ) {
-            // Use a temporary variable to safely perform the swap
-            QueueElement memory temp = heapArray[index];
-            heapArray[index] = heapArray[index / 2];
-            heapArray[index / 2] = temp;
+        while (index > 1) {
+            uint256 parentIndex = index / 2;
+            bool shouldSwap = heapArray[index].priority >
+                heapArray[parentIndex].priority ||
+                (heapArray[index].priority == heapArray[parentIndex].priority &&
+                    heapArray[index].insertionOrder <
+                    heapArray[parentIndex].insertionOrder);
 
-            index /= 2; // Move up to the parent's index
+            if (shouldSwap) {
+                // Use a temporary variable to perform the swap
+                QueueElement memory temp = heapArray[parentIndex];
+                heapArray[parentIndex] = heapArray[index];
+                heapArray[index] = temp;
+
+                index = parentIndex;
+            } else {
+                break;
+            }
         }
     }
 
     function _bubbleDown(uint256 index) private {
         while (index * 2 <= size) {
-            uint256 largest = index;
             uint256 leftChildIndex = 2 * index;
             uint256 rightChildIndex = 2 * index + 1;
+            uint256 swapIndex = index;
 
             if (
                 leftChildIndex <= size &&
-                heapArray[leftChildIndex].priority > heapArray[largest].priority
+                (heapArray[leftChildIndex].priority >
+                    heapArray[swapIndex].priority ||
+                    (heapArray[leftChildIndex].priority ==
+                        heapArray[swapIndex].priority &&
+                        heapArray[leftChildIndex].insertionOrder <
+                        heapArray[swapIndex].insertionOrder))
             ) {
-                largest = leftChildIndex;
+                swapIndex = leftChildIndex;
             }
+
             if (
                 rightChildIndex <= size &&
-                heapArray[rightChildIndex].priority >
-                heapArray[largest].priority
+                (heapArray[rightChildIndex].priority >
+                    heapArray[swapIndex].priority ||
+                    (heapArray[rightChildIndex].priority ==
+                        heapArray[swapIndex].priority &&
+                        heapArray[rightChildIndex].insertionOrder <
+                        heapArray[swapIndex].insertionOrder))
             ) {
-                largest = rightChildIndex;
+                swapIndex = rightChildIndex;
             }
-            if (largest == index) {
-                break; // The node is already in the correct position
+
+            if (swapIndex != index) {
+                // Use a temporary variable to perform the swap
+                QueueElement memory temp = heapArray[index];
+                heapArray[index] = heapArray[swapIndex];
+                heapArray[swapIndex] = temp;
+
+                index = swapIndex;
+            } else {
+                break;
             }
-            // Swap using a temporary variable
-            QueueElement memory temp = heapArray[index];
-            heapArray[index] = heapArray[largest];
-            heapArray[largest] = temp;
-            index = largest; // Continue with the largest child
         }
     }
 

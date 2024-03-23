@@ -104,13 +104,13 @@ contract("PriorityQueue", (accounts) => {
 
   // Test for Queue Stability with Equal Priorities
   it("should maintain insertion order for elements with equal priorities", async () => {
-    // Assuming all addresses are set to the same loyalty points
+    // Assuming all addresses are set to the same loyalty points before being enqueued
     const commonPoints = 6000;
     await loyaltyPoints.setPoints(accounts[1], commonPoints);
+    await priorityQueue.enqueue(accounts[1]);  // Enqueue accounts in the correct order after setting points
+    await loyaltyPoints.setPoints(accounts[2], commonPoints);
     await priorityQueue.enqueue(accounts[2]);
     await loyaltyPoints.setPoints(accounts[3], commonPoints);
-    await priorityQueue.enqueue(accounts[1]);
-    await loyaltyPoints.setPoints(accounts[2], commonPoints);
     await priorityQueue.enqueue(accounts[3]);
 
     const firstOut = await priorityQueue.popHighestPriorityBuyer();
