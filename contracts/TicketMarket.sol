@@ -41,7 +41,6 @@ contract TicketMarket {
         ticketContract = ticketAddress;
         commissionFee = fee;
         loyaltyPoints = _loyaltyPointsAddress;
-        buyerQueue = new PriorityQueue();
     }
 
     // List a ticket for sale. Price needs to be >= value + fee
@@ -86,36 +85,6 @@ contract TicketMarket {
         return commissionFee;
     }
 
-    //Addition of PriorityQueue
-    //add buyers to the PriorityQueue instead of immediately processing the purchase
-    function requestTicketPurchase(address buyer) public {
-        uint points = loyaltyPoints.getPoints(buyer);
-        buyerQueue.enqueue(buyer, points);
-    }
-
-    function processTicketPurchases(uint256 ticketId) public {
-        require(
-            msg.sender == ticketContract.getOwner(ticketId),
-            "Only the owner can process purchases"
-        );
-
-        while (!buyerQueue.isEmpty() && thereAreTicketsAvailable()) {
-            address buyer = buyerQueue.dequeue();
-
-            // For simplicity, we attempt to purchase the first available ticket.
-            uint256 ticketId = listedTickets[0];
-
-            uint256 ticketPrice = listPrice[ticketId];
-
-            // Transfer the ticket and emit an event.
-            ticketContract.transfer(ticketId, buyer);
-            emit TicketSold(ticketId, buyer, ticketPrice);
-
-            // Remove the ticket from the listing.
-            unlist(ticketId);
-        }
-    }
-
     // Buy the ticket at the requested price
     function buy(uint256 ticketId) public payable {
         // Check if the ticket is listed for sale
@@ -146,16 +115,6 @@ contract TicketMarket {
 
         // Remove the ticket from the listing after purchase
         listPrice[ticketId] = 0;
-    }
-
-    function thereAreTicketsAvailable() public view returns (bool) {
-        uint256 availableTickets = 0;
-        for (uint256 i = 0; i < listedTickets.length; i++) {
-            if (listPrice[i] > 0) {
-                availableTickets++;
-            }
-        }
-        return availableTickets > 0;
     }
 
     // get price of ticket

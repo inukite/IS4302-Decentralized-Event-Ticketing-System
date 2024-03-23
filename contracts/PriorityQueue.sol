@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./LoyaltyPoints.sol";
+
 contract PriorityQueue {
     struct QueueElement {
         address addr;
@@ -9,78 +11,140 @@ contract PriorityQueue {
 
     QueueElement[] private heapArray;
     uint256 public size;
+    address private organizer; // Added for access control
+    LoyaltyPoints loyaltyPointsContract;
 
-    constructor() {
-        // Dummy element to start indexing from 1
+    function setLoyaltyPointsContractAddress(
+        address _addr
+    ) external onlyOrganizer {
+        loyaltyPointsContract = LoyaltyPoints(_addr);
+    }
+
+    modifier onlyOrganizer() {
+        require(msg.sender == organizer, "Caller is not the organizer");
+        _;
+    }
+
+    constructor(address loyaltyPointsAddress) {
+        organizer = msg.sender;
+        loyaltyPointsContract = LoyaltyPoints(loyaltyPointsAddress);
         heapArray.push(QueueElement({addr: address(0), priority: 0}));
         size = 0;
     }
 
-    //Adding to queue
-    function enqueue(address _addr, uint256 _priority) public {
-        QueueElement memory element = QueueElement({
-            addr: _addr,
-            priority: _priority
-        });
-        heapArray.push(element);
+    event ElementEnqueued(address indexed enqueuedAddress);
+    event ElementDequeued(address indexed dequeuedAddress);
+
+    function enqueue(address _addr) public onlyOrganizer {
+        uint256 loyaltyPoints = loyaltyPointsContract.getPoints(_addr);
+        heapArray.push(QueueElement({addr: _addr, priority: loyaltyPoints}));
         size++;
         _bubbleUp(size);
+        emit ElementEnqueued(_addr);
+    }
+
+    function dequeue() public onlyOrganizer returns (address) {
+        require(size > 0, "Queue is empty");
+        address highestPriorityAddress = heapArray[1].addr;
+
+        heapArray[1] = heapArray[size]; // Move the last element to the top
+        heapArray.pop(); // Remove the last element
+        size--;
+        if (size > 0) {
+            _bubbleDown(1); // Re-sort the heap
+        }
+        emit ElementDequeued(highestPriorityAddress);
+        return highestPriorityAddress;
+    }
+
+    function popHighestPriorityBuyer() public onlyOrganizer returns (address) {
+        require(size > 0, "Queue is empty");
+        return dequeue(); // Use dequeue logic to pop and return the highest priority (loyalty points) buyer
+    }
+
+    function peekHighestPriority()
+        public
+        view
+        returns (address addr, uint256 priority)
+    {
+        require(size > 0, "Queue is empty");
+        return (heapArray[1].addr, heapArray[1].priority);
+    }
+
+    function updatePriority(address _addr) public onlyOrganizer {
+        for (uint256 i = 1; i <= size; i++) {
+            if (heapArray[i].addr == _addr) {
+                uint256 newLoyaltyPoints = loyaltyPointsContract.getPoints(
+                    _addr
+                );
+                bool shouldBubbleUp = newLoyaltyPoints > heapArray[i].priority;
+                heapArray[i].priority = newLoyaltyPoints; // Update priority
+
+                if (shouldBubbleUp) {
+                    // If the new priority is higher, it might need to bubble up
+                    _bubbleUp(i);
+                } else {
+                    // Otherwise, check if it needs to bubble down.
+                    // This case can be rare if updating to lower priority is allowed
+                    _bubbleDown(i);
+                }
+                break;
+            }
+        }
+    }
+
+    function isInQueue(address _addr) public view returns (bool) {
+        for (uint256 i = 1; i <= size; i++) {
+            if (heapArray[i].addr == _addr) {
+                return true;
+            }
+        }
+        return false;
     }
 
     function _bubbleUp(uint256 index) private {
         while (
             index > 1 &&
-            heapArray[index / 2].priority > heapArray[index].priority
+            heapArray[index / 2].priority < heapArray[index].priority
         ) {
-            QueueElement memory temp = heapArray[index / 2];
-            heapArray[index / 2] = heapArray[index];
-            heapArray[index] = temp;
-            index = index / 2;
+            // Parent has lower priority, swap with child
+            (heapArray[index], heapArray[index / 2]) = (
+                heapArray[index / 2],
+                heapArray[index]
+            );
+            index /= 2; // Move up to the parent's index
         }
-    }
-
-    //Remove from queue
-    function dequeue() public returns (address) {
-        require(size > 0, "Queue is empty");
-
-        // Get the address of the highest priority element
-        address highestPriorityAddress = heapArray[1].addr;
-
-        // Perform the pop operation to remove the highest priority element
-        // Similar logic to the existing pop method but adapted for QueueElement struct
-        QueueElement memory lastElement = heapArray[size];
-        heapArray[1] = lastElement;
-        heapArray.pop();
-        size--;
-        if (size > 0) {
-            _bubbleDown(1);
-        }
-
-        return highestPriorityAddress;
     }
 
     function _bubbleDown(uint256 index) private {
-        uint256 smallest = index;
-        uint256 leftChildIndex = 2 * index;
-        uint256 rightChildIndex = 2 * index + 1;
+        while (index * 2 <= size) {
+            // While there's at least one child
+            uint256 largest = index;
+            uint256 leftChildIndex = 2 * index;
+            uint256 rightChildIndex = 2 * index + 1;
 
-        if (
-            leftChildIndex <= size &&
-            heapArray[leftChildIndex].priority < heapArray[smallest].priority
-        ) {
-            smallest = leftChildIndex;
-        }
-        if (
-            rightChildIndex <= size &&
-            heapArray[rightChildIndex].priority < heapArray[smallest].priority
-        ) {
-            smallest = rightChildIndex;
-        }
-        if (smallest != index) {
-            QueueElement memory temp = heapArray[index];
-            heapArray[index] = heapArray[smallest];
-            heapArray[smallest] = temp;
-            _bubbleDown(smallest);
+            if (
+                leftChildIndex <= size &&
+                heapArray[leftChildIndex].priority > heapArray[largest].priority
+            ) {
+                largest = leftChildIndex;
+            }
+            if (
+                rightChildIndex <= size &&
+                heapArray[rightChildIndex].priority >
+                heapArray[largest].priority
+            ) {
+                largest = rightChildIndex;
+            }
+            if (largest == index) {
+                break; // The node is already in the correct position
+            }
+            // Swap the current index with the largest (highest priority) child
+            (heapArray[index], heapArray[largest]) = (
+                heapArray[largest],
+                heapArray[index]
+            );
+            index = largest; // Continue with the largest child
         }
     }
 
