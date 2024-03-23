@@ -107,18 +107,17 @@ contract PriorityQueue {
             index > 1 &&
             heapArray[index / 2].priority < heapArray[index].priority
         ) {
-            // Parent has lower priority, swap with child
-            (heapArray[index], heapArray[index / 2]) = (
-                heapArray[index / 2],
-                heapArray[index]
-            );
+            // Use a temporary variable to safely perform the swap
+            QueueElement memory temp = heapArray[index];
+            heapArray[index] = heapArray[index / 2];
+            heapArray[index / 2] = temp;
+
             index /= 2; // Move up to the parent's index
         }
     }
 
     function _bubbleDown(uint256 index) private {
         while (index * 2 <= size) {
-            // While there's at least one child
             uint256 largest = index;
             uint256 leftChildIndex = 2 * index;
             uint256 rightChildIndex = 2 * index + 1;
@@ -139,11 +138,10 @@ contract PriorityQueue {
             if (largest == index) {
                 break; // The node is already in the correct position
             }
-            // Swap the current index with the largest (highest priority) child
-            (heapArray[index], heapArray[largest]) = (
-                heapArray[largest],
-                heapArray[index]
-            );
+            // Swap using a temporary variable
+            QueueElement memory temp = heapArray[index];
+            heapArray[index] = heapArray[largest];
+            heapArray[largest] = temp;
             index = largest; // Continue with the largest child
         }
     }
