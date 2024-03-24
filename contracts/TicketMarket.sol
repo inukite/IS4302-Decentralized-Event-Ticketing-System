@@ -12,9 +12,6 @@ contract TicketMarket {
     uint256 public commissionFee;
     Ticket public ticketContract;
 
-    PriorityQueue public buyerQueue;
-    LoyaltyPoints public loyaltyPoints;
-
     // Mapping from ticket ID to listing price
     mapping(uint256 => uint256) public listPrice;
 
@@ -33,14 +30,9 @@ contract TicketMarket {
         uint256 price
     );
 
-    constructor(
-        Ticket ticketAddress,
-        uint256 fee,
-        LoyaltyPoints _loyaltyPointsAddress
-    ) {
+    constructor(Ticket ticketAddress, uint256 fee) {
         ticketContract = ticketAddress;
         commissionFee = fee;
-        loyaltyPoints = _loyaltyPointsAddress;
     }
 
     // List a ticket for sale. Price needs to be >= value + fee
@@ -48,6 +40,11 @@ contract TicketMarket {
         require(
             price >= (ticketContract.getPrice(ticketId) + commissionFee),
             "Price must be at least ticket price plus commission fee"
+        );
+
+        require(
+            price <= ((ticketContract.getPrice(ticketId) * 6) / 5),
+            "Price cannot be more than 20% extra of original price "
         );
         require(
             msg.sender == ticketContract.getOwner(ticketId),
@@ -87,31 +84,23 @@ contract TicketMarket {
 
     // Buy the ticket at the requested price
     function buy(uint256 ticketId) public payable {
-        // Check if the ticket is listed for sale
         require(listPrice[ticketId] != 0, "Ticket must be listed for sale");
-        // Check if payment is enough
         require(msg.value >= listPrice[ticketId], "Insufficient payment");
-
-        address ticketOwner = ticketContract.getOwner(ticketId);
-        require(msg.sender != ticketOwner, "Buyer already owns the ticket");
-
-        address payable recipient = payable(
-            ticketContract.getPrevOwner(ticketId)
+        require(
+            msg.sender != ticketContract.getOwner(ticketId),
+            "Buyer already owns the ticket"
         );
 
-        // Calculate the amount to transfer to the ticket owner after deducting the commission fee
-        uint256 amountToTransfer = listPrice[ticketId] - commissionFee;
-        // Transfer payment to the ticket owner after deducting the commission fee
+        address payable recipient = payable(ticketContract.getOwner(ticketId));
+
+        uint256 resellPrice = listPrice[ticketId];
+        uint256 amountToTransfer = resellPrice - commissionFee;
         recipient.transfer(amountToTransfer);
 
-        // Transfer ownership in the Ticket contract
-        ticketContract.transfer(ticketId, msg.sender);
+        ticketContract.transfer(ticketId, msg.sender, resellPrice);
 
         // Emit event for ticket purchase
-        emit TicketSold(ticketId, msg.sender, listPrice[ticketId]);
-
-        // Transfer ownership of the ticket
-        ticketContract.transfer(ticketId, msg.sender);
+        emit TicketSold(ticketId, msg.sender, resellPrice);
 
         // Remove the ticket from the listing after purchase
         listPrice[ticketId] = 0;

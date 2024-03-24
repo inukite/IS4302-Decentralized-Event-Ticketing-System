@@ -34,7 +34,6 @@ contract PresaleMarket {
         string memory concertName,
         string memory concertVenue,
         uint256 concertDate,
-        string memory ticketCategory,
         uint256[] memory ticketSectionNos,
         uint256[] memory ticketSeatNos,
         uint256 price
@@ -54,7 +53,6 @@ contract PresaleMarket {
                 concertName,
                 concertVenue,
                 concertDate,
-                ticketCategory,
                 ticketSectionNos[i],
                 ticketSeatNos[i],
                 price

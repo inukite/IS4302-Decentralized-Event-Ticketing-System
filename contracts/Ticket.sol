@@ -17,13 +17,13 @@ contract Ticket {
         string concertName;
         string concertVenue;
         uint256 concertDate;
-        string ticketCategory;
         uint256 ticketSectionNo;
         uint256 ticketSeatNo;
         TicketState ticketState;
         address owner;
         address prevOwner;
         uint256 price;
+        uint256 resellPrice;
     }
 
     mapping(uint256 => ticket) public tickets;
@@ -61,7 +61,6 @@ contract Ticket {
         string memory concertName,
         string memory concertVenue,
         uint256 concertDate,
-        string memory ticketCategory,
         uint256 ticketSectionNo,
         uint256 ticketSeatNo,
         uint256 price
@@ -77,19 +76,18 @@ contract Ticket {
             concertName: concertName,
             concertVenue: concertVenue,
             concertDate: concertDate,
-            ticketCategory: ticketCategory,
             ticketSectionNo: ticketSectionNo,
             ticketSeatNo: ticketSeatNo,
             ticketState: TicketState.Active,
-            owner: msg.sender, // Assuming the owner creates the ticket
             prevOwner: address(0),
-            price: price
+            owner: msg.sender, // Assuming the owner creates the ticket
+            price: price,
+            resellPrice: 0
         });
 
-        uint256 newTicketId = ticketCounter++;
-        tickets[newTicketId] = newTicket;
-        emit TicketCreated(ticketCounter, msg.sender);
-        return newTicketId; // Return the ID of the newly created ticket
+        tickets[ticketCounter++] = newTicket;
+        emit TicketCreated(ticketCounter - 1, msg.sender);
+        return ticketCounter - 1; // Return the ID of the newly created ticket
     }
 
     //modifier to ensure a function is callable only by its owner
@@ -121,7 +119,8 @@ contract Ticket {
 
     function transfer(
         uint256 ticketId,
-        address newOwner
+        address newOwner,
+        uint256 resellPrice
     ) external validTicketId(ticketId) {
         require(
             tickets[ticketId].ticketState == TicketState.Active,
@@ -130,6 +129,7 @@ contract Ticket {
 
         tickets[ticketId].prevOwner = tickets[ticketId].owner;
         tickets[ticketId].owner = newOwner;
+        tickets[ticketId].price = resellPrice;
 
         emit TicketBought(ticketId, newOwner, tickets[ticketId].price);
     }
@@ -163,12 +163,6 @@ contract Ticket {
         uint256 ticketId
     ) public view validTicketId(ticketId) returns (uint256) {
         return tickets[ticketId].concertDate;
-    }
-
-    function getTicketCategory(
-        uint256 ticketId
-    ) public view validTicketId(ticketId) returns (string memory) {
-        return tickets[ticketId].ticketCategory;
     }
 
     function getTicketSectionNo(
