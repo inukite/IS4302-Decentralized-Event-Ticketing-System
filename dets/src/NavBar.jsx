@@ -39,8 +39,8 @@ const NavBar = () => {
         style={{ display: 'flex', contentAlign: 'center' }}
       >
         <Container>
-          <Navbar.Brand href="#home">
-            <div href="#home" style={{ marginLeft: 10 }}>
+          <Navbar.Brand href="/">
+            <div href="/" style={{ marginLeft: 10 }}>
               <img
                 alt=""
                 src={require('./DET Token image.png')}
@@ -50,7 +50,7 @@ const NavBar = () => {
               />
             </div>
           </Navbar.Brand>
-          <Navbar.Brand>DET Tickets</Navbar.Brand>
+          <Navbar.Brand href="/">DET Tickets</Navbar.Brand>
           <div style={{ marginLeft: '20%' }}></div>
           <div>
             <Form className="d-flex">

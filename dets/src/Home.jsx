@@ -4,12 +4,7 @@ import { useUserAddress } from './UserAddressContext';
 const Home = () => {
   const { userAddress, setUserAddress } = useUserAddress();
 
-  return (
-    <>
-      <div>Home</div>
-      <div>User Address: {userAddress}</div>
-    </>
-  );
+  return <></>;
 };
 
 export default Home;
