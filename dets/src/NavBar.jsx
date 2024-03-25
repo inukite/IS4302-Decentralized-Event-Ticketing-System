@@ -65,6 +65,7 @@ const NavBar = () => {
             </Form>
           </div>
           <div style={{ marginLeft: '5%' }}></div>
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav text-center">
             <Nav className="me-auto text-center">
               <Nav.Link href="/">Home</Nav.Link>
