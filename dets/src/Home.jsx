@@ -6,8 +6,16 @@ const Home = () => {
 
   return (
     <>
-      <div>Home</div>
-      <div>User Address: {userAddress}</div>
+      <div
+        style={{
+          padding: 20,
+          alignContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center',
+        }}
+      >
+        <img src={require('./Cover Image.png')} alt="Concert" />
+      </div>
     </>
   );
 };

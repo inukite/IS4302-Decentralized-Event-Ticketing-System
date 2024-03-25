@@ -3,6 +3,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import React, { useState } from 'react';
 import { useUserAddress } from './UserAddressContext';
+import Col from 'react-bootstrap/Col';
 
 // Example NavBar component
 const NavBar = () => {
@@ -38,9 +39,9 @@ const NavBar = () => {
         expand="lg"
         style={{ display: 'flex', contentAlign: 'center' }}
       >
-        <Container>
-          <Navbar.Brand href="#home">
-            <div href="#home" style={{ marginLeft: 10 }}>
+        <Container fluid>
+          <Navbar.Brand href="/">
+            <div href="/" style={{ marginLeft: 10 }}>
               <img
                 alt=""
                 src={require('./DET Token image.png')}
@@ -50,8 +51,8 @@ const NavBar = () => {
               />
             </div>
           </Navbar.Brand>
-          <Navbar.Brand>DET Tickets</Navbar.Brand>
-          <div style={{ marginLeft: '20%' }}></div>
+          <Navbar.Brand href="/">DET Tickets</Navbar.Brand>
+          <div style={{ marginLeft: '10%' }}></div>
           <div>
             <Form className="d-flex">
               <Form.Control
@@ -63,8 +64,10 @@ const NavBar = () => {
               <Button variant="outline-success">Search</Button>
             </Form>
           </div>
-          <Navbar.Collapse id="basic-navbar-nav">
-            <Nav className="me-auto">
+          <div style={{ marginLeft: '5%' }}></div>
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
+          <Navbar.Collapse id="basic-navbar-nav text-center">
+            <Nav className="me-auto text-center">
               <Nav.Link href="/">Home</Nav.Link>
               <Nav.Link href="upcomingconcerts">Upcoming Concerts</Nav.Link>
               <Nav.Link href="marketplace">Marketplace</Nav.Link>
@@ -72,21 +75,22 @@ const NavBar = () => {
             </Nav>
           </Navbar.Collapse>
           <>
-            <div style={{ marginLeft: 10, padding: 5 }}>
+            <div style={{ padding: 5 }}>
               <button
                 onClick={connectWallet}
                 style={{
                   borderRadius: 5,
                   padding: 5,
                   backgroundColor: 'light-gray',
-                  textAlign: 'center',
                 }}
               >
-                {isConnected ? 'Disconnect' : 'Connect'}
-                {isConnected && <p>{userAddress.substring(0, 10)}...</p>}
+                {isConnected
+                  ? `Disconnect ${userAddress.substring(0, 10)}...`
+                  : 'Connect'}
               </button>
             </div>
           </>
+          <div style={{ marginLeft: '5%' }}></div>
         </Container>
       </Navbar>
     </div>
