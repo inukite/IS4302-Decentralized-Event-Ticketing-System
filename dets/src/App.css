@@ -1,0 +1,16 @@
+.footer {
+  background-color: #f8f8f8;
+  padding: 2rem;
+  /* Add more styling according to your Figma design */
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  /* Add more styling according to your Figma design */
+}
+
+.footer-section ul {
+  list-style: none;
+  /* Add more styling according to your Figma design */
+}
