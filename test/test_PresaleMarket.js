@@ -39,4 +39,22 @@ contract("PresaleMarket", (accounts) => {
         assert.equal(actualOrganizer, organizer, "Organizer is not correctly set");
     });
 
+    // Test event creation
+    it("should allow the organizer to create an event", async () => {
+        // Use example values for event creation
+        await presaleMarketInstance.createEvent(
+            1, // concertId
+            "Example Concert", // concertName
+            "Example Venue", // concertVenue
+            Math.floor(Date.now() / 1000) + 86400, // concertDate, assuming it's tomorrow
+            [1, 2, 3], // ticketSectionNos
+            [101, 102, 103], // ticketSeatNos
+            web3.utils.toWei("0.1", "ether"), // price
+            { from: organizer }
+        );
+
+        // Get event details to verify the event creation
+        const eventDetails = await presaleMarketInstance.getEventDetails(1);
+        assert.equal(eventDetails.concertName, "Example Concert", "Event name does not match");
+    });
 });

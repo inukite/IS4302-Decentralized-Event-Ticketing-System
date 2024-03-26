@@ -153,10 +153,42 @@ contract PresaleMarket {
 
         // Transfer the ticket to the caller
         // Assuming Ticket contract has a method to handle this (ticketContract.transferTicket(ticketId, msg.sender))
-        ticketContract.transfer(selectedTicketId, msg.sender, ticketContract.getPrice(selectedTicketId));
+        ticketContract.transfer(
+            selectedTicketId,
+            msg.sender,
+            ticketContract.getPrice(selectedTicketId)
+        );
     }
+
+    // Getters
+    function getEventDetails(
+        uint256 _concertId
+    )
+        public
+        view
+        returns (
+            uint256 concertId,
+            string memory concertName,
+            string memory concertVenue,
+            uint256 concertDate,
+            uint256[] memory ticketSectionNos,
+            uint256[] memory ticketSeatNos,
+            uint256 price,
+            bool ticketsReleased
+        )
+    {
+        EventDetails storage eventDetail = events[_concertId];
+        return (
+            eventDetail.concertId,
+            eventDetail.concertName,
+            eventDetail.concertVenue,
+            eventDetail.concertDate,
+            eventDetail.ticketSectionNos,
+            eventDetail.ticketSeatNos,
+            eventDetail.price,
+            eventDetail.ticketsReleased
+        );
+    }
+
+    // Additional functions related to priority queue management, loyalty points check, etc.
 }
-
-// Assume PriorityQueue and LoyaltyPoints contracts are correctly imported and initialized
-
-// Additional functions related to priority queue management, loyalty points check, etc.
