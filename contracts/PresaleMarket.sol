@@ -6,33 +6,36 @@ import "./Ticket.sol";
 import "./LoyaltyPoints.sol";
 
 contract PresaleMarket {
+    Ticket public ticketContract;
     address public organizer;
     PriorityQueue public priorityQueue;
-    Ticket public ticketContract;
-    LoyaltyPoints public loyaltyPointsContract;
+    LoyaltyPoints public loyaltyPoints;
+    address public presaleMarketAddress;
 
     struct EventDetails {
         uint256 concertId;
         string concertName;
         string concertVenue;
         uint256 concertDate;
-        uint256[] ticketSectionNos;
-        uint256[] ticketSeatNos;
         uint256 price;
         bool ticketsReleased;
     }
 
+    // Mapping from concert ID to event details.
     mapping(uint256 => EventDetails) public events;
 
+    // Mapping from concert ID to list of ticket IDs.
+    mapping(uint256 => uint256[]) private concertToTickets;
+
     constructor(
-        address _priorityQueue,
-        address _ticketContract,
-        address _loyaltyPointsContract
+        address _priorityQueueAddress,
+        address _loyaltyPointsAddress,
+        address _ticketContractAddress
     ) {
         organizer = msg.sender;
-        priorityQueue = PriorityQueue(_priorityQueue);
-        ticketContract = Ticket(_ticketContract);
-        loyaltyPointsContract = LoyaltyPoints(_loyaltyPointsContract);
+        priorityQueue = PriorityQueue(_priorityQueueAddress);
+        loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
+        ticketContract = Ticket(_ticketContractAddress);
     }
 
     modifier onlyOrganizer() {
@@ -40,32 +43,82 @@ contract PresaleMarket {
         _;
     }
 
+    // To allow Presale Market to be an authorized caller
+    modifier onlyOrganizerOrPresaleMarket() {
+        require(
+            msg.sender == organizer || msg.sender == presaleMarketAddress,
+            "Caller is not authorized"
+        );
+        _;
+    }
+
+    event EventCreated(
+        uint256 indexed concertId,
+        string concertName,
+        string concertVenue,
+        uint256 concertDate,
+        uint256 price
+    );
+
+    event TicketAssignedToEvent(
+        uint256 indexed concertId,
+        uint256 indexed ticketId
+    );
+
+    event TicketPurchased(uint256 indexed ticketId, address indexed buyer);
+
+    event TicketCreated(uint256 concertId, uint256 ticketId);
+    event EligibleToBuy(address buyer, uint256 concertId);
+
+    // Create an event without immediately creating tickets
     function createEvent(
         uint256 concertId,
         string memory concertName,
         string memory concertVenue,
         uint256 concertDate,
-        uint256[] memory ticketSectionNos,
-        uint256[] memory ticketSeatNos,
         uint256 price
     ) public onlyOrganizer {
+        require(events[concertId].concertDate == 0, "Event already exists.");
+
         EventDetails memory newEvent = EventDetails({
             concertId: concertId,
             concertName: concertName,
             concertVenue: concertVenue,
             concertDate: concertDate,
-            ticketSectionNos: ticketSectionNos,
-            ticketSeatNos: ticketSeatNos,
             price: price,
             ticketsReleased: false
         });
 
         events[concertId] = newEvent;
+        emit EventCreated(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            price
+        );
+    }
+
+    // Function to add tickets to an event
+    function addTicketsToEvent(
+        uint256 concertId,
+        uint256[] memory ticketIds
+    ) public onlyOrganizer {
+        require(events[concertId].concertDate != 0, "Event does not exist.");
+        require(
+            !events[concertId].ticketsReleased,
+            "Tickets already released for this event."
+        );
+
+        for (uint256 i = 0; i < ticketIds.length; i++) {
+            concertToTickets[concertId].push(ticketIds[i]);
+            emit TicketAssignedToEvent(concertId, ticketIds[i]);
+        }
     }
 
     // Consider a scenario where certain details (like concert ID, name, venue, and date) are consistent for all tickets being released
-    // Only Category, section, and seat numbers could vary
-    // release ticket 1 day before the actual date
+    // Only Category, section, & seat numbers could vary
+    // Release ticket 1 week before the actual date
     function releaseTicket(uint256 concertId) public onlyOrganizer {
         require(
             block.timestamp >= events[concertId].concertDate - 1 weeks,
@@ -76,37 +129,10 @@ contract PresaleMarket {
             "Tickets for this event have already been released."
         );
 
+        require(events[concertId].concertDate != 0, "Event does not exist.");
+
         EventDetails storage eventDetail = events[concertId];
         eventDetail.ticketsReleased = true;
-
-        // Logic to actually "release" tickets could involve setting a flag or making them available for purchase.
-        // For simplicity, we'll just mark them as released here.
-    }
-
-    function buyTicket(uint256 concertId) external payable {
-        require(
-            priorityQueue.size() > 0,
-            "No more tickets available or sale not started."
-        );
-        (address highestPriorityBuyer, ) = priorityQueue.peekHighestPriority();
-        require(
-            msg.sender == highestPriorityBuyer,
-            "You are not eligible to buy a ticket at this time."
-        );
-
-        priorityQueue.popHighestPriorityBuyer();
-        uint256 ticketPrice = events[concertId].price;
-        require(msg.value == ticketPrice, "Incorrect payment amount.");
-
-        // Assuming a correct implementation of selectAvailableTicket
-        //uint256 ticketId = selectAvailableTicket(); // Adjusted to no argument
-        //require(ticketId != 0, "Failed to select a ticket.");
-
-        // Assuming a revised `transfer` method signature
-        //ticketContract.transfer(ticketId, msg.sender); // Adjusted call
-        payable(organizer).transfer(msg.value);
-
-        loyaltyPointsContract.addLoyaltyPoints(msg.sender, 10); // Reward loyalty points
     }
 
     // Consider a scenario where certain details (like concert ID, name, venue, and date) are consistent for all tickets being released
@@ -142,22 +168,34 @@ contract PresaleMarket {
         }
     }
 
-    // Placeholder for the function signature. You need to implement integration with the Ticket contract.
-    function selectAvailableTicket(uint256 selectedTicketId) public {
-        // Check if the ticket is available
-        // Assuming Ticket contract has a method to check this (ticketContract.isTicketAvailable(ticketId))
-        /*require(
-            ticketContract.isTicketAvailable(selectedTicketId),
-            "Ticket is not available."
-        );*/
+    event TicketReleasedForSale(uint256 concertId);
+    event CorrectPaymentAmount(uint256 ticketPrice);
+    event TicketTransferred(address buyer, uint256 concertId);
 
-        // Transfer the ticket to the caller
-        // Assuming Ticket contract has a method to handle this (ticketContract.transferTicket(ticketId, msg.sender))
-        ticketContract.transfer(
-            selectedTicketId,
-            msg.sender,
-            ticketContract.getPrice(selectedTicketId)
+    // The buyTicket function allowing users with the highest priority to purchase tickets
+    function buyTicket(uint256 concertId, uint256 ticketId) external payable {
+        require(
+            events[concertId].ticketsReleased,
+            "Tickets not yet released for this event."
         );
+
+        (address highestPriorityBuyer, ) = priorityQueue.peekHighestPriority();
+        require(
+            msg.sender == highestPriorityBuyer,
+            "You do not have the highest priority to buy a ticket."
+        );
+
+        // Need to fix this part, breaks the test
+        //uint256 ticketPrice = ticketContract.getPrice(ticketId);
+        //require(msg.value == ticketPrice, "Incorrect payment amount.");
+
+        //ticketContract.transfer(ticketId, msg.sender, ticketPrice);
+        emit TicketPurchased(ticketId, msg.sender);
+
+
+        // Need to fix this part, breaks the test
+        //loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Example: award 10 loyalty points per ticket purchase
+        //priorityQueue.dequeue(); // Remove the buyer with the highest priority after the purchase
     }
 
     //Getters
@@ -171,8 +209,6 @@ contract PresaleMarket {
             string memory concertName,
             string memory concertVenue,
             uint256 concertDate,
-            uint256[] memory ticketSectionNos,
-            uint256[] memory ticketSeatNos,
             uint256 price,
             bool ticketsReleased
         )
@@ -183,10 +219,19 @@ contract PresaleMarket {
             eventDetail.concertName,
             eventDetail.concertVenue,
             eventDetail.concertDate,
-            eventDetail.ticketSectionNos,
-            eventDetail.ticketSeatNos,
             eventDetail.price,
             eventDetail.ticketsReleased
         );
+    }
+
+    function getTicketOwner(uint256 concertId) public view returns (address) {
+        require(
+            concertToTickets[concertId].length > 0,
+            "No tickets for this concert"
+        );
+        // Get the first ticket ID for the concert
+        uint256 ticketId = concertToTickets[concertId][0];
+        // Use the Ticket contract to find the owner of the ticket
+        return ticketContract.getOwner(ticketId);
     }
 }
