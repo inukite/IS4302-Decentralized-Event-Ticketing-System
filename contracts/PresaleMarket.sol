@@ -68,8 +68,8 @@ contract PresaleMarket {
     // release ticket 1 day before the actual date
     function releaseTicket(uint256 concertId) public onlyOrganizer {
         require(
-            block.timestamp <= events[concertId].concertDate - 1 days,
-            "Tickets can only be released 1 day before the event."
+            block.timestamp >= events[concertId].concertDate - 1 weeks,
+            "Tickets can only be released 1 week before the event."
         );
         require(
             !events[concertId].ticketsReleased,
@@ -160,7 +160,7 @@ contract PresaleMarket {
         );
     }
 
-    // Getters
+    //Getters
     function getEventDetails(
         uint256 _concertId
     )
@@ -189,6 +189,4 @@ contract PresaleMarket {
             eventDetail.ticketsReleased
         );
     }
-
-    // Additional functions related to priority queue management, loyalty points check, etc.
 }
