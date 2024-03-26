@@ -28,36 +28,6 @@ contract PresaleMarket {
     }
 
     event TicketPurchased(address buyer);
-    // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
-
-import "./PriorityQueue.sol";
-import "./Ticket.sol";
-import "./LoyaltyPoints.sol";
-
-contract PresaleMarket {
-    address public organizer;
-    PriorityQueue public priorityQueue;
-    Ticket public ticketContract;
-    LoyaltyPoints public loyaltyPointsContract;
-
-    constructor(
-        address _priorityQueue,
-        address _ticketContract,
-        address _loyaltyPointsContract
-    ) {
-        organizer = msg.sender;
-        priorityQueue = PriorityQueue(_priorityQueue);
-        ticketContract = Ticket(_ticketContract);
-        loyaltyPointsContract = LoyaltyPoints(_loyaltyPointsContract);
-    }
-
-    modifier onlyOrganizer() {
-        require(msg.sender == organizer, "Caller is not the organizer");
-        _;
-    }
-
-    event TicketPurchased(address buyer);
     event PurchaseLogged(address buyer, uint256 ticketId);
 
     //emit this after the buyer has selected which ticket they want to buy
