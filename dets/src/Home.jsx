@@ -7,6 +7,8 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import ConcertCardScroll from './ConcertCardScroll';
 import LoyalScoreHome from './LoyaltyScoreHome';
+import ArtistScroll from './ArtistCard';
+import JoinCommunity from './JoinCommunity';
 
 const Home = () => {
   const { userAddress, setUserAddress } = useUserAddress();
@@ -31,19 +33,19 @@ const Home = () => {
               style={{ width: '100%' }}
               alt="Concert"
             />
-            <Button
+            {/* <Button
               variant="primary"
               onClick={navigateToUpcomingConcerts} // navigate to upcomingconcerts
               style={{
                 color: 'white',
                 backgroundColor: '#6F4FF2',
-                marginTop: '19%',
-                marginLeft: '-79%',
-                position: 'absolute',
+                // marginTop: '0%',
+                // marginLeft: '-85%',
+                // position: 'absolute',
               }}
             >
               Discover Now
-            </Button>
+            </Button> */}
           </div>
         </Row>
         <br />
@@ -70,9 +72,22 @@ const Home = () => {
         </Row>
 
         <br />
+        <br />
         <Row>
           <LoyalScoreHome />
         </Row>
+        <br />
+        <br />
+        <Row>
+          <ArtistScroll />
+        </Row>
+        <br />
+        <br />
+        <Row>
+          <JoinCommunity />
+        </Row>
+        <br />
+        <br />
       </Container>
     </>
   );
