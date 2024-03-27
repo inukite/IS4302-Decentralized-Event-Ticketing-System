@@ -1,0 +1,46 @@
+.concert-card-scroll {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: thin; /* For supporting browsers */
+}
+
+.concert-card {
+  min-width: 300px; /* Adjust based on your design */
+  margin-right: 16px; /* Space between cards */
+  flex-shrink: 0; /* Prevents cards from shrinking */
+  border-radius: 8px; /* Optional for rounded corners */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional for shadow */
+  overflow: hidden; /* Keeps the image corners rounded */
+}
+
+.concert-card img {
+  width: 100%;
+  display: block; /* Removes bottom space/margin */
+}
+
+.concert-info {
+  padding: 16px;
+  background: white; /* Fallback for non-transparent cards */
+}
+
+.concert-info h3 {
+  margin-top: 0;
+}
+
+.concert-info button {
+  /* Style your button */
+}
+
+/* Custom scrollbar for Webkit browsers */
+.concert-card-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.concert-card-scroll::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.concert-card-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}

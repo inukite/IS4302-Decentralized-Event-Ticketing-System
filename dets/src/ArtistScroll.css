@@ -1,0 +1,59 @@
+.artist-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  padding: 20px 0;
+  scrollbar-width: thin;
+}
+
+.artist-card {
+  flex: 0 0 auto; /* Don't grow, don't shrink, basis is auto */
+  width: 250px; /* Set a fixed width for the cards */
+  margin-right: 16px; /* Spacing between cards */
+  margin-left: 5px;
+  border-radius: 10px; /* Round corners */
+  background: white; /* Card background */
+  box-shadow: 0 2px 2px 2px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+  text-align: center; /* Center text */
+  padding: 20px 0;
+}
+
+.artist-image-container {
+  position: relative;
+  /* Adjust the size as needed */
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  border-radius: 50%; /* Circle */
+  overflow: hidden;
+}
+
+.artist-image {
+  width: 100%;
+  height: auto;
+}
+
+.artist-info {
+  padding: 10px;
+}
+
+.artist-info h4 {
+  margin: 10px 0 5px;
+}
+
+.artist-info p {
+  margin: 5px 0;
+}
+
+/* Styles for custom scrollbar on Webkit browsers */
+.artist-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.artist-scroll-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.artist-scroll-container::-webkit-scrollbar-track {
+  background: transparent;
+}
