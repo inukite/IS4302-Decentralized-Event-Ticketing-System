@@ -11,6 +11,19 @@ contract PresaleMarket {
     Ticket public ticketContract;
     LoyaltyPoints public loyaltyPointsContract;
 
+    struct EventDetails {
+        uint256 concertId;
+        string concertName;
+        string concertVenue;
+        uint256 concertDate;
+        uint256[] ticketSectionNos;
+        uint256[] ticketSeatNos;
+        uint256 price;
+        bool ticketsReleased;
+    }
+
+    mapping(uint256 => EventDetails) public events;
+
     constructor(
         address _priorityQueue,
         address _ticketContract,
@@ -25,6 +38,75 @@ contract PresaleMarket {
     modifier onlyOrganizer() {
         require(msg.sender == organizer, "Caller is not the organizer");
         _;
+    }
+
+    function createEvent(
+        uint256 concertId,
+        string memory concertName,
+        string memory concertVenue,
+        uint256 concertDate,
+        uint256[] memory ticketSectionNos,
+        uint256[] memory ticketSeatNos,
+        uint256 price
+    ) public onlyOrganizer {
+        EventDetails memory newEvent = EventDetails({
+            concertId: concertId,
+            concertName: concertName,
+            concertVenue: concertVenue,
+            concertDate: concertDate,
+            ticketSectionNos: ticketSectionNos,
+            ticketSeatNos: ticketSeatNos,
+            price: price,
+            ticketsReleased: false
+        });
+
+        events[concertId] = newEvent;
+    }
+
+    // Consider a scenario where certain details (like concert ID, name, venue, and date) are consistent for all tickets being released
+    // Only Category, section, and seat numbers could vary
+    // release ticket 1 day before the actual date
+    function releaseTicket(uint256 concertId) public onlyOrganizer {
+        require(
+            block.timestamp <= events[concertId].concertDate - 1 days,
+            "Tickets can only be released 1 day before the event."
+        );
+        require(
+            !events[concertId].ticketsReleased,
+            "Tickets for this event have already been released."
+        );
+
+        EventDetails storage eventDetail = events[concertId];
+        eventDetail.ticketsReleased = true;
+
+        // Logic to actually "release" tickets could involve setting a flag or making them available for purchase.
+        // For simplicity, we'll just mark them as released here.
+    }
+
+    function buyTicket(uint256 concertId) external payable {
+        require(
+            priorityQueue.size() > 0,
+            "No more tickets available or sale not started."
+        );
+        (address highestPriorityBuyer, ) = priorityQueue.peekHighestPriority();
+        require(
+            msg.sender == highestPriorityBuyer,
+            "You are not eligible to buy a ticket at this time."
+        );
+
+        priorityQueue.popHighestPriorityBuyer();
+        uint256 ticketPrice = events[concertId].price;
+        require(msg.value == ticketPrice, "Incorrect payment amount.");
+
+        // Assuming a correct implementation of selectAvailableTicket
+        //uint256 ticketId = selectAvailableTicket(); // Adjusted to no argument
+        //require(ticketId != 0, "Failed to select a ticket.");
+
+        // Assuming a revised `transfer` method signature
+        //ticketContract.transfer(ticketId, msg.sender); // Adjusted call
+        payable(organizer).transfer(msg.value);
+
+        loyaltyPointsContract.addLoyaltyPoints(msg.sender, 10); // Reward loyalty points
     }
 
     // Consider a scenario where certain details (like concert ID, name, venue, and date) are consistent for all tickets being released
@@ -60,28 +142,53 @@ contract PresaleMarket {
         }
     }
 
-    /*function buyTicket() external {
-        uint256 buyerLoyaltyPoints = loyaltyPointsContract.getPoints(
-            msg.sender
-        );
-        require(
-            priorityQueue.isInQueue(msg.sender, buyerLoyaltyPoints),
-            "Buyer is not in priority queue."
-        );
+    // Placeholder for the function signature. You need to implement integration with the Ticket contract.
+    function selectAvailableTicket(uint256 selectedTicketId) public {
+        // Check if the ticket is available
+        // Assuming Ticket contract has a method to check this (ticketContract.isTicketAvailable(ticketId))
+        /*require(
+            ticketContract.isTicketAvailable(selectedTicketId),
+            "Ticket is not available."
+        );*/
 
-        // Simulate priority queue pop operation for the highest priority buyer
-        address highestPriorityBuyer = priorityQueue.popHighestPriorityBuyer();
-        require(
-            msg.sender == highestPriorityBuyer,
-            "It's not your turn to buy a ticket yet."
+        // Transfer the ticket to the caller
+        // Assuming Ticket contract has a method to handle this (ticketContract.transferTicket(ticketId, msg.sender))
+        ticketContract.transfer(
+            selectedTicketId,
+            msg.sender,
+            ticketContract.getPrice(selectedTicketId)
         );
-
-        // Assuming a function in Ticket contract to handle ticket purchase
-        ticketContract.purchaseTicket(msg.sender);
-
-        // Update priority queue after purchase
-        // This might involve recalculating loyalty points or adjusting queue positions
     }
-*/
+
+    // Getters
+    function getEventDetails(
+        uint256 _concertId
+    )
+        public
+        view
+        returns (
+            uint256 concertId,
+            string memory concertName,
+            string memory concertVenue,
+            uint256 concertDate,
+            uint256[] memory ticketSectionNos,
+            uint256[] memory ticketSeatNos,
+            uint256 price,
+            bool ticketsReleased
+        )
+    {
+        EventDetails storage eventDetail = events[_concertId];
+        return (
+            eventDetail.concertId,
+            eventDetail.concertName,
+            eventDetail.concertVenue,
+            eventDetail.concertDate,
+            eventDetail.ticketSectionNos,
+            eventDetail.ticketSeatNos,
+            eventDetail.price,
+            eventDetail.ticketsReleased
+        );
+    }
+
     // Additional functions related to priority queue management, loyalty points check, etc.
 }
