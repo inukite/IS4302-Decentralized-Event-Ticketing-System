@@ -31,5 +31,5 @@ module.exports = async function (deployer, network, accounts) {
    const priorityQueueInstance = await deployer.deploy(PriorityQueue, loyaltyPointsInstance.address);
 
    // Deploy PresaleMarket
-   await deployer.deploy(PresaleMarket, priorityQueueInstance.address, ticketInstance.address, loyaltyPointsInstance.address);
+   await deployer.deploy(PresaleMarket, priorityQueueInstance.address, loyaltyPointsInstance.address, ticketInstance.address);
 };
