@@ -110,8 +110,9 @@ contract PresaleMarket {
             ticketSectionNo,
             ticketSeatNo,
             price
-        );
+        ); 
 
+       //uint256 newTicketId = 1;
         concertToTicketIds[concertId].push(newTicketId);
         emit TicketAssignedToEvent(concertId, newTicketId);
         return newTicketId;
