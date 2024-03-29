@@ -3,6 +3,7 @@
     "@openzeppelin/test-helpers": "^0.5.16",
     "bignumber": "^1.1.0",
     "bignumber.js": "^9.1.2",
+    "chai": "^4.4.1",
     "truffle-assertions": "^0.9.2"
   }
 }

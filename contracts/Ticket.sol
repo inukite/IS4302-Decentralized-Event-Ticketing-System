@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./ERC20.sol";
 import "./TicketToken.sol";
+import "./PresaleMarket.sol";
 
 contract Ticket {
     enum TicketState {
@@ -36,6 +37,11 @@ contract Ticket {
     TicketToken public ticketToken;
     uint256 public ticketCounter = 0;
     address public owner;
+    address public presaleMarketAddress;
+
+    function setPresaleMarketAddress(address _presaleMarketAddress) public {
+        presaleMarketAddress = _presaleMarketAddress;
+    }
 
     constructor(address _ticketToken) {
         owner = msg.sender;
@@ -64,12 +70,7 @@ contract Ticket {
         uint256 ticketSectionNo,
         uint256 ticketSeatNo,
         uint256 price
-    ) public returns (uint256) {
-        require(
-            msg.sender == owner,
-            "Only the owner (organizer) can create a new ticket"
-        );
-
+    ) public onlyOwnerOrMarket returns (uint256) {
         ticket memory newTicket = ticket({
             ticketId: ticketCounter,
             concertId: concertId,
@@ -90,9 +91,18 @@ contract Ticket {
         return ticketCounter - 1; // Return the ID of the newly created ticket
     }
 
-    //modifier to ensure a function is callable only by its owner
+    // Modifier to ensure a function is callable only by its owner
     modifier ownerOnly(uint256 ticketId) {
         require(tickets[ticketId].owner == msg.sender);
+        _;
+    }
+
+    // Modifier to ensure function can be called by presaleMarket as well
+    modifier onlyOwnerOrMarket() {
+        require(
+            msg.sender == owner || msg.sender == presaleMarketAddress,
+            "Unauthorized"
+        );
         _;
     }
 

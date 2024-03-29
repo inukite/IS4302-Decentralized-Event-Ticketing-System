@@ -5,6 +5,7 @@ contract LoyaltyPoints {
     mapping(address => uint256) public lpBalances;
 
     address owner;
+    address public presaleMarketAddress; // Allow presaleMartet to be an authorised caller
 
     event LoyaltyPointsAdded(address indexed user, uint256 points);
     event LoyaltyPointsSubtracted(address indexed user, uint256 points);
@@ -15,11 +16,25 @@ contract LoyaltyPoints {
         _;
     }
 
+    modifier onlyPresaleMarketOrOwner() {
+        require(
+            msg.sender == owner || msg.sender == presaleMarketAddress,
+            "Unauthorized"
+        );
+        _;
+    }
+
     constructor() {
         owner = msg.sender;
     }
 
-    function addLoyaltyPoints(address user, uint256 points) public onlyOwner {
+    function setPresaleMarketAddress(
+        address _presaleMarketAddress
+    ) external onlyOwner {
+        presaleMarketAddress = _presaleMarketAddress;
+    }
+
+    function addLoyaltyPoints(address user, uint256 points) public onlyPresaleMarketOrOwner  {
         lpBalances[user] += points;
         emit LoyaltyPointsAdded(user, points);
     }

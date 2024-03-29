@@ -15,6 +15,22 @@ contract PriorityQueue {
     address private organizer; // Added for access control
     LoyaltyPoints loyaltyPointsContract;
     uint256 private insertionCounter = 0;
+    address public presaleMarketAddress; // Allow presaleMarket to be an authorised caller
+
+    // New function to set the PresaleMarket address
+    function setPresaleMarketAddress(
+        address _presaleMarketAddress
+    ) external onlyOrganizer {
+        presaleMarketAddress = _presaleMarketAddress;
+    }
+
+    modifier onlyPresaleMarketOrOrganizer() {
+        require(
+            msg.sender == organizer || msg.sender == presaleMarketAddress,
+            "Unauthorized"
+        );
+        _;
+    }
 
     function setLoyaltyPointsContractAddress(
         address _addr
@@ -39,7 +55,7 @@ contract PriorityQueue {
     event ElementEnqueued(address indexed enqueuedAddress);
     event ElementDequeued(address indexed dequeuedAddress);
 
-    function enqueue(address _addr) public onlyOrganizer {
+    function enqueue(address _addr) public onlyPresaleMarketOrOrganizer {
         uint256 loyaltyPoints = loyaltyPointsContract.getPoints(_addr);
         heapArray.push(
             QueueElement({
@@ -66,7 +82,7 @@ contract PriorityQueue {
         return highestPriorityAddress;
     }
 
-    function popHighestPriorityBuyer() public onlyOrganizer returns (address) {
+    function popHighestPriorityBuyer() public onlyPresaleMarketOrOrganizer returns (address) {
         require(size > 0, "Queue is empty");
         return dequeue(); // Use dequeue logic to pop and return the highest priority (loyalty points) buyer
     }
