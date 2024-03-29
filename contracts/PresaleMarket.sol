@@ -10,7 +10,6 @@ contract PresaleMarket {
     address public organizer;
     PriorityQueue public priorityQueue;
     LoyaltyPoints public loyaltyPoints;
-    address public presaleMarketAddress;
     uint256 public ticketCounter;
 
     struct EventDetails {
@@ -41,15 +40,6 @@ contract PresaleMarket {
 
     modifier onlyOrganizer() {
         require(msg.sender == organizer, "Caller is not the organizer");
-        _;
-    }
-
-    // To allow Presale Market to be an authorized caller
-    modifier onlyOrganizerOrPresaleMarket() {
-        require(
-            msg.sender == organizer || msg.sender == presaleMarketAddress,
-            "Caller is not authorized"
-        );
         _;
     }
 
@@ -155,7 +145,7 @@ contract PresaleMarket {
             msg.sender == highestPriorityBuyer,
             "You do not have the highest priority to buy a ticket."
         );
-        
+
         // Need to fix this part, breaks the test
         //uint256 ticketPrice = ticketContract.getPrice(ticketId);
         //require(msg.value == ticketPrice, "Incorrect payment amount.");

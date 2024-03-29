@@ -105,7 +105,7 @@ contract("PresaleMarket", (accounts) => {
     });
 
     it("should be able to create a new ticket and associate it to the event", async () => {
-        await presaleMarketInstance.createEvent(
+        let eventTx = await presaleMarketInstance.createEvent(
             2, // Using a different concertId to avoid collision
             "Test Concert",
             "Test Venue",
@@ -113,6 +113,10 @@ contract("PresaleMarket", (accounts) => {
             web3.utils.toWei("0.1", "ether"),
             { from: organizer }
         );
+
+        truffleAssert.eventEmitted(eventTx, 'EventCreated', (ev) => {
+            return ev.concertId.toNumber() === 2;
+        }, "Event should be created successfully");
 
         // Create a ticket and associate it with the event
         let ticketTx = await presaleMarketInstance.createTicketAndAddToEvent(
@@ -125,6 +129,8 @@ contract("PresaleMarket", (accounts) => {
             web3.utils.toWei("0.1", "ether"),
             { from: organizer }
         );
+
+        assert(ticketTx > 0, "Invalid ticket ID returned");
 
         truffleAssert.eventEmitted(ticketTx, 'TicketAssignedToEvent', (ev) => {
             return ev.concertId.toNumber() === 2; // Ensure the ticket is tagged to the correct event
