@@ -68,8 +68,6 @@ contract PresaleMarket {
         uint256 concertDate,
         uint256 price
     ) public onlyOrganizer {
-        require(events[concertId].concertDate == 0, "Event already exists.");
-
         EventDetails memory newEvent = EventDetails({
             concertId: concertId,
             concertName: concertName,
@@ -102,6 +100,7 @@ contract PresaleMarket {
         // Ensure the event exists
         require(events[concertId].concertDate != 0, "Event does not exist.");
 
+        //Needs to fix this, breaks the test
         uint256 newTicketId = ticketContract.createTicket(
             concertId,
             concertName,
@@ -110,9 +109,9 @@ contract PresaleMarket {
             ticketSectionNo,
             ticketSeatNo,
             price
-        ); 
+        );
 
-       //uint256 newTicketId = 1;
+        //uint256 newTicketId = 1;
         concertToTicketIds[concertId].push(newTicketId);
         emit TicketAssignedToEvent(concertId, newTicketId);
         return newTicketId;

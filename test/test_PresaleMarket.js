@@ -21,17 +21,17 @@ contract("PresaleMarket", async (accounts) => {
 
     beforeEach(async () => {
         // Deploy TicketToken first since it's a dependency for the Ticket contract
-        ticketTokenInstance = await TicketToken.new({ from: organizer });
+        ticketTokenInstance = await TicketToken.deployed({ from: organizer });
 
         // Deploy the rest of the contracts with their respective dependencies
-        ticketInstance = await Ticket.new(ticketTokenInstance.address, { from: organizer });
+        ticketInstance = await Ticket.deployed(ticketTokenInstance.address, { from: organizer });
 
-        loyaltyPointsInstance = await LoyaltyPoints.new({ from: organizer });
-        priorityQueueInstance = await PriorityQueue.new(loyaltyPointsInstance.address, { from: organizer });
-        presaleMarketInstance = await PresaleMarket.new(
+        loyaltyPointsInstance = await LoyaltyPoints.deployed({ from: organizer });
+        priorityQueueInstance = await PriorityQueue.deployed(loyaltyPointsInstance.address, { from: organizer });
+        presaleMarketInstance = await PresaleMarket.deployed(
             priorityQueueInstance.address,
-            ticketInstance.address,
             loyaltyPointsInstance.address,
+            ticketInstance.address,
             { from: organizer }
         );
     });

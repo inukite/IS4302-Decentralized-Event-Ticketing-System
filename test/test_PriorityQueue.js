@@ -6,8 +6,8 @@ contract("PriorityQueue", (accounts) => {
   let loyaltyPoints;
 
   before(async () => {
-    loyaltyPoints = await LoyaltyPoints.new();
-    priorityQueue = await PriorityQueue.new(loyaltyPoints.address);
+    loyaltyPoints = await LoyaltyPoints.deployed();
+    priorityQueue = await PriorityQueue.deployed(loyaltyPoints.address);
   });
 
   it("should correctly enqueue and update the size of the queue", async () => {
