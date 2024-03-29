@@ -152,7 +152,7 @@ contract PresaleMarket {
 
         // Need to fix this part, breaks the test
         loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Example: award 10 loyalty points per ticket purchase
-        //priorityQueue.dequeue(); // Remove the buyer with the highest priority after the purchase
+        priorityQueue.dequeue(); // Remove the buyer with the highest priority after the purchase
     }
 
     //Getters
