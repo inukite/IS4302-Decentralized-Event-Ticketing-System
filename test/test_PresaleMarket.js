@@ -145,7 +145,9 @@ contract("PresaleMarket", async (accounts) => {
         let currentTime = await time.latest();
         let oneWeekFromNow = currentTime.add(time.duration.seconds(oneWeekInSeconds));
 
+        // Allow presaleMarket to be authorized callers in the ticket & loyaltyPoints contract
         await ticketInstance.setPresaleMarketAddress(presaleMarketInstance.address, { from: organizer });
+        await loyaltyPointsInstance.setPresaleMarketAddress(presaleMarketInstance.address, { from: organizer });
 
         // Create an event with concert ID 1 
         await presaleMarketInstance.createEvent(1, "Example Concert", "Example Venue", oneWeekFromNow, ticketPrice, { from: organizer });
@@ -163,7 +165,7 @@ contract("PresaleMarket", async (accounts) => {
         await time.increaseTo(oneWeekFromNow.sub(time.duration.days(2)));
 
         // Create a ticket and capture the event
-        /*await presaleMarketInstance.createTicketAndAddToEvent(
+        await presaleMarketInstance.createTicketAndAddToEvent(
             concertId,
             concertName,
             concertVenue,
@@ -172,7 +174,7 @@ contract("PresaleMarket", async (accounts) => {
             ticketSeatNo,
             price,
             { from: organizer }
-        );*/
+        );
         
         // Release the tickets
         await presaleMarketInstance.releaseTicket(1, { from: organizer });

@@ -144,15 +144,14 @@ contract PresaleMarket {
             "You do not have the highest priority to buy a ticket."
         );
 
-        // Need to fix this part, breaks the test
-        //uint256 ticketPrice = ticketContract.getPrice(ticketId);
-        //require(msg.value == ticketPrice, "Incorrect payment amount.");
+        uint256 ticketPrice = ticketContract.getPrice(ticketId);
+        require(msg.value == ticketPrice, "Incorrect payment amount.");
 
-        //ticketContract.transfer(ticketId, msg.sender, ticketPrice);
+        ticketContract.transfer(ticketId, msg.sender, ticketPrice);
         emit TicketPurchased(ticketId, msg.sender);
 
         // Need to fix this part, breaks the test
-        //loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Example: award 10 loyalty points per ticket purchase
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Example: award 10 loyalty points per ticket purchase
         //priorityQueue.dequeue(); // Remove the buyer with the highest priority after the purchase
     }
 

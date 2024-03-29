@@ -68,7 +68,7 @@ contract PriorityQueue {
         _bubbleUp(size);
         emit ElementEnqueued(_addr);
     }
-    function dequeue() public onlyOrganizer returns (address) {
+    function dequeue() public onlyPresaleMarketOrOrganizer returns (address) {
         require(size > 0, "Queue is empty");
         address highestPriorityAddress = heapArray[1].addr;
 
