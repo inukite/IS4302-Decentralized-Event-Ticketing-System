@@ -148,6 +148,7 @@ contract("PresaleMarket", async (accounts) => {
         // Allow presaleMarket to be authorized callers in the ticket & loyaltyPoints contract
         await ticketInstance.setPresaleMarketAddress(presaleMarketInstance.address, { from: organizer });
         await loyaltyPointsInstance.setPresaleMarketAddress(presaleMarketInstance.address, { from: organizer });
+        await priorityQueueInstance.setPresaleMarketAddress(presaleMarketInstance.address, { from: organizer });
 
         // Create an event with concert ID 1 
         await presaleMarketInstance.createEvent(1, "Example Concert", "Example Venue", oneWeekFromNow, ticketPrice, { from: organizer });
