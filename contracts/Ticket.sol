@@ -90,7 +90,7 @@ contract Ticket {
         return ticketCounter - 1; // Return the ID of the newly created ticket
     }
 
-    //modifier to ensure a function is callable only by its owner
+    // Modifier to ensure a function is callable only by its owner
     modifier ownerOnly(uint256 ticketId) {
         require(tickets[ticketId].owner == msg.sender);
         _;
