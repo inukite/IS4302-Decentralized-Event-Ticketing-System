@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useUserAddress } from './UserAddressContext';
-import Button from 'react-bootstrap/Button';
-import { useNavigate } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import ConcertCardScroll from './ConcertCardScroll';
 import LoyalScoreHome from './LoyaltyScoreHome';
 import ArtistScroll from './ArtistCard';
@@ -12,12 +9,6 @@ import JoinCommunity from './JoinCommunity';
 
 const Home = () => {
   const { userAddress, setUserAddress } = useUserAddress();
-
-  let navigate = useNavigate();
-  const navigateToUpcomingConcerts = () => {
-    let path = `/upcomingconcerts`;
-    navigate(path);
-  };
 
   return (
     <>
@@ -33,19 +24,6 @@ const Home = () => {
               style={{ width: '100%' }}
               alt="Concert"
             />
-            {/* <Button
-              variant="primary"
-              onClick={navigateToUpcomingConcerts} // navigate to upcomingconcerts
-              style={{
-                color: 'white',
-                backgroundColor: '#6F4FF2',
-                // marginTop: '0%',
-                // marginLeft: '-85%',
-                // position: 'absolute',
-              }}
-            >
-              Discover Now
-            </Button> */}
           </div>
         </Row>
         <br />
