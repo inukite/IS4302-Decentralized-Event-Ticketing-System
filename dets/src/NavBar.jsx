@@ -1,36 +1,66 @@
 import { Navbar, Nav, Container } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { useUserAddress } from './UserAddressContext';
-import Col from 'react-bootstrap/Col';
 
 // Example NavBar component
 const NavBar = () => {
   const { userAddress, setUserAddress } = useUserAddress();
   // const [userAddress, setUserAddress] = useState('');
-  const isConnected = Boolean(userAddress); // Determines if a user is connected
+  // const isConnected = Boolean(userAddress); // Determines if a user is connected
+
+  // On component mount, check if the user is connected
+  useEffect(() => {
+    const connectedAddress = localStorage.getItem('connectedAddress');
+    if (connectedAddress) {
+      setUserAddress(connectedAddress);
+    }
+  }, [setUserAddress]);
 
   const connectWallet = async () => {
-    // Check if MetaMask is installed
-    if (window.ethereum && !isConnected) {
+    if (window.ethereum) {
       try {
-        // Request account access
         const accounts = await window.ethereum.request({
           method: 'eth_requestAccounts',
         });
-        // Set userAddress to the first account
         setUserAddress(accounts[0]);
+        // Set connected address in local storage
+        localStorage.setItem('connectedAddress', accounts[0]);
       } catch (error) {
         console.error('Error connecting to MetaMask', error);
       }
-    } else if (isConnected) {
-      // Simulate "logout" by clearing the user address
-      setUserAddress('');
     } else {
       alert('Please install MetaMask to use this feature!');
     }
   };
+
+  const disconnectWallet = () => {
+    setUserAddress('');
+    // Clear the connected address in local storage
+    localStorage.removeItem('connectedAddress');
+  };
+
+  // const connectWallet = async () => {
+  //   // Check if MetaMask is installed
+  //   if (window.ethereum && !isConnected) {
+  //     try {
+  //       // Request account access
+  //       const accounts = await window.ethereum.request({
+  //         method: 'eth_requestAccounts',
+  //       });
+  //       // Set userAddress to the first account
+  //       setUserAddress(accounts[0]);
+  //     } catch (error) {
+  //       console.error('Error connecting to MetaMask', error);
+  //     }
+  //   } else if (isConnected) {
+  //     // Simulate "logout" by clearing the user address
+  //     setUserAddress('');
+  //   } else {
+  //     alert('Please install MetaMask to use this feature!');
+  //   }
+  // };
 
   return (
     <div>
@@ -77,14 +107,15 @@ const NavBar = () => {
           <>
             <div style={{ padding: 5 }}>
               <button
-                onClick={connectWallet}
+                onClick={userAddress ? disconnectWallet : connectWallet}
                 style={{
                   borderRadius: 5,
                   padding: 5,
-                  backgroundColor: 'light-gray',
+                  backgroundColor: userAddress ? '#6F4FF2' : 'lightgray',
+                  color: userAddress ? 'white' : 'black',
                 }}
               >
-                {isConnected
+                {userAddress
                   ? `Disconnect ${userAddress.substring(0, 10)}...`
                   : 'Connect'}
               </button>
