@@ -28,10 +28,6 @@
   margin-top: 0;
 }
 
-.concert-info button {
-  /* Style your button */
-}
-
 /* Custom scrollbar for Webkit browsers */
 .concert-card-scroll::-webkit-scrollbar {
   height: 8px;
