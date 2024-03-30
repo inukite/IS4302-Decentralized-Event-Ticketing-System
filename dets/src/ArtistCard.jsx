@@ -10,28 +10,28 @@ const artists = [
     id: 1,
     name: 'Taylor Swift',
     handle: '@taylorswift',
-    concertsCount: 30,
+    concertsCount: 4,
     imageUrl: TaylorSwiftProfile, // Make sure to use actual paths or URLs
   },
   {
     id: 2,
     name: 'Bruno Mars',
     handle: '@brunomars',
-    concertsCount: 23,
+    concertsCount: 2,
     imageUrl: BrunoMarsProfile,
   },
   {
     id: 3,
     name: 'Ed Sheeran',
     handle: '@teddysphotos',
-    concertsCount: 15,
+    concertsCount: 5,
     imageUrl: EdSheeranProfile,
   },
   {
     id: 4,
     name: 'BlackPink',
     handle: '@blackpinkofficial',
-    concertsCount: 34,
+    concertsCount: 7,
     imageUrl: BlackPinkProfile,
   },
 ];

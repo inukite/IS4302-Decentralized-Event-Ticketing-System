@@ -4,7 +4,7 @@
   scrollbar-width: thin; /* For supporting browsers */
 }
 
-.concert-card {
+.concert-card-home {
   min-width: 300px; /* Adjust based on your design */
   margin-right: 16px; /* Space between cards */
   flex-shrink: 0; /* Prevents cards from shrinking */
@@ -13,12 +13,13 @@
   overflow: hidden; /* Keeps the image corners rounded */
 }
 
-.concert-card img {
-  width: 100%;
+.cards {
+  width: 350px;
+  height: 300px;
   display: block; /* Removes bottom space/margin */
 }
 
-.concert-info {
+.concert-info-home {
   padding: 16px;
   background: white; /* Fallback for non-transparent cards */
 }

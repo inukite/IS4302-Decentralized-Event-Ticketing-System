@@ -2,9 +2,9 @@ import React from 'react';
 import './ConcertCardScroll.css'; // Your CSS file for styling
 import EdSheeranAsiaTour from './Ed Sheeran Asia Tour.png';
 import ColdplayWorldTour from './Coldplay World Tour.png';
-import LANYConcert from './LANY Concert.png';
-import LauvAsiaTour from './Lauv Asia Tour.png';
-import BrunoMars from './Bruno Mars.png';
+import LANYConcert from './LANY Concert.jpg';
+import LauvAsiaTour from './Lauv Asia Tour.jpeg';
+import BrunoMars from './Bruno Mars.jpg';
 import ethereumCurrency from './currency-ethereum.png';
 import Button from 'react-bootstrap/Button';
 
@@ -53,9 +53,9 @@ const concerts = [
 
 const ConcertCard = ({ concert }) => {
   return (
-    <div className="concert-card">
-      <img src={concert.imageUrl} alt={concert.name} />
-      <div className="concert-info">
+    <div className="concert-card-home">
+      <img src={concert.imageUrl} alt={concert.name} className="cards" />
+      <div className="concert-info-home">
         <h4 style={{ fontWeight: 'bold', color: '#6F4FF2' }}>{concert.name}</h4>
         <hr />
         <p>Tickets starting from</p>
