@@ -73,9 +73,12 @@ const Home = () => {
 
         <br />
         <br />
-        <Row>
-          <LoyalScoreHome />
-        </Row>
+        {/* Render LoyaltyScoreHome only if userAddress is present */}
+        {userAddress && (
+          <Row>
+            <LoyalScoreHome />
+          </Row>
+        )}
         <br />
         <br />
         <Row>
