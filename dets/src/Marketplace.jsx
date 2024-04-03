@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useUserAddress } from './UserAddressContext';
+import FavouriteArtists from './FavouriteArtists';
 
 const Marketplace = () => {
   const { userAddress, setUserAddress } = useUserAddress();
 
   return (
     <>
-      <div>Marketplace</div>
+      <FavouriteArtists />
     </>
   );
 };
