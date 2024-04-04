@@ -7,6 +7,7 @@ contract LoyaltyPoints {
     address owner;
     address public presaleMarketAddress; // Allow presaleMartet to be an authorised caller
     address public ticketMarketAddress; // Allow ticketMarket to be an authorised caller
+    address public futureConcertPollAddress; // Allow futureConcertPoll to be an authorised caller
 
     event LoyaltyPointsAdded(address indexed user, uint256 points);
     event LoyaltyPointsSubtracted(address indexed user, uint256 points);
@@ -17,11 +18,14 @@ contract LoyaltyPoints {
         _;
     }
 
-    modifier onlyPresaleMarketOrOwnerorTicketMarket() {
+    modifier onlyAuthorisedCallers() {
+        //the Authroised callers include
+        //the owner, presaleMarketAddress, ticketMarketAddress and futureConcertPollAddress
         require(
             msg.sender == owner ||
                 msg.sender == presaleMarketAddress ||
-                msg.sender == ticketMarketAddress,
+                msg.sender == ticketMarketAddress ||
+                msg.sender == futureConcertPollAddress,
             "Unauthorized"
         );
         _;
@@ -43,10 +47,16 @@ contract LoyaltyPoints {
         ticketMarketAddress = _ticketMarketAddress;
     }
 
+    function setFutureConcertPollAddress(
+        address _futureConcertPollAddress
+    ) external onlyOwner {
+        futureConcertPollAddress = _futureConcertPollAddress;
+    }
+
     function addLoyaltyPoints(
         address user,
         uint256 points
-    ) public onlyPresaleMarketOrOwnerorTicketMarket {
+    ) public onlyAuthorisedCallers {
         lpBalances[user] += points;
         emit LoyaltyPointsAdded(user, points);
     }
@@ -54,7 +64,7 @@ contract LoyaltyPoints {
     function subtractLoyaltyPoints(
         address user,
         uint256 points
-    ) public onlyPresaleMarketOrOwnerorTicketMarket {
+    ) public onlyAuthorisedCallers {
         require(lpBalances[user] >= points, "Insufficient balance.");
         lpBalances[user] -= points;
         emit LoyaltyPointsSubtracted(user, points);
@@ -62,7 +72,7 @@ contract LoyaltyPoints {
 
     // Other loyalty points management functions as needed
 
-    //getter functions
+    // Getter functions
 
     function setPoints(address user, uint256 points) public onlyOwner {
         lpBalances[user] = points;
