@@ -17,6 +17,7 @@ contract("PresaleMarket", async (accounts) => {
     const organizer = accounts[0];
     const buyer1 = accounts[1];
     const buyer2 = accounts[2];
+    const buyer3 = accounts[3];
     const ticketPrice = web3.utils.toWei("0.1", "ether");
 
     beforeEach(async () => {
@@ -233,6 +234,50 @@ contract("PresaleMarket", async (accounts) => {
         // Verify loyalty points were awarded
         const loyaltyPoints = await loyaltyPointsInstance.getPoints(buyer2);
         expect(loyaltyPoints.toNumber()).to.equal(10, "Buyer should be awarded 10 loyalty points for redeeming a ticket");
+    });
+
+    it("should not allow a ticket to be redeemed again if it has already been redeemed", async () => {
+    
+        const concertId = 4; 
+        const concertName = "Second Live Concert";
+        const concertVenue = "Virtual Venue Again";
+        const ticketPrice = web3.utils.toWei("0.1", "ether");
+        const now = await time.latest();
+        const concertDate = now.toNumber(); // Using 'now' for simplicity
+    
+        await presaleMarketInstance.createEvent(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            ticketPrice,
+            { from: organizer }
+        );
+    
+        let ticketTx = await presaleMarketInstance.createTicketAndAddToEvent(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            1, // Assuming section number
+            1, // Assuming seat number
+            ticketPrice,
+            { from: organizer }
+        );
+        const ticketId = ticketTx.logs[0].args.ticketId.toNumber();
+    
+        // Transfer the ticket to buyer3
+        await ticketInstance.transfer(ticketId, buyer3, ticketPrice, { from: organizer });
+    
+        // Redeem the ticket on the day of the event
+        await presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer3 });
+    
+        // Attempt to redeem the ticket again
+        await truffleAssert.reverts(
+            presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer3 }),
+            null,
+            "Should revert because the ticket has already been redeemed"
+        );
     });
 
 });

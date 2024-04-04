@@ -3,6 +3,9 @@ const LoyaltyPoints = artifacts.require("LoyaltyPoints");
 const truffleAssert = require("truffle-assertions");
 const assert = require("assert");
 
+// needs to be integrated in ticketMarket and presaleTicketMarket 
+// users are allowed to vote after they have purchased the ticket 
+
 contract("FutureConcertPoll", async (accounts) => {
     let loyaltyPointsInstance;
     let futureConcertPollInstance;
