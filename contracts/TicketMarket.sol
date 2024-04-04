@@ -6,12 +6,14 @@ import "./Ticket.sol";
 import "./TicketToken.sol";
 import "./PriorityQueue.sol";
 import "./LoyaltyPoints.sol";
+import "./FutureConcertPoll.sol";
 
 contract TicketMarket {
     address _owner = msg.sender;
     uint256 public commissionFee;
     Ticket public ticketContract;
     LoyaltyPoints public loyaltyPoints;
+    FutureConcertPoll futureConcertPoll;
 
     // Mapping from ticket ID to listing price
     mapping(uint256 => uint256) public listPrice;
@@ -34,9 +36,15 @@ contract TicketMarket {
     // Event emitted when a ticket is redeemed
     event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
-    constructor(Ticket ticketAddress, LoyaltyPoints loyaltyPointsAddress, uint256 fee) {
+    constructor(
+        Ticket ticketAddress,
+        LoyaltyPoints loyaltyPointsAddress,
+        FutureConcertPoll futureConcertPollAddress,
+        uint256 fee
+    ) {
         ticketContract = ticketAddress;
         loyaltyPoints = loyaltyPointsAddress;
+        futureConcertPoll = futureConcertPollAddress;
         commissionFee = fee;
     }
 
@@ -78,7 +86,12 @@ contract TicketMarket {
     }
 
     // Redeem a ticket for an event
-    function redeemInTicketMarket(uint256 ticketId) external {
+    function redeemInTicketMarket(
+        uint256 ticketId,
+        bool wantToRegisterAndVote,
+        uint256 concertOptionId,
+        uint256 votePoints
+    ) external {
         require(
             ticketContract.getOwner(ticketId) == msg.sender,
             "You do not own this ticket"
@@ -106,6 +119,28 @@ contract TicketMarket {
         loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
 
         emit TicketRedeemed(ticketId, msg.sender);
+
+
+         if (wantToRegisterAndVote) {
+            // Ensure the user hasn't already registered to vote on this concert option
+            require(
+                !futureConcertPoll.userVoteRegistration(
+                    msg.sender,
+                    concertOptionId
+                ),
+                "Already registered to vote on this concert option"
+            );
+
+            uint256 userPoints = loyaltyPoints.getPoints(msg.sender);
+            require(userPoints >= votePoints, "Not enough loyalty points");
+            loyaltyPoints.subtractLoyaltyPoints(msg.sender, votePoints);
+
+            // Register the user for voting on the concert option
+            futureConcertPoll.registerToVote(concertOptionId);
+
+            // Assuming the user is now eligible to vote, proceed with casting the vote
+            futureConcertPoll.castVote(concertOptionId, votePoints);
+        }
     }
 
     // Getter functions below

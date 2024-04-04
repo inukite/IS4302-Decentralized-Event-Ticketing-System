@@ -26,26 +26,27 @@ module.exports = async function (deployer, network, accounts) {
       ticketTokenInstance.address
    );
 
-   // Deploy TicketMarket with the necessary addresses, commission fee and loyaltyPoints
-   await deployer.deploy(TicketMarket, ticketInstance.address, loyaltyPointsInstance.address, commissionFee);
-
    // Deploy PriorityQueue first as PresaleMarket depends on it
    const priorityQueueInstance = await deployer.deploy(
       PriorityQueue,
       loyaltyPointsInstance.address
    );
 
+   // Deploy ConcertDetailsPoll
+   await deployer.deploy(ConcertDetailsPoll, ticketInstance.address);
+
+   // Deploy FutureConcertPoll
+   const futureConcertPollInstance = await deployer.deploy(FutureConcertPoll, loyaltyPointsInstance.address);
+
+   // Deploy TicketMarket
+   await deployer.deploy(TicketMarket, ticketInstance.address, loyaltyPointsInstance.address, futureConcertPollInstance.address, commissionFee);
+
    // Deploy PresaleMarket
    await deployer.deploy(
       PresaleMarket,
       priorityQueueInstance.address,
       loyaltyPointsInstance.address,
-      ticketInstance.address
+      ticketInstance.address,
+      futureConcertPollInstance.address
    );
-
-   // Deploy ConcertDetailsPoll
-   await deployer.deploy(ConcertDetailsPoll, ticketInstance.address);
-
-   // Deploy FutureConcertPoll
-   await deployer.deploy(FutureConcertPoll, loyaltyPointsInstance.address)
 };
