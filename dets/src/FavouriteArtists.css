@@ -1,0 +1,45 @@
+/* FavouriteArtists.css */
+.favourite-artists-container {
+  padding: 20px;
+}
+
+.artist-cards-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.artist-card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer; /* Indicates the item is clickable */
+  transition: box-shadow 0.3s ease; /* Smooth transition for the shadow */
+}
+
+.artist-card:hover {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+}
+
+.artist-card-selected {
+  border: 2px solid #6f4ff2; /* Border color to indicate selection */
+  box-shadow: 0px 0px 15px rgba(111, 79, 242, 0.5); /* Optional: a different shadow to indicate selection */
+}
+
+.artist-image {
+  width: 100%; /* Adjust as necessary */
+  height: auto; /* Adjust as necessary */
+  border-radius: 50%;
+}
+
+.see-all-button {
+  background-color: #6f4ff2;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+/* Add more CSS here for things like hover effects, responsive design, etc. */
