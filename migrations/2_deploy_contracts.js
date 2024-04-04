@@ -35,17 +35,18 @@ module.exports = async function (deployer, network, accounts) {
       loyaltyPointsInstance.address
    );
 
+   // Deploy ConcertDetailsPoll
+   await deployer.deploy(ConcertDetailsPoll, ticketInstance.address);
+
+   // Deploy FutureConcertPoll
+   const futureConcertPollInstance = await deployer.deploy(FutureConcertPoll, loyaltyPointsInstance.address);
+
    // Deploy PresaleMarket
    await deployer.deploy(
       PresaleMarket,
       priorityQueueInstance.address,
       loyaltyPointsInstance.address,
-      ticketInstance.address
+      ticketInstance.address,
+      futureConcertPollInstance.address
    );
-
-   // Deploy ConcertDetailsPoll
-   await deployer.deploy(ConcertDetailsPoll, ticketInstance.address);
-
-   // Deploy FutureConcertPoll
-   await deployer.deploy(FutureConcertPoll, loyaltyPointsInstance.address)
 };

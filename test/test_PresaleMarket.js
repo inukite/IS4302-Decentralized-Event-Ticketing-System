@@ -3,6 +3,7 @@ const Ticket = artifacts.require("Ticket");
 const PresaleMarket = artifacts.require("PresaleMarket");
 const LoyaltyPoints = artifacts.require("LoyaltyPoints");
 const PriorityQueue = artifacts.require("PriorityQueue");
+const FutureConcertPoll = artifacts.require("FutureConcertPoll");
 const truffleAssert = require('truffle-assertions');
 const assert = require("assert");
 const BigNumber = require("bignumber.js");
@@ -14,6 +15,7 @@ contract("PresaleMarket", async (accounts) => {
     let priorityQueueInstance;
     let loyaltyPointsInstance;
     let ticketInstance;
+    let futureConcertPollInstance;
     const organizer = accounts[0];
     const buyer1 = accounts[1];
     const buyer2 = accounts[2];
@@ -35,6 +37,9 @@ contract("PresaleMarket", async (accounts) => {
             ticketInstance.address,
             { from: organizer }
         );
+        futureConcertPollInstance = await FutureConcertPoll.deployed(loyaltyPointsInstance.address, { from: organizer });
+        //await futureConcertPollInstance.addConcertOption("The Big Concert", "Big Arena", concertDate.toNumber(), { from: organizer });
+
     });
 
     it("should set the correct organizer", async () => {
@@ -224,8 +229,8 @@ contract("PresaleMarket", async (accounts) => {
 
         await ticketInstance.transfer(ticketId, buyer2, ticketPrice, { from: organizer });
 
-        // Redeem the ticket on the day of the event
-        await presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer2 });
+        // Redeem the ticket on the day of the event (user does not want to vote)
+        await presaleMarketInstance.redeemInPresaleMarket(ticketId, false, 0, 0, { from: buyer2 });
 
         // Verify the ticket is marked as redeemed
         const ticketState = await ticketInstance.getTicketState(ticketId);
@@ -264,17 +269,28 @@ contract("PresaleMarket", async (accounts) => {
             ticketPrice,
             { from: organizer }
         );
+
+        // Organizer creates an upcoming concert option
+        const concertNameUpcoming = "The Big Concert";
+        const concertVenueUpcoming = "Big Arena";
+        const concertDateUpcoming = await time.latest();
+
+        await futureConcertPollInstance.addConcertOption(concertNameUpcoming, concertVenueUpcoming, concertDateUpcoming, { from: organizer });
+
         const ticketId = ticketTx.logs[0].args.ticketId.toNumber();
 
         // Transfer the ticket to buyer3
         await ticketInstance.transfer(ticketId, buyer3, ticketPrice, { from: organizer });
 
-        // Redeem the ticket on the day of the event
-        await presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer3 });
+        //Add loyaltyPoints to buyer3 for voting
+        await loyaltyPointsInstance.addLoyaltyPoints(buyer3, 100, { from: organizer });
 
-        // Attempt to redeem the ticket again
+        // Redeem the ticket on the day of the event (user does not want to vote)
+        await presaleMarketInstance.redeemInPresaleMarket(ticketId, false, 0, 0, { from: buyer3 });
+
+        // Attempt to redeem the ticket again (user does not want to vote)
         await truffleAssert.reverts(
-            presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer3 }),
+            presaleMarketInstance.redeemInPresaleMarket(ticketId, false, 0, 0, { from: buyer3 }),
             null,
             "Should revert because the ticket has already been redeemed"
         );

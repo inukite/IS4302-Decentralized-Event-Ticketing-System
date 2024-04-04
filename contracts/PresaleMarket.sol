@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./PriorityQueue.sol";
 import "./Ticket.sol";
 import "./LoyaltyPoints.sol";
+import "./FutureConcertPoll.sol";
 
 contract PresaleMarket {
     Ticket public ticketContract;
@@ -11,6 +12,7 @@ contract PresaleMarket {
     PriorityQueue public priorityQueue;
     LoyaltyPoints public loyaltyPoints;
     uint256 public ticketCounter;
+    FutureConcertPoll futureConcertPoll;
 
     struct EventDetails {
         uint256 concertId;
@@ -27,15 +29,20 @@ contract PresaleMarket {
     // Mapping from concert ID to list of ticket IDs.
     mapping(uint256 => uint256[]) public concertToTicketIds;
 
+    // Track whether a user is eligible to vote based on ticket redemption
+    mapping(address => bool) public isEligibleToVote;
+
     constructor(
         address _priorityQueueAddress,
         address _loyaltyPointsAddress,
-        address _ticketContractAddress
+        address _ticketContractAddress,
+        address _futureConcertPollAddress
     ) {
         organizer = msg.sender;
         priorityQueue = PriorityQueue(_priorityQueueAddress);
         loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
         ticketContract = Ticket(_ticketContractAddress);
+        futureConcertPoll = FutureConcertPoll(_futureConcertPollAddress);
     }
 
     modifier onlyOrganizer() {
@@ -159,7 +166,12 @@ contract PresaleMarket {
     }
 
     // Redeem a ticket for an event
-    function redeemInPresaleMarket(uint256 ticketId) external {
+    function redeemInPresaleMarket(
+        uint256 ticketId,
+        bool wantToRegisterAndVote,
+        uint256 concertOptionId,
+        uint256 votePoints
+    ) external {
         require(
             ticketContract.getOwner(ticketId) == msg.sender,
             "You do not own this ticket"
@@ -187,6 +199,23 @@ contract PresaleMarket {
         loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
 
         emit TicketRedeemed(ticketId, msg.sender);
+
+        if (wantToRegisterAndVote) {
+            // Ensure the user hasn't already registered to vote on this concert option
+            require(
+                !futureConcertPoll.userVoteRegistration(
+                    msg.sender,
+                    concertOptionId
+                ),
+                "Already registered to vote on this concert option"
+            );
+
+            // Register the user for voting on the concert option
+            futureConcertPoll.registerToVote(concertOptionId);
+
+            // Assuming the user is now eligible to vote, proceed with casting the vote
+            futureConcertPoll.castVote(concertOptionId, votePoints);
+        }
     }
 
     //Getters
