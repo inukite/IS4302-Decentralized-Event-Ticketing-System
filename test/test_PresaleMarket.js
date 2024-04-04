@@ -93,7 +93,7 @@ contract("PresaleMarket", async (accounts) => {
         assert.equal(eventDetails.ticketsReleased, true, "Tickets should be marked as released.");
     });
 
-
+    //Test that non-organizers cannot release tickets
     it("reverts when a non-organizer tries to release tickets", async () => {
         await presaleMarketInstance.createEvent(
             1, // concertId
@@ -112,6 +112,7 @@ contract("PresaleMarket", async (accounts) => {
         }
     });
 
+    //Test that organizers can create a new ticket and tag it to the event created
     it("should be able to create a new ticket and tag it to the event created", async () => {
         let eventTx = await presaleMarketInstance.createEvent(
             2, // Using a different concertId to avoid collision
@@ -131,7 +132,7 @@ contract("PresaleMarket", async (accounts) => {
             2, // concertId must match the created event
             "Test Concert",
             "Test Venue",
-            Math.floor(Date.now() / 1000) + 86400, // Make sure this matches the event
+            Math.floor(Date.now() / 1000) + 86400, 
             1, // ticketSectionNo
             1, // ticketSeatNo
             web3.utils.toWei("0.1", "ether"),
@@ -191,14 +192,13 @@ contract("PresaleMarket", async (accounts) => {
         // Buy a ticket
         let txResult = await presaleMarketInstance.buyTicket(1, 0, { from: buyer1, value: ticketPrice });
 
-        // Listen for the TicketPurchased event and assert
         truffleAssert.eventEmitted(txResult, "TicketPurchased", (ev) => {
             return ev.ticketId.toNumber() === 0 && ev.buyer === buyer1;
         }, "Ticket purchase should emit TicketPurchased event with correct parameters.");
     });
 
 
-    // Test redeeming a ticket
+    // Test redeeming a ticket and awarding loyalty points
     it("should allow a ticket to be redeemed on the day of the event and award loyalty points", async () => {
         // Create an event and a ticket for today
         const concertId = 3;
@@ -239,7 +239,8 @@ contract("PresaleMarket", async (accounts) => {
         const loyaltyPoints = await loyaltyPointsInstance.getPoints(buyer2);
         expect(loyaltyPoints.toNumber()).to.equal(10, "Buyer should be awarded 10 loyalty points for redeeming a ticket");
     });
-
+    
+    // Test that a ticket cannot be redeemed again if it has already been redeemed
     it("should not allow a ticket to be redeemed again if it has already been redeemed", async () => {
 
         const concertId = 4;
@@ -295,6 +296,7 @@ contract("PresaleMarket", async (accounts) => {
         );
     });
 
+    // Test that ticket redeemers can register and vote on a concert option
     it("allows ticket redeemers to register and vote on a concert option", async () => {
         // Create an event and a ticket for today
         const concertId = 3;
@@ -338,5 +340,5 @@ contract("PresaleMarket", async (accounts) => {
         // Verify the user's loyalty points have been deducted
         const remainingPoints = await loyaltyPointsInstance.getPoints(buyer4);
         assert.equal(remainingPoints.toNumber(), 0, "Loyalty points were not deducted correctly");
-    });
+    });    
 });

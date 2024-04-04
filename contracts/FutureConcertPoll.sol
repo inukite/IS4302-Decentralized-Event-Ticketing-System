@@ -5,7 +5,7 @@ import "./LoyaltyPoints.sol";
 
 contract FutureConcertPoll {
     LoyaltyPoints public loyaltyPointsContract;
-    uint256 public maxVotesPerUser = 100; // Maximum points a user can spend on voting
+    uint256 public maxVotePointsPerUser = 100; // Maximum points a user can spend on voting
     uint256 private nextConcertOptionId = 1; // Keep track of the next ID to ensure uniqueness
     address organizer;
 
@@ -113,8 +113,8 @@ contract FutureConcertPoll {
         //Require more than 0 points to cast a vote
         require(points > 0, "Points must be greater than 0");
         require(
-            userTotalVotes[msg.sender] + points <= maxVotesPerUser,
-            "Vote limit exceeded"
+            userTotalVotes[msg.sender] + points <= maxVotePointsPerUser,
+            "Vote points limit exceeded"
         );
         userVotes[msg.sender][concertOptionId] += points;
         concertVotes[concertOptionId] += points;

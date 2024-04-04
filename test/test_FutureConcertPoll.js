@@ -31,6 +31,18 @@ contract("FutureConcertPoll", async (accounts) => {
         );
     });
 
+    it("only allows the organizer to add new concert options", async () => {
+        const concertName = "New Concert";
+        const concertVenue = "New Venue";
+        const concertDate = Math.floor(Date.now() / 1000) + 86400;
+    
+        // Attempt to add a concert option by a non-organizer account
+        await truffleAssert.reverts(
+            futureConcertPollInstance.addConcertOption(concertName, concertVenue, concertDate, { from: voter1 }),
+            "Only the organizer can perform this action"
+        );
+    });
+
     it("should ensure users have sufficient loyalty points for voting", async () => {
         // Assign loyalty points to voter1 and voter2
         await loyaltyPointsInstance.addLoyaltyPoints(voter1, 100, { from: organizer });
@@ -77,5 +89,77 @@ contract("FutureConcertPoll", async (accounts) => {
         } catch (error) {
             assert.ok(error.message, "revert", "The transaction should revert due to insufficient loyalty points");
         }
+    });    
+    
+    //Test that users can withdraw from their vote registration
+    it("should allow users to withdraw from their vote registration", async () => {
+        // Organizer creates a concert option
+        const concertName = "Future Star Performance";
+        const concertVenue = "Downtown Arena";
+        let concertDate = (await time.latest()).add(time.duration.days(30)); // 30 days from now
+        concertDate = concertDate.toNumber();
+        
+        // Add a concert option
+        await futureConcertPollInstance.addConcertOption(concertName, concertVenue, concertDate, { from: organizer });
+    
+        // First concert option added has concertOptionId = 1
+        const concertOptionId = 1;
+    
+        await futureConcertPollInstance.registerToVote(concertOptionId, { from: voter1 });
+    
+        // Verify registration status before withdrawal
+        let isRegisteredBefore = await futureConcertPollInstance.userVoteRegistration(voter1, concertOptionId);
+        assert.equal(isRegisteredBefore, true, "Voter1 should be registered before withdrawal");
+    
+        // Voter1 withdraws their registration
+        await futureConcertPollInstance.withdrawVoteRegistration(concertOptionId, { from: voter1 });
+    
+        // Verify registration status after withdrawal
+        let isRegisteredAfter = await futureConcertPollInstance.userVoteRegistration(voter1, concertOptionId);
+        assert.equal(isRegisteredAfter, false, "Voter1 should not be registered after withdrawal");
     });
+
+    //Test Case: Vote points limit enforcement
+    it("enforces vote points limits per user", async () => {
+        // maxVotePointsPerUser is 100
+        const maxVotePoints = 100;
+        const concertOptionId = 1;
+    
+        // Register voter1 and attempt to cast votes exceeding the limit
+        await futureConcertPollInstance.registerToVote(concertOptionId, { from: voter1 });
+        await truffleAssert.reverts(
+            futureConcertPollInstance.castVote(concertOptionId, maxVotePoints + 1, { from: voter1 }),
+            "Vote points limit exceeded"
+        );
+    });
+
+    // Test Case: Invalid Concert Option Voting
+    it("reverts when voting for an invalid concert option", async () => {
+        const invalidConcertOptionId = 999;
+        await truffleAssert.reverts(
+            futureConcertPollInstance.registerToVote(invalidConcertOptionId, { from: voter1 }),
+            "Concert option does not exist."
+        );
+    });
+
+    // Test Case: Multiple users voting on the same concert option
+    it("correctly counts votes from multiple users for the same concert option", async () => {
+        const concertOptionId = 1; 
+        const votesFromVoter1 = 10;
+        const votesFromVoter2 = 20;
+    
+        // Register voters
+        await futureConcertPollInstance.registerToVote(concertOptionId, { from: voter1 });
+        await futureConcertPollInstance.registerToVote(concertOptionId, { from: voter2 });
+    
+        // Voters cast their votes
+        await futureConcertPollInstance.castVote(concertOptionId, votesFromVoter1, { from: voter1 });
+        await futureConcertPollInstance.castVote(concertOptionId, votesFromVoter2, { from: voter2 });
+    
+        // Verify total votes for concertOptionId
+        const totalVotes = await futureConcertPollInstance.getTotalVotes(concertOptionId);
+        //+50 because a voter voted 50points as well
+        assert.equal(totalVotes.toNumber(), votesFromVoter1 + votesFromVoter2 + 50, "Incorrect total votes counted");
+    });
+
 });

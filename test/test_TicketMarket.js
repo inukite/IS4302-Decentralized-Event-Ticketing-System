@@ -57,7 +57,7 @@ contract("TicketMarket", function (accounts) {
       const ticketId = await ticketInstance.getTicketId(0);
       const ownerAddress = await ticketInstance.getOwner(ticketId);
 
-      // Corrected assertion: Check if the returned owner address matches the owner's address
+      // Check if the returned owner address matches the owner's address
       assert.equal(
          ownerAddress,
          owner,
@@ -147,13 +147,13 @@ contract("TicketMarket", function (accounts) {
       );
    });
 
-   //To test the unlisting of a ticket
+   //Test the unlisting of a ticket
    it("Ticket can be unlisted from market", async () => {
       assert(await ticketMarketInstance.unlist(1), "Ticket not unlisted");
    });
 
+   //Test that a ticket can be bought from the market
    it("should allow a ticket to be bought from the market", async () => {
-      // Step 1: Create a ticket
       // Details for creating a ticket
       const concertId = 4;
       const concertName = "Taylor Swift";
@@ -174,7 +174,7 @@ contract("TicketMarket", function (accounts) {
          { from: owner }
       );
 
-      // Step 2: List the ticket for sale
+      // List the ticket for sale
       let ticketId = 1; // Assuming this is the ID of the created ticket; adjust as needed
       const listingPrice = web3.utils.toWei("0.11", "ether"); // Listing price must be >= ticketPrice + commissionFee
 
@@ -188,13 +188,13 @@ contract("TicketMarket", function (accounts) {
          "Ticket was not listed correctly"
       );
 
-      // Step 3: Attempt to buy the listed ticket
+      // Attempt to buy the listed ticket
       const txResult = await ticketMarketInstance.buy(ticketId, {
          from: buyer,
          value: listingPrice,
       });
 
-      // Step 4: Verify the purchase
+      // Verify the purchase
       // Check for the TicketSold event
       truffleAssert.eventEmitted(
          txResult,
@@ -257,6 +257,7 @@ contract("TicketMarket", function (accounts) {
       );
    });
 
+   // Test Case: Allowing a ticket to be redeemed and award loyalty points
    it("should allow a ticket to be redeemed and award loyalty points", async () => {
 
       // Details for creating a ticket
@@ -306,7 +307,7 @@ contract("TicketMarket", function (accounts) {
       expect(loyaltyPoints.toNumber()).to.equal(10, "Buyer should be awarded 10 loyalty points for redeeming a ticket");
    });
 
-
+   // Test Case: Not Allowing a ticket to be redeemed again
    it("should not allow a ticket to be redeemed again if it has already been redeemed", async () => {
       // Same setup from the previous test where a ticket is created, listed, and bought
       const concertId = 5;
@@ -353,6 +354,7 @@ contract("TicketMarket", function (accounts) {
       }
    });
 
+   // Test Case: Allowing ticket redeemers to register and vote for upcoming concert
    it("allows ticket redeemers to register and vote on a concert option", async () => {
 
       // Details for creating a ticket
@@ -398,6 +400,8 @@ contract("TicketMarket", function (accounts) {
       await loyaltyPointsInstance.setTicketMarketAddress(ticketMarketInstance.address, { from: owner });
 
       // Redeem the ticket on the day of the event (with voting)
+      // When the user redeems the ticket -> earns 10 loyaltyPoints
+      // Afterwards, uses up all 10 loyaltyPoints to vote
       await ticketMarketInstance.redeemInTicketMarket(ticketId, true, 1, 10, { from: buyer3 });
 
       // Verify the vote has been cast
