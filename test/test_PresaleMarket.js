@@ -237,14 +237,14 @@ contract("PresaleMarket", async (accounts) => {
     });
 
     it("should not allow a ticket to be redeemed again if it has already been redeemed", async () => {
-    
-        const concertId = 4; 
+
+        const concertId = 4;
         const concertName = "Second Live Concert";
         const concertVenue = "Virtual Venue Again";
         const ticketPrice = web3.utils.toWei("0.1", "ether");
         const now = await time.latest();
         const concertDate = now.toNumber(); // Using 'now' for simplicity
-    
+
         await presaleMarketInstance.createEvent(
             concertId,
             concertName,
@@ -253,7 +253,7 @@ contract("PresaleMarket", async (accounts) => {
             ticketPrice,
             { from: organizer }
         );
-    
+
         let ticketTx = await presaleMarketInstance.createTicketAndAddToEvent(
             concertId,
             concertName,
@@ -265,13 +265,13 @@ contract("PresaleMarket", async (accounts) => {
             { from: organizer }
         );
         const ticketId = ticketTx.logs[0].args.ticketId.toNumber();
-    
+
         // Transfer the ticket to buyer3
         await ticketInstance.transfer(ticketId, buyer3, ticketPrice, { from: organizer });
-    
+
         // Redeem the ticket on the day of the event
         await presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer3 });
-    
+
         // Attempt to redeem the ticket again
         await truffleAssert.reverts(
             presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer3 }),
@@ -279,5 +279,4 @@ contract("PresaleMarket", async (accounts) => {
             "Should revert because the ticket has already been redeemed"
         );
     });
-
 });
