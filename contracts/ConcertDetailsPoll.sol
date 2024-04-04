@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./Ticket.sol";
 
-contract EventVoting {
+contract ConcertDetailsPoll {
     // Structure to represent a poll option
     struct PollOption {
         uint256 optionId;

@@ -1,12 +1,12 @@
 const TicketToken = artifacts.require("TicketToken");
 const Ticket = artifacts.require("Ticket");
-const EventVoting = artifacts.require("EventVoting");
+const EventVoting = artifacts.require("ConcertDetailsPoll");
 const truffleAssert = require("truffle-assertions");
 const assert = require("assert");
 const BigNumber = require("bignumber.js");
 
-contract("EventVoting", (accounts) => {
-   let ticketInstance, ticketTokenInstance, eventVoting;
+contract("ConcertDetailsPoll", (accounts) => {
+   let ticketInstance, ticketTokenInstance, ConcertDetailsPoll;
    const owner = accounts[0];
    const ticketHolder1 = accounts[1];
    const ticketHolder2 = accounts[2];
