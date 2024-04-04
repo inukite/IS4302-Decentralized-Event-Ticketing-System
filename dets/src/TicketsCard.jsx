@@ -13,6 +13,7 @@ const TicketCard = ({ ticket }) => {
         <div
           style={{
             display: 'flex',
+            paddingTop: 10,
           }}
         >
           <div style={{ width: 25, height: 25, marginRight: 10 }}>
@@ -22,7 +23,13 @@ const TicketCard = ({ ticket }) => {
               style={{ width: 30, height: 30 }}
             />
           </div>
-          <h6 style={{ alignContent: 'center', alignItems: 'center' }}>
+          <h6
+            style={{
+              alignContent: 'center',
+              alignItems: 'center',
+              fontSize: 15,
+            }}
+          >
             @ {ticket.username}
           </h6>
         </div>
