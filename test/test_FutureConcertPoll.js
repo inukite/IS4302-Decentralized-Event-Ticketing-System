@@ -29,9 +29,6 @@ contract("FutureConcertPoll", async (accounts) => {
             ticketInstance.address,
             { from: organizer }
         );
-
-        // Allow futureConcertPoll to be authorized caller in the loyaltyPoints contract
-        await loyaltyPointsInstance.setFutureConcertPollAddress(futureConcertPollInstance.address, { from: organizer });
     });
 
     it("should ensure users have sufficient loyalty points for voting", async () => {
@@ -52,30 +49,24 @@ contract("FutureConcertPoll", async (accounts) => {
         const concertName = "The Big Concert";
         const concertVenue = "Big Arena";
         let concertDate = (await time.latest()).add(time.duration.days(30)); // 30 days from now
-        concertDate = concertDate.toNumber(); // Convert to a number if necessary
-
+        concertDate = concertDate.toNumber(); 
+        
         // Add a concert option
         await futureConcertPollInstance.addConcertOption(concertName, concertVenue, concertDate, { from: organizer });
-        
-        // First concert created has concertOptionId =
+
+        // First concert created has concertOptionId = 1
         const concertOptionId = 1;
-    
+
         // Voter1 registers to vote on concertOptionId
         await futureConcertPollInstance.registerToVote(concertOptionId, { from: voter1 });
-    
+
         // Voter1 casts a vote
         await futureConcertPollInstance.castVote(concertOptionId, 50, { from: voter1 });
-    
+
         // Verify vote count for concertOptionId
         const totalVotes = await futureConcertPollInstance.getTotalVotes(concertOptionId);
-        assert.equal(totalVotes.toNumber(), 50, "The concert option should have 50 votes");
-    
-        // Verify voter1's loyalty points are deducted
-        const balanceVoter1After = await loyaltyPointsInstance.getPoints(voter1);
-        assert.equal(balanceVoter1After.toNumber(), 50, "voter1 should have 50 loyalty points after voting");
+        assert.equal(totalVotes.toNumber(), 50, "The vote was not registered correctly");
     });
-    
-
 
     it("should not allow voting with more loyalty points than the user has", async () => {
         const concertOptionId = 2;

@@ -8,7 +8,6 @@ contract FutureConcertPoll {
     uint256 public maxVotesPerUser = 100; // Maximum points a user can spend on voting
     uint256 private nextConcertOptionId = 1; // Keep track of the next ID to ensure uniqueness
     address organizer;
-    address public presaleMarketAddress; // Allow presaleMarket to be an authorised caller
 
     struct ConcertOption {
         uint256 concertOptionId;
@@ -111,15 +110,12 @@ contract FutureConcertPoll {
             userVoteRegistration[msg.sender][concertOptionId],
             "User has not registered to vote on this concert option"
         );
+        //Require more than 0 points to cast a vote
         require(points > 0, "Points must be greater than 0");
-        uint256 userPoints = loyaltyPointsContract.getPoints(msg.sender);
-        require(userPoints >= points, "Not enough loyalty points");
         require(
             userTotalVotes[msg.sender] + points <= maxVotesPerUser,
             "Vote limit exceeded"
         );
-
-        loyaltyPointsContract.subtractLoyaltyPoints(msg.sender, points);
         userVotes[msg.sender][concertOptionId] += points;
         concertVotes[concertOptionId] += points;
         userTotalVotes[msg.sender] += points;

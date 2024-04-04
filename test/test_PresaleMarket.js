@@ -20,6 +20,7 @@ contract("PresaleMarket", async (accounts) => {
     const buyer1 = accounts[1];
     const buyer2 = accounts[2];
     const buyer3 = accounts[3];
+    const buyer4 = accounts[4];
     const ticketPrice = web3.utils.toWei("0.1", "ether");
 
     beforeEach(async () => {
@@ -38,8 +39,6 @@ contract("PresaleMarket", async (accounts) => {
             { from: organizer }
         );
         futureConcertPollInstance = await FutureConcertPoll.deployed(loyaltyPointsInstance.address, { from: organizer });
-        //await futureConcertPollInstance.addConcertOption("The Big Concert", "Big Arena", concertDate.toNumber(), { from: organizer });
-
     });
 
     it("should set the correct organizer", async () => {
@@ -294,5 +293,50 @@ contract("PresaleMarket", async (accounts) => {
             null,
             "Should revert because the ticket has already been redeemed"
         );
+    });
+
+    it("allows ticket redeemers to register and vote on a concert option", async () => {
+        // Create an event and a ticket for today
+        const concertId = 3;
+        const concertDate = await time.latest();
+
+        await presaleMarketInstance.createEvent(
+            concertId,
+            "Live Concert Today",
+            "Virtual Venue",
+            concertDate.toNumber(),
+            ticketPrice,
+            { from: organizer }
+        );
+
+        // Create a ticket for this event
+        let ticketTx = await presaleMarketInstance.createTicketAndAddToEvent(
+            concertId,
+            "Live Concert Today",
+            "Virtual Venue",
+            concertDate.toNumber(),
+            1, // ticketSectionNo
+            1, // ticketSeatNo
+            ticketPrice,
+            { from: organizer }
+        );
+        const ticketId = ticketTx.logs[0].args.ticketId.toNumber();
+
+        await ticketInstance.transfer(ticketId, buyer4, ticketPrice, { from: organizer });
+
+        await loyaltyPointsInstance.setPresaleMarketAddress(presaleMarketInstance.address, { from: organizer });
+
+        // Simulate ticket redemption and voting
+        // When the user redeems the ticket -> earns 10 loyaltyPoints
+        // Afterwards, uses up all 10 loyaltyPoints to vote
+        await presaleMarketInstance.redeemInPresaleMarket(ticketId, true, 1, 10, { from: buyer4 });
+
+        // Verify the vote has been cast
+        const totalVotes = await futureConcertPollInstance.getTotalVotes(1);
+        assert.equal(totalVotes.toNumber(), 10, "The vote was not registered correctly");
+
+        // Verify the user's loyalty points have been deducted
+        const remainingPoints = await loyaltyPointsInstance.getPoints(buyer4);
+        assert.equal(remainingPoints.toNumber(), 0, "Loyalty points were not deducted correctly");
     });
 });

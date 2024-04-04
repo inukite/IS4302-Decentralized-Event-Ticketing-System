@@ -2,6 +2,7 @@ const TicketToken = artifacts.require("TicketToken");
 const Ticket = artifacts.require("Ticket");
 const TicketMarket = artifacts.require("TicketMarket");
 const LoyaltyPoints = artifacts.require("LoyaltyPoints");
+const FutureConcertPoll = artifacts.require("FutureConcertPoll");
 const truffleAssert = require("truffle-assertions");
 const assert = require("assert");
 const BigNumber = require("bignumber.js");
@@ -13,9 +14,11 @@ contract("TicketMarket", function (accounts) {
    let ticketMarketInstance;
    let ticketInstance;
    let loyaltyPointsInstance;
+   let futureConcertPollInstance;
    const owner = accounts[0];
    const buyer = accounts[1];
    const buyer2 = accounts[2];
+   const buyer3 = accounts[3];
 
    beforeEach(async () => {
       ticketTokenInstance = await TicketToken.deployed();
@@ -26,18 +29,7 @@ contract("TicketMarket", function (accounts) {
          web3.utils.toWei("0.01", "ether")
       );
       loyaltyPointsInstance = await LoyaltyPoints.deployed({ from: owner });
-   });
-
-   it("should deploy the contracts correctly", async () => {
-      assert(
-         ticketMarketInstance.address,
-         "TicketMarket contract was not deployed"
-      );
-      assert(
-         ticketTokenInstance.address,
-         "TicketToken contract was not deployed"
-      );
-      assert(ticketInstance.address, "Ticket contract was not deployed");
+      futureConcertPollInstance = await FutureConcertPoll.deployed(loyaltyPointsInstance.address, { from: owner });
    });
 
    it("Verify ownership of ticket", async () => {
@@ -302,8 +294,8 @@ contract("TicketMarket", function (accounts) {
       // Allow ticketMarket to be authorized callers in the loyaltyPoints contract
       await loyaltyPointsInstance.setTicketMarketAddress(ticketMarketInstance.address, { from: owner });
 
-      // Redeem the ticket on the day of the event
-      await ticketMarketInstance.redeemInTicketMarket(ticketId, { from: buyer2 });
+      // Redeem the ticket on the day of the event (with no voting)
+      await ticketMarketInstance.redeemInTicketMarket(ticketId, false, 0, 0, { from: buyer2 });
 
       // Verify the ticket is marked as redeemed
       const ticketState = await ticketInstance.getTicketState(ticketId);
@@ -348,16 +340,73 @@ contract("TicketMarket", function (accounts) {
 
       await loyaltyPointsInstance.setTicketMarketAddress(ticketMarketInstance.address, { from: owner });
 
-      // Redeem the ticket for the first time
-      await ticketMarketInstance.redeemInTicketMarket(ticketId, { from: buyer2 });
+      // Redeem the ticket for the first time (with no voting)
+      await ticketMarketInstance.redeemInTicketMarket(ticketId, false, 0, 0, { from: buyer2 });
 
-      // Attempt to redeem the ticket again
+      // Attempt to redeem the ticket again (with no voting)
       try {
-         await ticketMarketInstance.redeemInTicketMarket(ticketId, { from: buyer2 });
+         await ticketMarketInstance.redeemInTicketMarket(ticketId, false, 0, 0, { from: buyer2 });
          assert.fail("Should have thrown an error but did not");
       } catch (error) {
          // Check the error message to ensure it failed for the correct reason
          assert.ok(error.message.includes("already been redeemed"), "Error should be for already redeemed ticket");
       }
    });
+
+   it("allows ticket redeemers to register and vote on a concert option", async () => {
+
+      // Details for creating a ticket
+      const concertId = 5;
+      const concertName = "Taylor Swift";
+      const concertVenue = "Singapore Indoor Sports Hall";
+      const concertDate = await time.latest();
+      const ticketSectionNo = 2;
+      const ticketSeatNo = 300;
+      const price = web3.utils.toWei("0.1", "ether");
+
+      let ticketCreationTx = await ticketInstance.createTicket(
+         concertId,
+         concertName,
+         concertVenue,
+         concertDate.toNumber(),
+         ticketSectionNo,
+         ticketSeatNo,
+         price,
+         { from: owner }
+      );
+
+      const listingPrice = web3.utils.toWei("0.12", "ether"); // Listing price must be >= ticketPrice + commissionFee
+
+      const ticketId = ticketCreationTx.logs[0].args.ticketId.toNumber();
+
+      // List the ticket for sale
+      await ticketMarketInstance.list(ticketId, listingPrice, { from: owner });
+
+      // Buy the ticket
+      await ticketMarketInstance.buy(ticketId, {
+         from: buyer3, value: listingPrice
+      });
+
+      // Organizer creates an upcoming concert option
+      const concertNameUpcoming = "The Big Concert";
+      const concertVenueUpcoming = "Big Arena";
+      const concertDateUpcoming = await time.latest();
+
+      await futureConcertPollInstance.addConcertOption(concertNameUpcoming, concertVenueUpcoming, concertDateUpcoming, { from: owner });
+
+      // Allow ticketMarket to be authorized callers in the loyaltyPoints contract
+      await loyaltyPointsInstance.setTicketMarketAddress(ticketMarketInstance.address, { from: owner });
+
+      // Redeem the ticket on the day of the event (with voting)
+      await ticketMarketInstance.redeemInTicketMarket(ticketId, true, 1, 10, { from: buyer3 });
+
+      // Verify the vote has been cast
+      const totalVotes = await futureConcertPollInstance.getTotalVotes(1);
+      assert.equal(totalVotes.toNumber(), 10, "The vote was not registered correctly");
+
+      // Verify the user's loyalty points have been deducted
+      const remainingPoints = await loyaltyPointsInstance.getPoints(buyer3);
+      assert.equal(remainingPoints.toNumber(), 0, "Loyalty points were not deducted correctly");
+   });
+
 });

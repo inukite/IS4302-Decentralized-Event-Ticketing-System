@@ -7,7 +7,6 @@ contract LoyaltyPoints {
     address owner;
     address public presaleMarketAddress; // Allow presaleMartet to be an authorised caller
     address public ticketMarketAddress; // Allow ticketMarket to be an authorised caller
-    address public futureConcertPollAddress; // Allow futureConcertPoll to be an authorised caller
 
     event LoyaltyPointsAdded(address indexed user, uint256 points);
     event LoyaltyPointsSubtracted(address indexed user, uint256 points);
@@ -20,12 +19,11 @@ contract LoyaltyPoints {
 
     modifier onlyAuthorisedCallers() {
         //the Authroised callers include
-        //the owner, presaleMarketAddress, ticketMarketAddress and futureConcertPollAddress
+        //the owner, presaleMarketAddress & ticketMarketAddress
         require(
             msg.sender == owner ||
                 msg.sender == presaleMarketAddress ||
-                msg.sender == ticketMarketAddress ||
-                msg.sender == futureConcertPollAddress,
+                msg.sender == ticketMarketAddress,
             "Unauthorized"
         );
         _;
@@ -45,12 +43,6 @@ contract LoyaltyPoints {
         address _ticketMarketAddress
     ) external onlyOwner {
         ticketMarketAddress = _ticketMarketAddress;
-    }
-
-    function setFutureConcertPollAddress(
-        address _futureConcertPollAddress
-    ) external onlyOwner {
-        futureConcertPollAddress = _futureConcertPollAddress;
     }
 
     function addLoyaltyPoints(

@@ -210,6 +210,10 @@ contract PresaleMarket {
                 "Already registered to vote on this concert option"
             );
 
+            uint256 userPoints = loyaltyPoints.getPoints(msg.sender);
+            require(userPoints >= votePoints, "Not enough loyalty points");
+            loyaltyPoints.subtractLoyaltyPoints(msg.sender, votePoints);
+
             // Register the user for voting on the concert option
             futureConcertPoll.registerToVote(concertOptionId);
 
