@@ -6,6 +6,7 @@ contract LoyaltyPoints {
 
     address owner;
     address public presaleMarketAddress; // Allow presaleMartet to be an authorised caller
+    address public ticketMarketAddress; // Allow ticketMarket to be an authorised caller
 
     event LoyaltyPointsAdded(address indexed user, uint256 points);
     event LoyaltyPointsSubtracted(address indexed user, uint256 points);
@@ -16,9 +17,11 @@ contract LoyaltyPoints {
         _;
     }
 
-    modifier onlyPresaleMarketOrOwner() {
+    modifier onlyPresaleMarketOrOwnerorTicketMarket() {
         require(
-            msg.sender == owner || msg.sender == presaleMarketAddress,
+            msg.sender == owner ||
+                msg.sender == presaleMarketAddress ||
+                msg.sender == ticketMarketAddress,
             "Unauthorized"
         );
         _;
@@ -34,7 +37,16 @@ contract LoyaltyPoints {
         presaleMarketAddress = _presaleMarketAddress;
     }
 
-    function addLoyaltyPoints(address user, uint256 points) public onlyPresaleMarketOrOwner  {
+    function setTicketMarketAddress(
+        address _ticketMarketAddress
+    ) external onlyOwner {
+        ticketMarketAddress = _ticketMarketAddress;
+    }
+
+    function addLoyaltyPoints(
+        address user,
+        uint256 points
+    ) public onlyPresaleMarketOrOwnerorTicketMarket {
         lpBalances[user] += points;
         emit LoyaltyPointsAdded(user, points);
     }
@@ -42,7 +54,7 @@ contract LoyaltyPoints {
     function subtractLoyaltyPoints(
         address user,
         uint256 points
-    ) public onlyOwner {
+    ) public onlyPresaleMarketOrOwnerorTicketMarket {
         require(lpBalances[user] >= points, "Insufficient balance.");
         lpBalances[user] -= points;
         emit LoyaltyPointsSubtracted(user, points);

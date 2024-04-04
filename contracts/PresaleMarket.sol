@@ -159,7 +159,7 @@ contract PresaleMarket {
     }
 
     // Redeem a ticket for an event
-    function redeemTicket(uint256 ticketId) external {
+    function redeemInPresaleMarket(uint256 ticketId) external {
         require(
             ticketContract.getOwner(ticketId) == msg.sender,
             "You do not own this ticket"

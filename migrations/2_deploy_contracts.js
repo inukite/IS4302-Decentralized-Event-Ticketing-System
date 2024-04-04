@@ -25,8 +25,8 @@ module.exports = async function (deployer, network, accounts) {
       ticketTokenInstance.address
    );
 
-   // Deploy TicketMarket with the necessary addresses and commission fee
-   await deployer.deploy(TicketMarket, ticketInstance.address, commissionFee);
+   // Deploy TicketMarket with the necessary addresses, commission fee and loyaltyPoints
+   await deployer.deploy(TicketMarket, ticketInstance.address, loyaltyPointsInstance.address, commissionFee);
 
    // Deploy PriorityQueue first as PresaleMarket depends on it
    const priorityQueueInstance = await deployer.deploy(

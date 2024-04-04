@@ -1,0 +1,120 @@
+{
+  "contractName": "FutureConcertPoll",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/FutureConcertPoll.sol\":\"FutureConcertPoll\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/FutureConcertPoll.sol\":{\"keccak256\":\"0xefe5cf4519bc49ba4d5936163bc6847f5a609b4a8c3e7dd7ff155371cb3cc9fc\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e226d5c338a3e95d8b849d6c10a710dcb2c47307614cdfaf50c6e5ef767677de\",\"dweb:/ipfs/QmeRvzQc8Wtwfu7WUMuscUEo7QSXC53c5djUnwXhbAgZEW\"]},\"project:/contracts/LoyaltyPoints.sol\":{\"keccak256\":\"0x5ec57e3ce10876be768f23e0c8c6439acc57dbef04c6f0f2b0ad2d15a36ccd6c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://7a04f6f76d12d96ef9c882ae117690a7d66452387b788e196aabad2d4d0b6d22\",\"dweb:/ipfs/QmVckbxXjPMeTBDZNiPabu8v9tpxjjkN4QPiwsg7WFvCVX\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212204383768a1a97aa017e8770d8a7d3e1d2cbfe3619ddb13b9e56b924aef70d433b64736f6c63430008000033",
+  "deployedBytecode": "0x6080604052600080fdfea26469706673582212204383768a1a97aa017e8770d8a7d3e1d2cbfe3619ddb13b9e56b924aef70d433b64736f6c63430008000033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "239:73:2:-:0;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "239:73:2:-:0;;;;;",
+  "source": "// SPDX-License-Identifier: MIT\r\npragma solidity ^0.8.0;\r\n\r\nimport \"./LoyaltyPoints.sol\";\r\n\r\n//Allowed to vote for the future artists/concerts\r\n//Takes in loyalty points and allow them to decide how many loyalty points they want to use\r\n\r\ncontract FutureConcertPoll {\r\n    LoyaltyPoints loyaltyPointsContract;\r\n}\r\n",
+  "sourcePath": "C:\\Users\\tngjo\\OneDrive\\Desktop\\GitHub\\IS4302-Decentralized-Event-Ticketing-System\\contracts\\FutureConcertPoll.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/FutureConcertPoll.sol",
+    "exportedSymbols": {
+      "FutureConcertPoll": [
+        780
+      ],
+      "LoyaltyPoints": [
+        962
+      ]
+    },
+    "id": 781,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 775,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "33:23:2"
+      },
+      {
+        "absolutePath": "project:/contracts/LoyaltyPoints.sol",
+        "file": "./LoyaltyPoints.sol",
+        "id": 776,
+        "nodeType": "ImportDirective",
+        "scope": 781,
+        "sourceUnit": 963,
+        "src": "60:29:2",
+        "symbolAliases": [],
+        "unitAlias": ""
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "fullyImplemented": true,
+        "id": 780,
+        "linearizedBaseContracts": [
+          780
+        ],
+        "name": "FutureConcertPoll",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": false,
+            "id": 779,
+            "mutability": "mutable",
+            "name": "loyaltyPointsContract",
+            "nodeType": "VariableDeclaration",
+            "scope": 780,
+            "src": "273:35:2",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_contract$_LoyaltyPoints_$962",
+              "typeString": "contract LoyaltyPoints"
+            },
+            "typeName": {
+              "id": 778,
+              "nodeType": "UserDefinedTypeName",
+              "pathNode": {
+                "id": 777,
+                "name": "LoyaltyPoints",
+                "nodeType": "IdentifierPath",
+                "referencedDeclaration": 962,
+                "src": "273:13:2"
+              },
+              "referencedDeclaration": 962,
+              "src": "273:13:2",
+              "typeDescriptions": {
+                "typeIdentifier": "t_contract$_LoyaltyPoints_$962",
+                "typeString": "contract LoyaltyPoints"
+              }
+            },
+            "visibility": "internal"
+          }
+        ],
+        "scope": 781,
+        "src": "239:73:2"
+      }
+    ],
+    "src": "33:281:2"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.0+commit.c7dfd78e.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.16",
+  "updatedAt": "2024-04-04T11:04:24.546Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}

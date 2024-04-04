@@ -224,7 +224,7 @@ contract("PresaleMarket", async (accounts) => {
         await ticketInstance.transfer(ticketId, buyer2, ticketPrice, { from: organizer });
 
         // Redeem the ticket on the day of the event
-        await presaleMarketInstance.redeemTicket(ticketId, { from: buyer2 });
+        await presaleMarketInstance.redeemInPresaleMarket(ticketId, { from: buyer2 });
 
         // Verify the ticket is marked as redeemed
         const ticketState = await ticketInstance.getTicketState(ticketId);

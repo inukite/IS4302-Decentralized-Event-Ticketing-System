@@ -11,6 +11,7 @@ contract TicketMarket {
     address _owner = msg.sender;
     uint256 public commissionFee;
     Ticket public ticketContract;
+    LoyaltyPoints public loyaltyPoints;
 
     // Mapping from ticket ID to listing price
     mapping(uint256 => uint256) public listPrice;
@@ -30,8 +31,12 @@ contract TicketMarket {
         uint256 price
     );
 
-    constructor(Ticket ticketAddress, uint256 fee) {
+    // Event emitted when a ticket is redeemed
+    event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
+
+    constructor(Ticket ticketAddress, LoyaltyPoints loyaltyPointsAddress, uint256 fee) {
         ticketContract = ticketAddress;
+        loyaltyPoints = loyaltyPointsAddress;
         commissionFee = fee;
     }
 
@@ -44,7 +49,7 @@ contract TicketMarket {
 
         require(
             price <= ((ticketContract.getPrice(ticketId) * 6) / 5),
-            "Price cannot be more than 20% extra of original price "
+            "Price cannot be more than 20% extra of original price"
         );
         require(
             msg.sender == ticketContract.getOwner(ticketId),
@@ -71,6 +76,39 @@ contract TicketMarket {
             }
         }
     }
+
+    // Redeem a ticket for an event
+    function redeemInTicketMarket(uint256 ticketId) external {
+        require(
+            ticketContract.getOwner(ticketId) == msg.sender,
+            "You do not own this ticket"
+        );
+
+        // Retrieve ticket details for verification
+        uint256 concertDate = ticketContract.getConcertDate(ticketId);
+
+        // Ensure the event is happening today
+        require(
+            block.timestamp >= concertDate &&
+                block.timestamp < concertDate + 1 days,
+            "This ticket can't be redeemed today"
+        );
+
+        // Check if the ticket has already been redeemed
+        require(
+            !ticketContract.isRedeemed(ticketId),
+            "Ticket has already been redeemed"
+        );
+
+        ticketContract.redeemTicket(ticketId);
+
+        // Award loyalty points
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
+
+        emit TicketRedeemed(ticketId, msg.sender);
+    }
+
+    // Getter functions below
 
     // Get price of ticket
     function getTicketPrice(uint256 ticketId) public view returns (uint256) {
