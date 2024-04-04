@@ -1,10 +1,10 @@
-.concert-card-scroll {
+.ticket-card-scroll {
   display: flex;
   overflow-x: auto;
   scrollbar-width: thin; /* For supporting browsers */
 }
 
-.concert-card-home {
+.ticket-card-home {
   min-width: 300px; /* Adjust based on your design */
   margin-right: 16px; /* Space between cards */
   flex-shrink: 0; /* Prevents cards from shrinking */
@@ -13,31 +13,37 @@
   overflow: hidden; /* Keeps the image corners rounded */
 }
 
-.cards-home {
-  width: 350px;
-  height: 300px;
-  display: block; /* Removes bottom space/margin */
+.cards {
+  width: 100%;
+  /* height: auto; Change this to a fixed height or remove if using background-size */
+  /* max-height: 300px; Adjust as needed */
+  /* object-fit: cover; This will cover the area without stretching the image */
+  display: block;
+  /* margin-bottom: 20px; */
+  aspect-ratio: 120 / 76;
+  border-radius: 2;
+  padding: 20px;
 }
 
-.concert-info-home {
+.ticket-info-home {
   padding: 16px;
   background: white; /* Fallback for non-transparent cards */
 }
 
-.concert-info h3 {
+.ticket-info h3 {
   margin-top: 0;
 }
 
 /* Custom scrollbar for Webkit browsers */
-.concert-card-scroll::-webkit-scrollbar {
+.ticket-card-scroll::-webkit-scrollbar {
   height: 8px;
 }
 
-.concert-card-scroll::-webkit-scrollbar-thumb {
+.ticket-card-scroll::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 4px;
 }
 
-.concert-card-scroll::-webkit-scrollbar-track {
+.ticket-card-scroll::-webkit-scrollbar-track {
   background: transparent;
 }

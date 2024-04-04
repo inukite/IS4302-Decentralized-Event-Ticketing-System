@@ -25,9 +25,12 @@
 
 .concert-image-grid {
   width: 100%;
-  height: 500px;
+  /* height: auto; Change this to a fixed height or remove if using background-size */
+  /* max-height: 300px; Adjust as needed */
+  /* object-fit: cover; This will cover the area without stretching the image */
   display: block;
   margin-bottom: 20px;
+  aspect-ratio: 120 / 76;
 }
 
 .concert-details {

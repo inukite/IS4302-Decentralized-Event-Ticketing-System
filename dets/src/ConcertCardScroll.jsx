@@ -54,7 +54,7 @@ const concerts = [
 const ConcertCard = ({ concert }) => {
   return (
     <div className="concert-card-home">
-      <img src={concert.imageUrl} alt={concert.name} className="cards" />
+      <img src={concert.imageUrl} alt={concert.name} className="cards-home" />
       <div className="concert-info-home">
         <h4 style={{ fontWeight: 'bold', color: '#6F4FF2' }}>{concert.name}</h4>
         <hr />
