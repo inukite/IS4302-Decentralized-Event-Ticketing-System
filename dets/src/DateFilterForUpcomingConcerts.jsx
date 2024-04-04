@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-const DateFilter = ({ onDateSelect, onFilterChange, filter }) => {
+const DateFilterForUpcomingConcerts = ({
+  onDateSelect,
+  onFilterChange,
+  filter,
+}) => {
   const [startDate, setStartDate] = useState(new Date());
   const [isDatePickerVisible, setDatePickerVisible] = useState(false);
 
@@ -74,4 +78,4 @@ const DateFilter = ({ onDateSelect, onFilterChange, filter }) => {
   );
 };
 
-export default DateFilter;
+export default DateFilterForUpcomingConcerts;
