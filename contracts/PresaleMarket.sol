@@ -59,6 +59,7 @@ contract PresaleMarket {
     event TicketPurchased(uint256 indexed ticketId, address indexed buyer);
     event CorrectPaymentAmount(uint256 ticketPrice);
     event TicketTransferred(address buyer, uint256 concertId);
+    event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
     // Create an event without immediately creating tickets
     function createEvent(
@@ -150,9 +151,42 @@ contract PresaleMarket {
         ticketContract.transfer(ticketId, msg.sender, ticketPrice);
         emit TicketPurchased(ticketId, msg.sender);
 
-        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Example: award 10 loyalty points per ticket purchase
-        
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); //  Award 10 loyalty points per ticket purchase
+
+        // Include voting system here
+
         priorityQueue.dequeue(); // Remove the buyer with the highest priority after the purchase
+    }
+
+    // Redeem a ticket for an event
+    function redeemTicket(uint256 ticketId) external {
+        require(
+            ticketContract.getOwner(ticketId) == msg.sender,
+            "You do not own this ticket"
+        );
+
+        // Retrieve ticket details for verification
+        uint256 concertDate = ticketContract.getConcertDate(ticketId);
+
+        // Ensure the event is happening today
+        require(
+            block.timestamp >= concertDate &&
+                block.timestamp < concertDate + 1 days,
+            "This ticket can't be redeemed today"
+        );
+
+        // Check if the ticket has already been redeemed
+        require(
+            !ticketContract.isRedeemed(ticketId),
+            "Ticket has already been redeemed"
+        );
+
+        ticketContract.redeemTicket(ticketId);
+
+        // Award loyalty points
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
+
+        emit TicketRedeemed(ticketId, msg.sender);
     }
 
     //Getters

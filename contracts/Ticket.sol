@@ -144,6 +144,13 @@ contract Ticket {
         emit TicketBought(ticketId, newOwner, tickets[ticketId].price);
     }
 
+    // Function to check if a ticket has been redeemed
+    function isRedeemed(
+        uint256 ticketId
+    ) public view validTicketId(ticketId) returns (bool) {
+        return tickets[ticketId].ticketState == TicketState.Redeemed;
+    }
+
     // Getter Functions for Ticket attributes
     function getTicketId(
         uint256 ticketId

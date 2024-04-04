@@ -176,7 +176,7 @@ contract("PresaleMarket", async (accounts) => {
             price,
             { from: organizer }
         );
-        
+
         // Release the tickets
         await presaleMarketInstance.releaseTicket(1, { from: organizer });
 
@@ -191,4 +191,48 @@ contract("PresaleMarket", async (accounts) => {
             return ev.ticketId.toNumber() === 0 && ev.buyer === buyer1;
         }, "Ticket purchase should emit TicketPurchased event with correct parameters.");
     });
+
+
+    // Test redeeming a ticket
+    it("should allow a ticket to be redeemed on the day of the event and award loyalty points", async () => {
+        // Create an event and a ticket for today
+        const concertId = 3;
+        const concertDate = await time.latest();
+
+        await presaleMarketInstance.createEvent(
+            concertId,
+            "Live Concert Today",
+            "Virtual Venue",
+            concertDate.toNumber(),
+            ticketPrice,
+            { from: organizer }
+        );
+
+        // Create a ticket for this event
+        let ticketTx = await presaleMarketInstance.createTicketAndAddToEvent(
+            concertId,
+            "Live Concert Today",
+            "Virtual Venue",
+            concertDate.toNumber(),
+            1, // ticketSectionNo
+            1, // ticketSeatNo
+            ticketPrice,
+            { from: organizer }
+        );
+        const ticketId = ticketTx.logs[0].args.ticketId.toNumber();
+
+        await ticketInstance.transfer(ticketId, buyer2, ticketPrice, { from: organizer });
+
+        // Redeem the ticket on the day of the event
+        await presaleMarketInstance.redeemTicket(ticketId, { from: buyer2 });
+
+        // Verify the ticket is marked as redeemed
+        const ticketState = await ticketInstance.getTicketState(ticketId);
+        assert.equal(ticketState.toNumber(), 1, "Ticket should be marked as redeemed (state 1)");
+
+        // Verify loyalty points were awarded
+        const loyaltyPoints = await loyaltyPointsInstance.getPoints(buyer2);
+        expect(loyaltyPoints.toNumber()).to.equal(10, "Buyer should be awarded 10 loyalty points for redeeming a ticket");
+    });
+
 });
