@@ -292,47 +292,55 @@ const FavouriteArtists = () => {
           onFilterChange={handleFilterChange}
           filter={filter}
         />
-        <Row>
-          <div
-            style={{
-              padding: 20,
-              display: 'flex',
-            }}
-          >
-            <h2
-              style={{
-                color: '#6F4FF2',
-                fontWeight: 'bold',
-              }}
-            >
-              Select Your Favourite Artists
-            </h2>
-            <Button
-              onClick={resetFavouriteArtists}
-              style={{ height: 35, marginLeft: 20, backgroundColor: '#6F4FF2' }}
-            >
-              Reset
-            </Button>
-          </div>
-        </Row>
-        <Row>
-          <div
-            className="artist-scroll-container"
-            style={{
-              padding: 20,
-              marginTop: -20,
-            }}
-          >
-            {artists.map((artist) => (
-              <FavouriteArtistCard
-                key={artist.id}
-                artist={artist}
-                onSelectArtist={handleSelectArtist}
-                isSelected={selectedArtist === artist.name}
-              />
-            ))}
-          </div>
-        </Row>
+        {filter === 'buy' && (
+          <>
+            <Row>
+              <div
+                style={{
+                  padding: 20,
+                  display: 'flex',
+                }}
+              >
+                <h2
+                  style={{
+                    color: '#6F4FF2',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Select Your Favourite Artists
+                </h2>
+                <Button
+                  onClick={resetFavouriteArtists}
+                  style={{
+                    height: 35,
+                    marginLeft: 20,
+                    backgroundColor: '#6F4FF2',
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </Row>
+            <Row>
+              <div
+                className="artist-scroll-container"
+                style={{
+                  padding: 20,
+                  marginTop: -20,
+                }}
+              >
+                {artists.map((artist) => (
+                  <FavouriteArtistCard
+                    key={artist.id}
+                    artist={artist}
+                    onSelectArtist={handleSelectArtist}
+                    isSelected={selectedArtist === artist.name}
+                  />
+                ))}
+              </div>
+            </Row>
+          </>
+        )}
         <div className="ticket-grid">
           {shuffledTickets.map((ticket) => (
             <TicketsCard key={ticket.id} ticket={ticket} />
