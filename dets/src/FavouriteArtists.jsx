@@ -75,7 +75,7 @@ const BlackPinkConcertTitleArray = [
   'BlackPink Cat 3',
 ];
 
-const buySellArray = ['buy', 'sell'];
+// const buySellArray = ['buy', 'sell'];
 
 const BrunoMarsConcertDatesArray = [
   new Date('14 Apr 2024'),
@@ -109,6 +109,14 @@ const BlackPinkConcertDatesArray = [
   new Date('24 Jun 2024'),
 ];
 
+const sectionArray = [
+  'Section A',
+  'Section B',
+  'Section C',
+  'Section D',
+  'Section E',
+];
+
 const tickets = [
   // Bruno Mars Tickets
   ...Array.from({ length: 10 }, (_, i) => ({
@@ -121,11 +129,14 @@ const tickets = [
     date: BrunoMarsConcertDatesArray[
       Math.floor(Math.random() * BrunoMarsConcertDatesArray.length)
     ],
-    category: `cat ${(i % 3) + 1}`,
+    category: `Cat ${(i % 3) + 1}`,
     price: Math.floor(Math.random() * 500) + 100,
     username: `themartian${Math.floor(Math.random() * 100000) + 1}`,
-    action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    action: 'buy',
     imageUrl: BrunoMarsConcert,
+    numberOfTickets: Math.floor(Math.random() * 10) + 1,
+    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
   })),
 
   // Taylor Swift Tickets
@@ -139,11 +150,14 @@ const tickets = [
     date: TaylorSwiftConcertDatesArray[
       Math.floor(Math.random() * TaylorSwiftConcertDatesArray.length)
     ],
-    category: `cat ${(i % 3) + 1}`,
+    category: `Cat ${(i % 3) + 1}`,
     price: Math.floor(Math.random() * 500) + 100,
     username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
-    action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    action: 'buy',
     imageUrl: TaylorSwiftConcert,
+    numberOfTickets: Math.floor(Math.random() * 10) + 1,
+    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
   })),
 
   // Ed Sheeran Tickets
@@ -157,11 +171,14 @@ const tickets = [
     date: EdSheeranConcertDatesArray[
       Math.floor(Math.random() * EdSheeranConcertDatesArray.length)
     ],
-    category: `cat ${(i % 3) + 1}`,
+    category: `Cat ${(i % 3) + 1}`,
     price: Math.floor(Math.random() * 500) + 100,
-    username: `ededucation${Math.floor(Math.random() * 100000) + 1}`,
-    action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    username: `ededed${Math.floor(Math.random() * 100000) + 1}`,
+    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    action: 'buy',
     imageUrl: EdSheeranConcert,
+    numberOfTickets: Math.floor(Math.random() * 10) + 1,
+    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
   })),
 
   // BlackPink Tickets
@@ -175,11 +192,14 @@ const tickets = [
     date: BlackPinkConcertDatesArray[
       Math.floor(Math.random() * BlackPinkConcertDatesArray.length)
     ],
-    category: `cat ${(i % 3) + 1}`,
+    category: `Cat ${(i % 3) + 1}`,
     price: Math.floor(Math.random() * 500) + 100,
     username: `blink${Math.floor(Math.random() * 100000) + 1}`,
-    action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+    action: 'buy',
     imageUrl: BlackPinkConcert,
+    numberOfTickets: Math.floor(Math.random() * 10) + 1,
+    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
   })),
 ];
 
@@ -188,7 +208,7 @@ const FavouriteArtistCard = ({ artist, onSelectArtist, isSelected }) => {
 
   return (
     <div
-      className={`artist-card ${selectedClass}`}
+      className={`artist-card-marketplace ${selectedClass}`}
       onClick={() => onSelectArtist(artist.name)}
     >
       <div className="artist-image-container">
@@ -234,7 +254,7 @@ const FavouriteArtists = () => {
     const matchDate = selectedDate
       ? new Date(ticket.date).toDateString() === selectedDate.toDateString()
       : true;
-    const matchFilter = filter === 'buy' || filter === 'sell';
+    const matchFilter = filter === 'buy';
     const matchArtist = !selectedArtist || ticket.artist === selectedArtist; // new line
 
     return matchDate && matchFilter && matchArtist;
