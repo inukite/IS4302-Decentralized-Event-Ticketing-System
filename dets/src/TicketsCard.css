@@ -20,7 +20,7 @@
   /* object-fit: cover; This will cover the area without stretching the image */
   display: block;
   /* margin-bottom: 20px; */
-  aspect-ratio: 120 / 76;
+  aspect-ratio: 120 / 90;
   border-radius: 2;
   padding: 20px;
 }

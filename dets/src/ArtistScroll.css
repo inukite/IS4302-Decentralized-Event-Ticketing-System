@@ -24,6 +24,7 @@
   text-align: center;
   cursor: pointer; /* Indicates the item is clickable */
   transition: box-shadow 0.3s ease; /* Smooth transition for the shadow */
+  margin-right: 30px;
 }
 
 .artist-card-marketplace:hover {
