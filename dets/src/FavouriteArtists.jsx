@@ -117,91 +117,7 @@ const sectionArray = [
   'Section E',
 ];
 
-const tickets = [
-  // Bruno Mars Tickets
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `BM${i + 1}`,
-    title:
-      BrunoMarsConcertTitleArray[
-        Math.floor(Math.random() * BrunoMarsConcertTitleArray.length)
-      ],
-    artist: 'Bruno Mars',
-    date: BrunoMarsConcertDatesArray[
-      Math.floor(Math.random() * BrunoMarsConcertDatesArray.length)
-    ],
-    category: `Cat ${(i % 3) + 1}`,
-    price: Math.floor(Math.random() * 500) + 100,
-    username: `themartian${Math.floor(Math.random() * 100000) + 1}`,
-    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
-    action: 'buy',
-    imageUrl: BrunoMarsConcert,
-    numberOfTickets: Math.floor(Math.random() * 10) + 1,
-    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
-  })),
-
-  // Taylor Swift Tickets
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `TS${i + 1}`,
-    title:
-      TaylorSwiftConcertTitleArray[
-        Math.floor(Math.random() * TaylorSwiftConcertTitleArray.length)
-      ],
-    artist: 'Taylor Swift',
-    date: TaylorSwiftConcertDatesArray[
-      Math.floor(Math.random() * TaylorSwiftConcertDatesArray.length)
-    ],
-    category: `Cat ${(i % 3) + 1}`,
-    price: Math.floor(Math.random() * 500) + 100,
-    username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
-    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
-    action: 'buy',
-    imageUrl: TaylorSwiftConcert,
-    numberOfTickets: Math.floor(Math.random() * 10) + 1,
-    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
-  })),
-
-  // Ed Sheeran Tickets
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `ES${i + 1}`,
-    title:
-      EdSheeranConcertTitleArray[
-        Math.floor(Math.random() * EdSheeranConcertTitleArray.length)
-      ],
-    artist: 'Ed Sheeran',
-    date: EdSheeranConcertDatesArray[
-      Math.floor(Math.random() * EdSheeranConcertDatesArray.length)
-    ],
-    category: `Cat ${(i % 3) + 1}`,
-    price: Math.floor(Math.random() * 500) + 100,
-    username: `ededed${Math.floor(Math.random() * 100000) + 1}`,
-    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
-    action: 'buy',
-    imageUrl: EdSheeranConcert,
-    numberOfTickets: Math.floor(Math.random() * 10) + 1,
-    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
-  })),
-
-  // BlackPink Tickets
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `BP${i + 1}`,
-    title:
-      BlackPinkConcertTitleArray[
-        Math.floor(Math.random() * BlackPinkConcertTitleArray.length)
-      ],
-    artist: 'BlackPink',
-    date: BlackPinkConcertDatesArray[
-      Math.floor(Math.random() * BlackPinkConcertDatesArray.length)
-    ],
-    category: `Cat ${(i % 3) + 1}`,
-    price: Math.floor(Math.random() * 500) + 100,
-    username: `blink${Math.floor(Math.random() * 100000) + 1}`,
-    // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
-    action: 'buy',
-    imageUrl: BlackPinkConcert,
-    numberOfTickets: Math.floor(Math.random() * 10) + 1,
-    section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
-  })),
-];
+const starRatingArray = ['★★☆☆☆', '★★★☆☆', '★★★★☆', '★★★★★'];
 
 const FavouriteArtistCard = ({ artist, onSelectArtist, isSelected }) => {
   const selectedClass = isSelected ? 'artist-card-selected' : '';
@@ -229,6 +145,119 @@ const FavouriteArtists = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [filter, setFilter] = useState('buy'); // 'buy' or 'sell'
   const [selectedArtist, setSelectedArtist] = useState(''); // new state for selected artist
+  const [tickets, setTickets] = useState([
+    // Bruno Mars Tickets
+    ...Array.from({ length: 10 }, (_, i) => ({
+      id: `BM${i + 1}`,
+      title:
+        BrunoMarsConcertTitleArray[
+          Math.floor(Math.random() * BrunoMarsConcertTitleArray.length)
+        ],
+      artist: 'Bruno Mars',
+      date: BrunoMarsConcertDatesArray[
+        Math.floor(Math.random() * BrunoMarsConcertDatesArray.length)
+      ],
+      category: `Cat ${(i % 3) + 1}`,
+      price: Math.floor(Math.random() * 500) + 100,
+      username: `themartian${Math.floor(Math.random() * 100000) + 1}`,
+      // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+      action: 'buy',
+      imageUrl: BrunoMarsConcert,
+      numberOfTickets: Math.floor(Math.random() * 10) + 1,
+      section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
+      seatNumber: Math.floor(Math.random() * 100) + 1,
+      venue: 'National Stadium',
+      starRating:
+        starRatingArray[Math.floor(Math.random() * starRatingArray.length)],
+      hasBeenPurchased: false,
+      concertName: 'Bruno Mars Concert',
+      listedForSale: false,
+    })),
+
+    // Taylor Swift Tickets
+    ...Array.from({ length: 10 }, (_, i) => ({
+      id: `TS${i + 1}`,
+      title:
+        TaylorSwiftConcertTitleArray[
+          Math.floor(Math.random() * TaylorSwiftConcertTitleArray.length)
+        ],
+      artist: 'Taylor Swift',
+      date: TaylorSwiftConcertDatesArray[
+        Math.floor(Math.random() * TaylorSwiftConcertDatesArray.length)
+      ],
+      category: `Cat ${(i % 3) + 1}`,
+      price: Math.floor(Math.random() * 500) + 100,
+      username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
+      // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+      action: 'buy',
+      imageUrl: TaylorSwiftConcert,
+      numberOfTickets: Math.floor(Math.random() * 10) + 1,
+      section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
+      seatNumber: Math.floor(Math.random() * 100) + 1,
+      venue: 'National Stadium',
+      starRating:
+        starRatingArray[Math.floor(Math.random() * starRatingArray.length)],
+      hasBeenPurchased: false,
+      concertName: 'Taylor Swift Eras Tour',
+      listedForSale: false,
+    })),
+
+    // Ed Sheeran Tickets
+    ...Array.from({ length: 10 }, (_, i) => ({
+      id: `ES${i + 1}`,
+      title:
+        EdSheeranConcertTitleArray[
+          Math.floor(Math.random() * EdSheeranConcertTitleArray.length)
+        ],
+      artist: 'Ed Sheeran',
+      date: EdSheeranConcertDatesArray[
+        Math.floor(Math.random() * EdSheeranConcertDatesArray.length)
+      ],
+      category: `Cat ${(i % 3) + 1}`,
+      price: Math.floor(Math.random() * 500) + 100,
+      username: `ededed${Math.floor(Math.random() * 100000) + 1}`,
+      // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+      action: 'buy',
+      imageUrl: EdSheeranConcert,
+      numberOfTickets: Math.floor(Math.random() * 10) + 1,
+      section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
+      seatNumber: Math.floor(Math.random() * 100) + 1,
+      venue: 'Singapore Indoor Stadium',
+      starRating:
+        starRatingArray[Math.floor(Math.random() * starRatingArray.length)],
+      hasBeenPurchased: false,
+      concertName: 'Ed Sheeran Divide Tour',
+      listedForSale: false,
+    })),
+
+    // BlackPink Tickets
+    ...Array.from({ length: 10 }, (_, i) => ({
+      id: `BP${i + 1}`,
+      title:
+        BlackPinkConcertTitleArray[
+          Math.floor(Math.random() * BlackPinkConcertTitleArray.length)
+        ],
+      artist: 'BlackPink',
+      date: BlackPinkConcertDatesArray[
+        Math.floor(Math.random() * BlackPinkConcertDatesArray.length)
+      ],
+      category: `Cat ${(i % 3) + 1}`,
+      price: Math.floor(Math.random() * 500) + 100,
+      username: `blink${Math.floor(Math.random() * 100000) + 1}`,
+      // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
+      action: 'buy',
+      imageUrl: BlackPinkConcert,
+      numberOfTickets: Math.floor(Math.random() * 10) + 1,
+      section: sectionArray[Math.floor(Math.random() * sectionArray.length)],
+      seatNumber: Math.floor(Math.random() * 100) + 1,
+      venue: 'Star Vista',
+      starRating:
+        starRatingArray[Math.floor(Math.random() * starRatingArray.length)],
+      hasBeenPurchased: false,
+      concertName: 'BlackPink Born Pink',
+      listedForSale: false,
+    })),
+  ]);
 
   const handleDateSelect = (date) => {
     setSelectedDate(date); // Just store the selected date
@@ -249,15 +278,30 @@ const FavouriteArtists = () => {
     setSelectedArtist('');
   };
 
+  // Function to update the purchase status
+  const handlePurchase = (ticketId) => {
+    setTickets(
+      tickets.map((ticket) =>
+        ticket.id === ticketId ? { ...ticket, hasBeenPurchased: true } : ticket
+      )
+    );
+  };
+
   // Combine date and availability filters
-  const filteredTickets = tickets.filter((ticket) => {
+  const filteredTicketsToBuy = tickets.filter((ticket) => {
     const matchDate = selectedDate
       ? new Date(ticket.date).toDateString() === selectedDate.toDateString()
       : true;
     const matchFilter = filter === 'buy';
     const matchArtist = !selectedArtist || ticket.artist === selectedArtist; // new line
+    const matchHasBeenPurchased = ticket.hasBeenPurchased === false;
 
-    return matchDate && matchFilter && matchArtist;
+    return matchDate && matchFilter && matchArtist && matchHasBeenPurchased;
+  });
+
+  const filteredTicketsToSell = tickets.filter((ticket) => {
+    const matchHasBeenPurchased = ticket.hasBeenPurchased === true;
+    return matchHasBeenPurchased;
   });
 
   // Function to shuffle an array
@@ -282,7 +326,16 @@ const FavouriteArtists = () => {
   }
 
   // In your component before the return statement, create a shuffled array
-  const shuffledTickets = shuffleArray([...filteredTickets]);
+  const shuffledTickets = shuffleArray([...filteredTicketsToBuy]);
+
+  // Helper function to generate an array of ticket objects
+  const generateTicketsWithSeatNumbers = (ticket) => {
+    return Array.from({ length: ticket.numberOfTickets }, (_, index) => ({
+      ...ticket, // spread the original ticket properties
+      id: `${ticket.id}-seat${ticket.seatNumber + index}`, // create a unique ID for each generated ticket
+      seatNumber: ticket.seatNumber + index, // increment the seat number
+    }));
+  };
 
   return (
     <>
@@ -341,11 +394,27 @@ const FavouriteArtists = () => {
             </Row>
           </>
         )}
-        <div className="ticket-grid">
-          {shuffledTickets.map((ticket) => (
-            <TicketsCard key={ticket.id} ticket={ticket} />
-          ))}
-        </div>
+
+        {filter === 'sell' ? (
+          <div className="ticket-grid">
+            {filteredTicketsToSell.map((ticket) => {
+              const ticketsWithSeats = generateTicketsWithSeatNumbers(ticket);
+              return ticketsWithSeats.map((ticketWithSeat) => (
+                <TicketsCard key={ticketWithSeat.id} ticket={ticketWithSeat} />
+              ));
+            })}
+          </div>
+        ) : (
+          <div className="ticket-grid">
+            {shuffledTickets.map((ticket) => (
+              <TicketsCard
+                key={ticket.id}
+                ticket={ticket}
+                onPurchase={handlePurchase}
+              />
+            ))}
+          </div>
+        )}
       </Container>
     </>
   );
