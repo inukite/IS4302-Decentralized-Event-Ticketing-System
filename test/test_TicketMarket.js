@@ -3,6 +3,7 @@ const Ticket = artifacts.require("Ticket");
 const TicketMarket = artifacts.require("TicketMarket");
 const LoyaltyPoints = artifacts.require("LoyaltyPoints");
 const FutureConcertPoll = artifacts.require("FutureConcertPoll");
+const Lottery = artifacts.require("Lottery");
 const truffleAssert = require("truffle-assertions");
 const assert = require("assert");
 const BigNumber = require("bignumber.js");
@@ -15,6 +16,7 @@ contract("TicketMarket", function (accounts) {
    let ticketInstance;
    let loyaltyPointsInstance;
    let futureConcertPollInstance;
+   let lotteryInstance;
    const owner = accounts[0];
    const buyer = accounts[1];
    const buyer2 = accounts[2];
@@ -30,6 +32,7 @@ contract("TicketMarket", function (accounts) {
       );
       loyaltyPointsInstance = await LoyaltyPoints.deployed({ from: owner });
       futureConcertPollInstance = await FutureConcertPoll.deployed(loyaltyPointsInstance.address, { from: owner });
+      lotteryInstance = await Lottery.deployed({ from: owner });
    });
 
    it("Verify ownership of ticket", async () => {
@@ -187,6 +190,10 @@ contract("TicketMarket", function (accounts) {
          listingPrice,
          "Ticket was not listed correctly"
       );
+
+      // Start the lottery
+      const lotteryDuration = 604800; // set as 7 days in seconds
+      await lotteryInstance.startLottery(lotteryDuration, { from: owner });
 
       // Attempt to buy the listed ticket
       const txResult = await ticketMarketInstance.buy(ticketId, {

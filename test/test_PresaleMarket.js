@@ -4,6 +4,7 @@ const PresaleMarket = artifacts.require("PresaleMarket");
 const LoyaltyPoints = artifacts.require("LoyaltyPoints");
 const PriorityQueue = artifacts.require("PriorityQueue");
 const FutureConcertPoll = artifacts.require("FutureConcertPoll");
+const Lottery = artifacts.require("Lottery");
 const truffleAssert = require('truffle-assertions');
 const assert = require("assert");
 const BigNumber = require("bignumber.js");
@@ -16,6 +17,7 @@ contract("PresaleMarket", async (accounts) => {
     let loyaltyPointsInstance;
     let ticketInstance;
     let futureConcertPollInstance;
+    let lotteryInstance;
     const organizer = accounts[0];
     const buyer1 = accounts[1];
     const buyer2 = accounts[2];
@@ -32,13 +34,16 @@ contract("PresaleMarket", async (accounts) => {
 
         loyaltyPointsInstance = await LoyaltyPoints.deployed({ from: organizer });
         priorityQueueInstance = await PriorityQueue.deployed(loyaltyPointsInstance.address, { from: organizer });
+        futureConcertPollInstance = await FutureConcertPoll.deployed(loyaltyPointsInstance.address, { from: organizer });
+        lotteryInstance = await Lottery.deployed({ from: organizer });
         presaleMarketInstance = await PresaleMarket.deployed(
             priorityQueueInstance.address,
             loyaltyPointsInstance.address,
             ticketInstance.address,
+            futureConcertPollInstance.address,
+            lotteryInstance.address,
             { from: organizer }
         );
-        futureConcertPollInstance = await FutureConcertPoll.deployed(loyaltyPointsInstance.address, { from: organizer });
     });
 
     it("should set the correct organizer", async () => {
@@ -132,7 +137,7 @@ contract("PresaleMarket", async (accounts) => {
             2, // concertId must match the created event
             "Test Concert",
             "Test Venue",
-            Math.floor(Date.now() / 1000) + 86400, 
+            Math.floor(Date.now() / 1000) + 86400,
             1, // ticketSectionNo
             1, // ticketSeatNo
             web3.utils.toWei("0.1", "ether"),
@@ -189,6 +194,10 @@ contract("PresaleMarket", async (accounts) => {
         await loyaltyPointsInstance.addLoyaltyPoints(buyer1, 10, { from: organizer });
         await priorityQueueInstance.enqueue(buyer1, { from: organizer });
 
+        // Start the lottery
+        const lotteryDuration = 604800; // set as 7 days in seconds
+        await lotteryInstance.startLottery(lotteryDuration, { from: organizer });
+
         // Buy a ticket
         let txResult = await presaleMarketInstance.buyTicket(1, 0, { from: buyer1, value: ticketPrice });
 
@@ -239,7 +248,7 @@ contract("PresaleMarket", async (accounts) => {
         const loyaltyPoints = await loyaltyPointsInstance.getPoints(buyer2);
         expect(loyaltyPoints.toNumber()).to.equal(10, "Buyer should be awarded 10 loyalty points for redeeming a ticket");
     });
-    
+
     // Test that a ticket cannot be redeemed again if it has already been redeemed
     it("should not allow a ticket to be redeemed again if it has already been redeemed", async () => {
 
@@ -340,5 +349,5 @@ contract("PresaleMarket", async (accounts) => {
         // Verify the user's loyalty points have been deducted
         const remainingPoints = await loyaltyPointsInstance.getPoints(buyer4);
         assert.equal(remainingPoints.toNumber(), 0, "Loyalty points were not deducted correctly");
-    });    
+    });
 });
