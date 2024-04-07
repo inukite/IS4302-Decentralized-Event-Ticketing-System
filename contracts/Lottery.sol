@@ -10,13 +10,15 @@ contract Lottery {
     bool public lotteryActive;
     uint256 public lotteryStartTime;
     uint256 public lotteryEndTime;
+    uint256[] public availableTicketIds;
 
     event LotteryStarted(uint256 startTime, uint256 endTime);
     event TicketPurchased(address indexed buyer, uint256 amount);
     event WinnerSelected(address winner, uint256 ticketId);
 
-    constructor() {
+    constructor(address _ticketContractAddress) {
         owner = msg.sender;
+        ticketContract = Ticket(_ticketContractAddress);
     }
 
     modifier onlyOwner() {
@@ -52,14 +54,29 @@ contract Lottery {
             uint256 winnerIndex = random() % participants.length;
             address winner = participants[winnerIndex];
 
-            uint256 ticketId = 0;
+            uint256 winningTicketId = selectWinningTicket();
 
-            // transfer ticket to the winner
-            ticketContract.transfer(ticketId, winner, 0); // resell price = 0
+            //transfer ticket to the winner
+            ticketContract.transfer(winningTicketId, winner, 0); // resell price = 0
 
-            emit WinnerSelected(winner, ticketId);
+            emit WinnerSelected(winner, winningTicketId);
         }
-        // Reset the lottery for the next round (optional)
+        // Reset the lottery for the next round
+        delete participants;
+        delete availableTicketIds;
+    }
+
+    function selectWinningTicket() private view returns (uint256) {
+        require(
+            availableTicketIds.length > 0,
+            "No tickets available for lottery"
+        );
+        uint256 ticketIndex = random() % availableTicketIds.length;
+        return availableTicketIds[ticketIndex];
+    }
+
+    function addAvailableTicketId(uint256 ticketId) public onlyOwner {
+        availableTicketIds.push(ticketId);
     }
 
     function addParticipant(address participant) external isLotteryActive {

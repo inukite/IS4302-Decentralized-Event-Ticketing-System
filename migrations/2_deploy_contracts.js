@@ -40,7 +40,7 @@ module.exports = async function (deployer, network, accounts) {
    const futureConcertPollInstance = await deployer.deploy(FutureConcertPoll, loyaltyPointsInstance.address);
 
    // Deploy Lottery
-   const lotteryInstance = await deployer.deploy(Lottery);
+   const lotteryInstance = await deployer.deploy(Lottery, ticketInstance.address);
 
    // Deploy TicketMarket
    await deployer.deploy(

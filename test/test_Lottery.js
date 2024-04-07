@@ -1,14 +1,19 @@
+const TicketToken = artifacts.require("TicketToken");
+const Ticket = artifacts.require("Ticket");
 const Lottery = artifacts.require("Lottery");
 const { expectRevert, time } = require('@openzeppelin/test-helpers');
 
 contract("Lottery", (accounts) => {
+    let ticketInstance;
     let lotteryInstance;
     let owner = accounts[0];
     let participant1 = accounts[1];
     let participant2 = accounts[2];
 
     beforeEach(async () => {
-        lotteryInstance = await Lottery.deployed({ from: owner });
+        ticketTokenInstance = await TicketToken.deployed({ from: owner });
+        ticketInstance = await Ticket.deployed(ticketTokenInstance.address, { from: owner });
+        lotteryInstance = await Lottery.deployed(ticketInstance.address, { from: owner });
     });
 
     it("lottery should be inactive by default", async () => {
@@ -52,19 +57,39 @@ contract("Lottery", (accounts) => {
         await lotteryInstance.addParticipant(participant1, { from: participant1 });
         await lotteryInstance.addParticipant(participant2, { from: participant2 });
 
+        const concertId = 4;
+        const concertName = "Taylor Swift";
+        const concertVenue = "Singapore Indoor Sports Hall";
+        const concertDate = 1;
+        const ticketSectionNo = 2;
+        const ticketSeatNo = 300;
+        const price = 20;
+
+        await ticketInstance.createTicket(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            ticketSectionNo,
+            ticketSeatNo,
+            price,
+            { from: owner }
+        );
+
+        // Create tickets available for the lottery
+        await lotteryInstance.addAvailableTicketId(0, { from: owner });
+
         // Fast forward time to ensure lottery has ended
         await time.increase(duration + 5000);
 
-        const initialBalance = new web3.utils.BN(await web3.eth.getBalance(participant1));
+        ticketInstance.setLotteryAddress(lotteryInstance.address);
 
         const receipt = await lotteryInstance.endLottery({ from: owner });
-        assert.equal(receipt.logs.length, 1, "endLottery should emit one event.");
-        assert.equal(receipt.logs[0].event, "WinnerSelected", "Event should be WinnerSelected.");
-
-        // Verify winner received the prize
         const winnerAddress = receipt.logs[0].args.winner;
-        const newBalance = new web3.utils.BN(await web3.eth.getBalance(winnerAddress));
-        const prizeAmount = new web3.utils.BN(receipt.logs[0].args.amount);
-        assert(newBalance.sub(initialBalance).eq(prizeAmount), "Winner should receive the prize amount.");
+        const winningTicketId = receipt.logs[0].args.ticketId;
+        const ticketOwner = await ticketInstance.getOwner(winningTicketId);
+
+        // Assert that the winning address now owns the ticket
+        assert.equal(ticketOwner, winnerAddress, "The winner should own the winning ticket.");
     });
 });
