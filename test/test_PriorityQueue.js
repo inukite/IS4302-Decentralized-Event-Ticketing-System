@@ -20,7 +20,7 @@ contract("PriorityQueue", (accounts) => {
 
   it("should dequeue the highest priority element", async () => {
     await loyaltyPoints.setPoints(accounts[2], 200); // Setting loyalty points
-    await priorityQueue.enqueue(accounts[2]); // Size of the queue becomes 2 now afer enqueing another account
+    await priorityQueue.enqueue(accounts[2]); // Size of the queue becomes 2 afer enqueing another account
 
     const txResult = await priorityQueue.popHighestPriorityBuyer();
     //Should dequeue accounts[2] because it has higher loyalty points
@@ -32,9 +32,7 @@ contract("PriorityQueue", (accounts) => {
   });
 
   it("should return correct boolean for isInQueue", async () => {
-    // Setup
     await priorityQueue.enqueue(accounts[1]);
-    // Test isInQueue
     const isInQueueResult = await priorityQueue.isInQueue(accounts[1]);
     assert.isTrue(isInQueueResult, "The address should be in the queue.");
 
@@ -43,7 +41,6 @@ contract("PriorityQueue", (accounts) => {
   });
 
   it("should correctly update priorities and maintain queue order", async () => {
-    // Set initial points and enqueue several addresses
     await loyaltyPoints.setPoints(accounts[4], 250);
     await priorityQueue.enqueue(accounts[4]);
     await loyaltyPoints.setPoints(accounts[5], 300);
@@ -84,7 +81,6 @@ contract("PriorityQueue", (accounts) => {
     await loyaltyPoints.setPoints(accounts[8], 2500);
     await loyaltyPoints.setPoints(accounts[9], 1500);
 
-    // Update priorities in a way that inverts the initial order
     await priorityQueue.updatePriority(accounts[7]); // Points updated to higher than others
     await priorityQueue.updatePriority(accounts[8]);
     await priorityQueue.updatePriority(accounts[9]); // Points lowered 

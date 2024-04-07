@@ -5,6 +5,7 @@ import "./PriorityQueue.sol";
 import "./Ticket.sol";
 import "./LoyaltyPoints.sol";
 import "./FutureConcertPoll.sol";
+import "./Lottery.sol";
 
 contract PresaleMarket {
     Ticket public ticketContract;
@@ -12,7 +13,8 @@ contract PresaleMarket {
     PriorityQueue public priorityQueue;
     LoyaltyPoints public loyaltyPoints;
     uint256 public ticketCounter;
-    FutureConcertPoll futureConcertPoll;
+    FutureConcertPoll public futureConcertPoll;
+    Lottery public lotteryContract;
 
     struct EventDetails {
         uint256 concertId;
@@ -36,13 +38,15 @@ contract PresaleMarket {
         address _priorityQueueAddress,
         address _loyaltyPointsAddress,
         address _ticketContractAddress,
-        address _futureConcertPollAddress
+        address _futureConcertPollAddress,
+        address _lotteryContractAddress
     ) {
         organizer = msg.sender;
         priorityQueue = PriorityQueue(_priorityQueueAddress);
         loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
         ticketContract = Ticket(_ticketContractAddress);
         futureConcertPoll = FutureConcertPoll(_futureConcertPollAddress);
+        lotteryContract = Lottery(_lotteryContractAddress);
     }
 
     modifier onlyOrganizer() {
@@ -160,9 +164,10 @@ contract PresaleMarket {
 
         loyaltyPoints.addLoyaltyPoints(msg.sender, 10); //  Award 10 loyalty points per ticket purchase
 
-        // Include voting system here
-
         priorityQueue.dequeue(); // Remove the buyer with the highest priority after the purchase
+
+        // Lottery: Add the user to the list of participants for the lottery
+        lotteryContract.addParticipant(msg.sender);
     }
 
     // Redeem a ticket for an event
@@ -200,6 +205,7 @@ contract PresaleMarket {
 
         emit TicketRedeemed(ticketId, msg.sender);
 
+        // Voting system below
         if (wantToRegisterAndVote) {
             // Ensure the user hasn't already registered to vote on this concert option
             require(

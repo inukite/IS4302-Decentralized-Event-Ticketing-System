@@ -7,13 +7,15 @@ import "./TicketToken.sol";
 import "./PriorityQueue.sol";
 import "./LoyaltyPoints.sol";
 import "./FutureConcertPoll.sol";
+import "./Lottery.sol";
 
 contract TicketMarket {
     address _owner = msg.sender;
     uint256 public commissionFee;
     Ticket public ticketContract;
     LoyaltyPoints public loyaltyPoints;
-    FutureConcertPoll futureConcertPoll;
+    FutureConcertPoll public futureConcertPoll;
+    Lottery public lotteryContract;
 
     // Mapping from ticket ID to listing price
     mapping(uint256 => uint256) public listPrice;
@@ -40,11 +42,13 @@ contract TicketMarket {
         Ticket ticketAddress,
         LoyaltyPoints loyaltyPointsAddress,
         FutureConcertPoll futureConcertPollAddress,
+        Lottery lotteryContractAddress,
         uint256 fee
     ) {
         ticketContract = ticketAddress;
         loyaltyPoints = loyaltyPointsAddress;
         futureConcertPoll = futureConcertPollAddress;
+        lotteryContract = lotteryContractAddress;
         commissionFee = fee;
     }
 
@@ -177,6 +181,10 @@ contract TicketMarket {
 
         // Remove the ticket from the listing after purchase
         listPrice[ticketId] = 0;
+
+
+        // Lottery
+        lotteryContract.addParticipant(msg.sender);
     }
 
     // get price of ticket

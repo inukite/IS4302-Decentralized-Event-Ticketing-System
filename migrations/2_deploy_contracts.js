@@ -7,6 +7,7 @@ const PriorityQueue = artifacts.require("PriorityQueue");
 const PresaleMarket = artifacts.require("PresaleMarket");
 const ConcertDetailsPoll = artifacts.require("ConcertDetailsPoll");
 const FutureConcertPoll = artifacts.require("FutureConcertPoll");
+const Lottery = artifacts.require("Lottery");
 
 module.exports = async function (deployer, network, accounts) {
    const commissionFee = web3.utils.toWei("0.01", "ether"); // Example fee: 0.01 ETH
@@ -38,8 +39,18 @@ module.exports = async function (deployer, network, accounts) {
    // Deploy FutureConcertPoll
    const futureConcertPollInstance = await deployer.deploy(FutureConcertPoll, loyaltyPointsInstance.address);
 
+   // Deploy Lottery
+   const lotteryInstance = await deployer.deploy(Lottery, ticketInstance.address);
+
    // Deploy TicketMarket
-   await deployer.deploy(TicketMarket, ticketInstance.address, loyaltyPointsInstance.address, futureConcertPollInstance.address, commissionFee);
+   await deployer.deploy(
+      TicketMarket,
+      ticketInstance.address,
+      loyaltyPointsInstance.address,
+      futureConcertPollInstance.address,
+      lotteryInstance.address,
+      commissionFee
+   );
 
    // Deploy PresaleMarket
    await deployer.deploy(
@@ -47,6 +58,7 @@ module.exports = async function (deployer, network, accounts) {
       priorityQueueInstance.address,
       loyaltyPointsInstance.address,
       ticketInstance.address,
-      futureConcertPollInstance.address
+      futureConcertPollInstance.address,
+      lotteryInstance.address
    );
 };
