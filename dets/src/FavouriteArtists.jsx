@@ -172,6 +172,10 @@ const FavouriteArtists = () => {
       hasBeenPurchased: false,
       concertName: 'Bruno Mars Concert',
       listedForSale: false,
+      myTicketsReadyToUse: false,
+      myTicketsListedForSale: false,
+      ticketUsed: false,
+      voted: false,
     })),
 
     // Taylor Swift Tickets
@@ -188,7 +192,6 @@ const FavouriteArtists = () => {
       category: `Cat ${(i % 3) + 1}`,
       price: Math.floor(Math.random() * 500) + 100,
       username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
-      // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
       action: 'buy',
       imageUrl: TaylorSwiftConcert,
       numberOfTickets: Math.floor(Math.random() * 10) + 1,
@@ -200,6 +203,10 @@ const FavouriteArtists = () => {
       hasBeenPurchased: false,
       concertName: 'Taylor Swift Eras Tour',
       listedForSale: false,
+      myTicketsReadyToUse: false,
+      myTicketsListedForSale: false,
+      ticketUsed: false,
+      voted: false,
     })),
 
     // Ed Sheeran Tickets
@@ -216,7 +223,6 @@ const FavouriteArtists = () => {
       category: `Cat ${(i % 3) + 1}`,
       price: Math.floor(Math.random() * 500) + 100,
       username: `ededed${Math.floor(Math.random() * 100000) + 1}`,
-      // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
       action: 'buy',
       imageUrl: EdSheeranConcert,
       numberOfTickets: Math.floor(Math.random() * 10) + 1,
@@ -228,6 +234,10 @@ const FavouriteArtists = () => {
       hasBeenPurchased: false,
       concertName: 'Ed Sheeran Divide Tour',
       listedForSale: false,
+      myTicketsReadyToUse: false,
+      myTicketsListedForSale: false,
+      ticketUsed: false,
+      voted: false,
     })),
 
     // BlackPink Tickets
@@ -244,7 +254,6 @@ const FavouriteArtists = () => {
       category: `Cat ${(i % 3) + 1}`,
       price: Math.floor(Math.random() * 500) + 100,
       username: `blink${Math.floor(Math.random() * 100000) + 1}`,
-      // action: buySellArray[Math.floor(Math.random() * buySellArray.length)],
       action: 'buy',
       imageUrl: BlackPinkConcert,
       numberOfTickets: Math.floor(Math.random() * 10) + 1,
@@ -256,6 +265,10 @@ const FavouriteArtists = () => {
       hasBeenPurchased: false,
       concertName: 'BlackPink Born Pink',
       listedForSale: false,
+      myTicketsReadyToUse: false,
+      myTicketsListedForSale: false,
+      ticketUsed: false,
+      voted: false,
     })),
   ]);
 
@@ -399,6 +412,7 @@ const FavouriteArtists = () => {
           <div className="ticket-grid">
             {filteredTicketsToSell.map((ticket) => {
               const ticketsWithSeats = generateTicketsWithSeatNumbers(ticket);
+              // addTicket(ticketsWithSeats);
               return ticketsWithSeats.map((ticketWithSeat) => (
                 <TicketsCard key={ticketWithSeat.id} ticket={ticketWithSeat} />
               ));
