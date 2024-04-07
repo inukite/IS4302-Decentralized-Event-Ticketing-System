@@ -92,7 +92,7 @@ contract FutureConcertPoll {
     }
 
     // Function for users to withdraw their registration to vote on a concert option
-    function withdrawVoteRegistration(uint256 concertOptionId) external {
+    function withdrawVoteRegistration(uint256 concertOptionId, uint256 points) external {
         require(
             userVoteRegistration[msg.sender][concertOptionId],
             "User is not registered to vote on this concert option"
@@ -100,6 +100,9 @@ contract FutureConcertPoll {
 
         // Withdraw the registration
         userVoteRegistration[msg.sender][concertOptionId] = false;
+
+        // Return users the loyalty points they initially used to vote with
+        loyaltyPointsContract.addLoyaltyPoints(msg.sender, points);
 
         emit UserWithdrawedToVote(msg.sender, concertOptionId);
     }
