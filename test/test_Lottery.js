@@ -53,19 +53,21 @@ contract("Lottery", (accounts) => {
     });
 
     it("should end the lottery correctly and select a winner", async () => {
-        const duration = 2;
-        await lotteryInstance.addParticipant(participant1, { from: participant1 });
-        await lotteryInstance.addParticipant(participant2, { from: participant2 });
+
+        const duration = 3600; // Duration in seconds
 
         const concertId = 4;
         const concertName = "Taylor Swift";
         const concertVenue = "Singapore Indoor Sports Hall";
-        const concertDate = 1;
+        const concertDate = (await web3.eth.getBlock('latest')).timestamp + duration * 2; // Future concert date
         const ticketSectionNo = 2;
         const ticketSeatNo = 300;
-        const price = 20;
+        const price = web3.utils.toWei('0.1', 'ether');
 
-        await ticketInstance.createTicket(
+        await ticketInstance.setLotteryAddress(lotteryInstance.address);
+
+        // Create and add a ticket to the available tickets of the lottery
+        await lotteryInstance.createAndAddTicket(
             concertId,
             concertName,
             concertVenue,
@@ -76,20 +78,43 @@ contract("Lottery", (accounts) => {
             { from: owner }
         );
 
-        // Create tickets available for the lottery
-        await lotteryInstance.addAvailableTicketId(0, { from: owner });
+        await lotteryInstance.resetParticipants();
 
-        // Fast forward time to ensure lottery has ended
+        // Add participants to the lottery
+        await lotteryInstance.addParticipant(participant1, { from: participant1 });
+        await lotteryInstance.addParticipant(participant2, { from: participant2 });
+
+        // Fast forward time to ensure the lottery has ended
         await time.increase(duration + 5000);
 
-        ticketInstance.setLotteryAddress(lotteryInstance.address);
-
+        // End the lottery and select a winner
         const receipt = await lotteryInstance.endLottery({ from: owner });
         const winnerAddress = receipt.logs[0].args.winner;
         const winningTicketId = receipt.logs[0].args.ticketId;
         const ticketOwner = await ticketInstance.getOwner(winningTicketId);
 
-        // Assert that the winning address now owns the ticket
         assert.equal(ticketOwner, winnerAddress, "The winner should own the winning ticket.");
     });
+
+    it("should not allow the lottery to end before the duration has elapsed", async () => {
+        const duration = 3600; // 1 hour in seconds
+        await lotteryInstance.startLottery(duration, { from: owner });
+        // Wait for some time but not the full duration
+        await time.increase(1800); // Increase time by half an hour
+
+        // Attempting to end the lottery prematurely should fail
+        await expectRevert(
+            lotteryInstance.endLottery({ from: owner }),
+            "Lottery time has not expired yet."
+        );
+    });
+
+    it("should not allow the same address to participate multiple times", async () => {
+        //Participant1 is already in the lottery, try adding again
+        await expectRevert(
+            lotteryInstance.addParticipant(participant1, { from: participant1 }),
+            "Participant already added."
+        );
+    });
+
 });

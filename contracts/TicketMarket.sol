@@ -182,8 +182,7 @@ contract TicketMarket {
         // Remove the ticket from the listing after purchase
         listPrice[ticketId] = 0;
 
-
-        // Lottery
+        // Lottery: Add the user to the list of participants for the lottery
         lotteryContract.addParticipant(msg.sender);
     }
 

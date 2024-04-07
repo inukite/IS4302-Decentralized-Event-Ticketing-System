@@ -342,6 +342,8 @@ contract("TicketMarket", function (accounts) {
 
       await ticketMarketInstance.list(ticketId, listingPrice, { from: owner });
 
+      await lotteryInstance.resetParticipants();
+      
       await ticketMarketInstance.buy(ticketId, {
          from: buyer2, value: listingPrice
       });

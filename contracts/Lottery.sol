@@ -15,6 +15,10 @@ contract Lottery {
     event LotteryStarted(uint256 startTime, uint256 endTime);
     event TicketPurchased(address indexed buyer, uint256 amount);
     event WinnerSelected(address winner, uint256 ticketId);
+    event TicketAddedToLottery(address owner, uint256 ticketId);
+
+    // Mapping to keep track of added participants
+    mapping(address => bool) public isParticipantAdded;
 
     constructor(address _ticketContractAddress) {
         owner = msg.sender;
@@ -29,6 +33,30 @@ contract Lottery {
     modifier isLotteryActive() {
         require(lotteryActive, "Lottery is not active.");
         _;
+    }
+
+    function createAndAddTicket(
+        uint256 concertId,
+        string memory concertName,
+        string memory concertVenue,
+        uint256 concertDate,
+        uint256 ticketSectionNo,
+        uint256 ticketSeatNo,
+        uint256 price
+    ) public onlyOwner {
+        uint256 newTicketId = ticketContract.createTicket(
+            concertId,
+            concertName,
+            concertVenue,
+            concertDate,
+            ticketSectionNo,
+            ticketSeatNo,
+            price
+        );
+
+        // Automatically add the new ticket ID to the available tickets
+        availableTicketIds.push(newTicketId);
+        emit TicketAddedToLottery(msg.sender, newTicketId);
     }
 
     function startLottery(uint256 duration) public onlyOwner {
@@ -80,7 +108,17 @@ contract Lottery {
     }
 
     function addParticipant(address participant) external isLotteryActive {
+        require(!isParticipantAdded[participant], "Participant already added.");
         participants.push(participant);
+        isParticipantAdded[participant] = true;
+    }
+
+    // Reset for a new lottery round if necessary
+    function resetParticipants() external {
+        for (uint i = 0; i < participants.length; i++) {
+            isParticipantAdded[participants[i]] = false;
+        }
+        delete participants;
     }
 
     function random() private view returns (uint256) {
