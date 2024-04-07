@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import './TicketsCard.css'; // Your CSS file for styling
 import ethereumCurrency from './currency-ethereum.png';
 import Button from 'react-bootstrap/Button';
