@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 import "./Ticket.sol";
 
-contract EventVoting {
+contract ConcertDetailsPoll {
     struct PollOption {
         uint256 optionId;
         string optionText;

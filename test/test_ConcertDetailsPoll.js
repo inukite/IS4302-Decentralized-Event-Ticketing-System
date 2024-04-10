@@ -6,7 +6,7 @@ const assert = require("assert");
 const BigNumber = require("bignumber.js");
 
 contract("ConcertDetailsPoll", (accounts) => {
-   let ticketInstance, ticketTokenInstance, concertDetailsPollInstance;
+   let ticketInstance, ticketTokenInstance, concertDetailsPoll;
    const owner = accounts[0];
    const ticketHolder1 = accounts[1];
    const ticketHolder2 = accounts[2];
@@ -14,14 +14,20 @@ contract("ConcertDetailsPoll", (accounts) => {
    before(async () => {
       ticketTokenInstance = await TicketToken.deployed();
       ticketInstance = await Ticket.deployed(ticketTokenInstance.address);
-      concertDetailsPollInstance = await ConcertDetailsPoll.deployed(ticketInstance.address);
+      concertDetailsPoll = await ConcertDetailsPoll.deployed(
+         ticketInstance.address
+      );
    });
 
    it("should create a poll", async () => {
       const question = "Which is your favorite color?";
       const options = ["Red", "Green", "Blue"];
 
-      const txResult = await concertDetailsPollInstance.createPoll(0, question, options);
+      const txResult = await concertDetailsPoll.createPoll(
+         0,
+         question,
+         options
+      );
 
       assert.equal(
          txResult.logs[0].args.question,
@@ -54,7 +60,11 @@ contract("ConcertDetailsPoll", (accounts) => {
       );
 
       const ticketId = transaction.logs[0].args.ticketId;
-      const txResult = await concertDetailsPollInstance.vote(ticketId, pollId, optionId);
+      const txResult = await concertDetailsPoll.vote(
+         ticketId,
+         pollId,
+         optionId
+      );
 
       const event = txResult.logs.find((log) => log.event === "Voted");
       // Assert that the event was emitted with the correct values
@@ -73,7 +83,7 @@ contract("ConcertDetailsPoll", (accounts) => {
       const nonTicketId = 3;
 
       // Ensure that non-ticket holders cannot vote
-      await truffleAssert.fails(eventVoting.vote(3, pollId, optionId));
+      await truffleAssert.fails(concertDetailsPoll.vote(3, pollId, optionId));
    });
 
    it("should allow retracting of votes", async () => {
@@ -103,15 +113,18 @@ contract("ConcertDetailsPoll", (accounts) => {
       const ticketId = transaction.logs[0].args.ticketId;
 
       // Vote on the poll
-      await eventVoting.vote(ticketId, pollId, optionId);
+      await concertDetailsPoll.vote(ticketId, pollId, optionId);
 
       // Retract the vote
-      const initialVotes = await eventVoting.getVotesForOption(
+      const initialVotes = await concertDetailsPoll.getVotesForOption(
          pollId,
          optionId
       );
-      await eventVoting.retractVote(ticketId, pollId);
-      const finalVotes = await eventVoting.getVotesForOption(pollId, optionId);
+      await concertDetailsPoll.retractVote(ticketId, pollId);
+      const finalVotes = await concertDetailsPoll.getVotesForOption(
+         pollId,
+         optionId
+      );
 
       // Ensure that the vote count decreases by 1 after retraction
       assert.equal(
@@ -148,7 +161,7 @@ contract("ConcertDetailsPoll", (accounts) => {
       const ticketId = transaction.logs[0].args.ticketId;
       // Ensure that tickets of different concerts cannot vote
       await truffleAssert.reverts(
-         eventVoting.vote(ticketId, pollId, optionId),
+         concertDetailsPoll.vote(ticketId, pollId, optionId),
          "Ticket should be of same Concert"
       );
    });
@@ -156,7 +169,7 @@ contract("ConcertDetailsPoll", (accounts) => {
    it("should close a poll", async () => {
       const pollId = 0; // Assuming we're closing the first poll created
 
-      const txResult = await concertDetailsPollInstance.closePoll(pollId);
+      const txResult = await concertDetailsPoll.closePoll(pollId);
       assert.equal(
          txResult.logs[0].args.pollId.toNumber(),
          pollId,
