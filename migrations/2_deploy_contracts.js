@@ -5,8 +5,9 @@ const TicketMarket = artifacts.require("TicketMarket");
 const LoyaltyPoints = artifacts.require("LoyaltyPoints");
 const PriorityQueue = artifacts.require("PriorityQueue");
 const PresaleMarket = artifacts.require("PresaleMarket");
-const ConcertDetailsPoll = artifacts.require("ConcertDetailsPoll");
+// const ConcertDetailsPoll = artifacts.require("ConcertDetailsPoll");
 const FutureConcertPoll = artifacts.require("FutureConcertPoll");
+const EventVoting = artifacts.require("EventVoting");
 const Lottery = artifacts.require("Lottery");
 
 module.exports = async function (deployer, network, accounts) {
@@ -33,14 +34,17 @@ module.exports = async function (deployer, network, accounts) {
       loyaltyPointsInstance.address
    );
 
-   // Deploy ConcertDetailsPoll
-   await deployer.deploy(ConcertDetailsPoll, ticketInstance.address);
-
    // Deploy FutureConcertPoll
-   const futureConcertPollInstance = await deployer.deploy(FutureConcertPoll, loyaltyPointsInstance.address);
+   const futureConcertPollInstance = await deployer.deploy(
+      FutureConcertPoll,
+      loyaltyPointsInstance.address
+   );
 
    // Deploy Lottery
-   const lotteryInstance = await deployer.deploy(Lottery, ticketInstance.address);
+   const lotteryInstance = await deployer.deploy(
+      Lottery,
+      ticketInstance.address
+   );
 
    // Deploy TicketMarket
    await deployer.deploy(
@@ -61,4 +65,5 @@ module.exports = async function (deployer, network, accounts) {
       futureConcertPollInstance.address,
       lotteryInstance.address
    );
+   await deployer.deploy(EventVoting, ticketInstance.address);
 };
