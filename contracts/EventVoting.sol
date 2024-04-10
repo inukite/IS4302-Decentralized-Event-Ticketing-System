@@ -1,21 +1,18 @@
-pragma solidity ^0.8.0;
-
 import "./Ticket.sol";
 
 contract EventVoting {
-    // Structure to represent a poll option
     struct PollOption {
         uint256 optionId;
         string optionText;
         uint256 votes;
     }
 
-    // Structure to represent a poll
     struct Poll {
         uint256 pollId;
-        uint256 concertId; // Added concertId
+        uint256 concertId;
         string question;
-        mapping(uint256 => uint256) ticketVotes; // Mapping of ticketId to selected optionId
+        mapping(uint256 => uint256) ticketVotes;
+        mapping(uint256 => bool) ticketHasVoted;
         PollOption[] options;
         uint256 totalVotes;
         bool isOpen;
@@ -24,9 +21,6 @@ contract EventVoting {
     mapping(uint256 => Poll) public polls;
     uint256 public pollCounter;
     Ticket public ticketContract;
-
-    // Mapping to connect concertId to pollId
-    mapping(uint256 => uint256) public concertToPoll;
 
     event PollCreated(
         uint256 indexed pollId,
@@ -39,6 +33,7 @@ contract EventVoting {
         uint256 optionId
     );
     event PollClosed(uint256 indexed pollId);
+    event VoteRetracted(uint256 indexed pollId, uint256 indexed ticketId);
 
     constructor(address _ticketContract) {
         ticketContract = Ticket(_ticketContract);
@@ -70,14 +65,10 @@ contract EventVoting {
         polls[pollCounter].question = _question;
         for (uint256 i = 0; i < _options.length; i++) {
             polls[pollCounter].options.push(
-                PollOption({optionId: i, optionText: _options[i], votes: 0})
+                PollOption({optionId: i + 1, optionText: _options[i], votes: 0})
             );
         }
         polls[pollCounter].isOpen = true;
-
-        // Connect concertId to pollId
-        concertToPoll[_concertId] = pollCounter;
-
         emit PollCreated(pollCounter, _concertId, _question);
         pollCounter++;
     }
@@ -92,14 +83,17 @@ contract EventVoting {
         isValidPoll(_pollId)
         isActiveTicketAndOpenPoll(_ticketId, _pollId)
     {
-        require(_optionId < polls[_pollId].options.length, "Invalid option ID");
+        require(
+            _optionId > 0 && _optionId <= polls[_pollId].options.length,
+            "Invalid option ID"
+        );
         require(
             polls[_pollId].concertId == ticketContract.getConcertId(_ticketId),
             "Ticket should be of same Concert"
         );
 
         polls[_pollId].ticketVotes[_ticketId] = _optionId;
-        polls[_pollId].options[_optionId].votes++;
+        polls[_pollId].options[_optionId - 1].votes++;
         polls[_pollId].totalVotes++;
         emit Voted(_pollId, _ticketId, _optionId);
     }
@@ -115,7 +109,11 @@ contract EventVoting {
         uint256 _pollId,
         uint256 _optionId
     ) public view returns (uint256) {
-        return polls[_pollId].options[_optionId].votes;
+        require(
+            _optionId > 0 && _optionId <= polls[_pollId].options.length,
+            "Invalid option ID"
+        );
+        return polls[_pollId].options[_optionId - 1].votes;
     }
 
     // Function to check if a poll is open
@@ -143,5 +141,25 @@ contract EventVoting {
         }
 
         return (concertId, question, optionsText, votes);
+    }
+
+    function retractVote(
+        uint256 _ticketId,
+        uint256 _pollId
+    )
+        public
+        isValidPoll(_pollId)
+        isActiveTicketAndOpenPoll(_ticketId, _pollId)
+    {
+        require(
+            polls[_pollId].ticketVotes[_ticketId] != 0,
+            "No vote to retract"
+        );
+
+        uint256 optionId = polls[_pollId].ticketVotes[_ticketId];
+        polls[_pollId].options[optionId - 1].votes--;
+        polls[_pollId].totalVotes--;
+        delete polls[_pollId].ticketVotes[_ticketId];
+        emit VoteRetracted(_pollId, _ticketId);
     }
 }
