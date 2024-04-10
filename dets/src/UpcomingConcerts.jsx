@@ -1,9 +1,9 @@
 import React from 'react';
-import { useUserAddress } from './UserAddressContext';
+// import { useUserAddress } from './UserAddressContext';
 import ConcertsGrid from './ConcertsGrid';
 
 const UpcomingConcerts = () => {
-  const { userAddress, setUserAddress } = useUserAddress();
+  // const { userAddress, setUserAddress } = useUserAddress();
 
   return (
     <>

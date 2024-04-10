@@ -6,11 +6,16 @@ import "./Ticket.sol";
 import "./TicketToken.sol";
 import "./PriorityQueue.sol";
 import "./LoyaltyPoints.sol";
+import "./FutureConcertPoll.sol";
+import "./Lottery.sol";
 
 contract TicketMarket {
     address _owner = msg.sender;
     uint256 public commissionFee;
     Ticket public ticketContract;
+    LoyaltyPoints public loyaltyPoints;
+    FutureConcertPoll public futureConcertPoll;
+    Lottery public lotteryContract;
 
     // Mapping from ticket ID to listing price
     mapping(uint256 => uint256) public listPrice;
@@ -30,8 +35,20 @@ contract TicketMarket {
         uint256 price
     );
 
-    constructor(Ticket ticketAddress, uint256 fee) {
+    // Event emitted when a ticket is redeemed
+    event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
+
+    constructor(
+        Ticket ticketAddress,
+        LoyaltyPoints loyaltyPointsAddress,
+        FutureConcertPoll futureConcertPollAddress,
+        Lottery lotteryContractAddress,
+        uint256 fee
+    ) {
         ticketContract = ticketAddress;
+        loyaltyPoints = loyaltyPointsAddress;
+        futureConcertPoll = futureConcertPollAddress;
+        lotteryContract = lotteryContractAddress;
         commissionFee = fee;
     }
 
@@ -44,7 +61,7 @@ contract TicketMarket {
 
         require(
             price <= ((ticketContract.getPrice(ticketId) * 6) / 5),
-            "Price cannot be more than 20% extra of original price "
+            "Price cannot be more than 20% extra of original price"
         );
         require(
             msg.sender == ticketContract.getOwner(ticketId),
@@ -71,6 +88,66 @@ contract TicketMarket {
             }
         }
     }
+
+    // Redeem a ticket for an event
+    function redeemInTicketMarket(
+        uint256 ticketId,
+        bool wantToRegisterAndVote,
+        uint256 concertOptionId,
+        uint256 votePoints
+    ) external {
+        require(
+            ticketContract.getOwner(ticketId) == msg.sender,
+            "You do not own this ticket"
+        );
+
+        // Retrieve ticket details for verification
+        uint256 concertDate = ticketContract.getConcertDate(ticketId);
+
+        // Ensure the event is happening today
+        require(
+            block.timestamp >= concertDate &&
+                block.timestamp < concertDate + 1 days,
+            "This ticket can't be redeemed today"
+        );
+
+        // Check if the ticket has already been redeemed
+        require(
+            !ticketContract.isRedeemed(ticketId),
+            "Ticket has already been redeemed"
+        );
+
+        ticketContract.redeemTicket(ticketId);
+
+        // Award loyalty points
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
+
+        emit TicketRedeemed(ticketId, msg.sender);
+
+
+         if (wantToRegisterAndVote) {
+            // Ensure the user hasn't already registered to vote on this concert option
+            require(
+                !futureConcertPoll.userVoteRegistration(
+                    msg.sender,
+                    concertOptionId
+                ),
+                "Already registered to vote on this concert option"
+            );
+
+            uint256 userPoints = loyaltyPoints.getPoints(msg.sender);
+            require(userPoints >= votePoints, "Not enough loyalty points");
+            loyaltyPoints.subtractLoyaltyPoints(msg.sender, votePoints);
+
+            // Register the user for voting on the concert option
+            futureConcertPoll.registerToVote(concertOptionId);
+
+            // Assuming the user is now eligible to vote, proceed with casting the vote
+            futureConcertPoll.castVote(concertOptionId, votePoints);
+        }
+    }
+
+    // Getter functions below
 
     // Get price of ticket
     function getTicketPrice(uint256 ticketId) public view returns (uint256) {
@@ -104,6 +181,9 @@ contract TicketMarket {
 
         // Remove the ticket from the listing after purchase
         listPrice[ticketId] = 0;
+
+        // Lottery: Add the user to the list of participants for the lottery
+        lotteryContract.addParticipant(msg.sender);
     }
 
     // get price of ticket

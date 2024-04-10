@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./ERC20.sol";
 import "./TicketToken.sol";
 import "./PresaleMarket.sol";
+import "./Lottery.sol";
 
 contract Ticket {
     enum TicketState {
@@ -38,9 +39,14 @@ contract Ticket {
     uint256 public ticketCounter = 0;
     address public owner;
     address public presaleMarketAddress;
+    address public lotteryAddress;
 
     function setPresaleMarketAddress(address _presaleMarketAddress) public {
         presaleMarketAddress = _presaleMarketAddress;
+    }
+
+    function setLotteryAddress(address _lotteryAddress) public {
+        lotteryAddress = _lotteryAddress;
     }
 
     constructor(address _ticketToken) {
@@ -70,7 +76,7 @@ contract Ticket {
         uint256 ticketSectionNo,
         uint256 ticketSeatNo,
         uint256 price
-    ) public onlyOwnerOrMarket returns (uint256) {
+    ) public onlyOwnerOrMarketorLottery returns (uint256) {
         ticket memory newTicket = ticket({
             ticketId: ticketCounter,
             concertId: concertId,
@@ -98,9 +104,9 @@ contract Ticket {
     }
 
     // Modifier to ensure function can be called by presaleMarket as well
-    modifier onlyOwnerOrMarket() {
+    modifier onlyOwnerOrMarketorLottery() {
         require(
-            msg.sender == owner || msg.sender == presaleMarketAddress,
+            msg.sender == owner || msg.sender == presaleMarketAddress || msg.sender == lotteryAddress,
             "Unauthorized"
         );
         _;
@@ -142,6 +148,13 @@ contract Ticket {
         tickets[ticketId].price = resellPrice;
 
         emit TicketBought(ticketId, newOwner, tickets[ticketId].price);
+    }
+
+    // Function to check if a ticket has been redeemed
+    function isRedeemed(
+        uint256 ticketId
+    ) public view validTicketId(ticketId) returns (bool) {
+        return tickets[ticketId].ticketState == TicketState.Redeemed;
     }
 
     // Getter Functions for Ticket attributes

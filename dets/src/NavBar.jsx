@@ -41,27 +41,6 @@ const NavBar = () => {
     localStorage.removeItem('connectedAddress');
   };
 
-  // const connectWallet = async () => {
-  //   // Check if MetaMask is installed
-  //   if (window.ethereum && !isConnected) {
-  //     try {
-  //       // Request account access
-  //       const accounts = await window.ethereum.request({
-  //         method: 'eth_requestAccounts',
-  //       });
-  //       // Set userAddress to the first account
-  //       setUserAddress(accounts[0]);
-  //     } catch (error) {
-  //       console.error('Error connecting to MetaMask', error);
-  //     }
-  //   } else if (isConnected) {
-  //     // Simulate "logout" by clearing the user address
-  //     setUserAddress('');
-  //   } else {
-  //     alert('Please install MetaMask to use this feature!');
-  //   }
-  // };
-
   return (
     <div>
       <Navbar
@@ -102,6 +81,7 @@ const NavBar = () => {
               <Nav.Link href="upcomingconcerts">Upcoming Concerts</Nav.Link>
               <Nav.Link href="marketplace">Marketplace</Nav.Link>
               <Nav.Link href="mytickets">My Tickets</Nav.Link>
+              <Nav.Link href="voting">Voting</Nav.Link>
             </Nav>
           </Navbar.Collapse>
           <>

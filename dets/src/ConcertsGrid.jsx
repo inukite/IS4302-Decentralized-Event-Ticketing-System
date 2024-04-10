@@ -10,14 +10,14 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import DateFilter from './DateFilter';
+import DateFilter from './DateFilterForUpcomingConcerts';
 import TaylorSwiftErasTour from './TaylorSwiftConcert.png';
 import IUConcert from './IUConcert.jpg';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
-import Alert from 'react-bootstrap/Alert';
+// import Alert from 'react-bootstrap/Alert';
 
 const concerts = [
   {
@@ -100,7 +100,7 @@ const ConcertCard = ({ concert }) => {
 
   // Handle showing and hiding of the modal
   const handleCloseModal = () => setShowModal(false);
-  const handleShowModal = () => setShowModal(true);
+  // const handleShowModal = () => setShowModal(true);
 
   // Function to handle both buying tickets and joining/leaving the waitlist
   const handleAction = () => {
@@ -142,7 +142,7 @@ const ConcertCard = ({ concert }) => {
       alert('Please select all options');
       return;
     } else {
-      setToastMessage('Tickets purchased successfully!');
+      setToastMessage('Tickets purchased successfully! You have earned 10 LP!');
     }
 
     // If validation is successful

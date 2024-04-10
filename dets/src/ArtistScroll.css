@@ -17,6 +17,25 @@
   padding: 20px 0;
 }
 
+.artist-card-marketplace {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer; /* Indicates the item is clickable */
+  transition: box-shadow 0.3s ease; /* Smooth transition for the shadow */
+  margin-right: 30px;
+}
+
+.artist-card-marketplace:hover {
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Shadow effect on hover */
+}
+
+.artist-card-selected {
+  border: 2px solid #6f4ff2; /* Border color to indicate selection */
+  box-shadow: 0px 0px 15px rgba(111, 79, 242, 0.5); /* Optional: a different shadow to indicate selection */
+}
+
 .artist-image-container {
   position: relative;
   /* Adjust the size as needed */
@@ -56,4 +75,11 @@
 
 .artist-scroll-container::-webkit-scrollbar-track {
   background: transparent;
+}
+
+.ticket-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Create two columns */
+  gap: 20px; /* Space between cards */
+  padding: 30px;
 }

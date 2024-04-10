@@ -1,12 +1,12 @@
 const TicketToken = artifacts.require("TicketToken");
 const Ticket = artifacts.require("Ticket");
-const EventVoting = artifacts.require("EventVoting");
+const ConcertDetailsPoll = artifacts.require("ConcertDetailsPoll");
 const truffleAssert = require("truffle-assertions");
 const assert = require("assert");
 const BigNumber = require("bignumber.js");
 
-contract("EventVoting", (accounts) => {
-   let ticketInstance, ticketTokenInstance, eventVoting;
+contract("ConcertDetailsPoll", (accounts) => {
+   let ticketInstance, ticketTokenInstance, concertDetailsPollInstance;
    const owner = accounts[0];
    const ticketHolder1 = accounts[1];
    const ticketHolder2 = accounts[2];
@@ -14,14 +14,14 @@ contract("EventVoting", (accounts) => {
    before(async () => {
       ticketTokenInstance = await TicketToken.deployed();
       ticketInstance = await Ticket.deployed(ticketTokenInstance.address);
-      eventVoting = await EventVoting.deployed(ticketInstance.address);
+      concertDetailsPollInstance = await ConcertDetailsPoll.deployed(ticketInstance.address);
    });
 
    it("should create a poll", async () => {
       const question = "Which is your favorite color?";
       const options = ["Red", "Green", "Blue"];
 
-      const txResult = await eventVoting.createPoll(0, question, options);
+      const txResult = await concertDetailsPollInstance.createPoll(0, question, options);
 
       assert.equal(
          txResult.logs[0].args.question,
@@ -54,7 +54,7 @@ contract("EventVoting", (accounts) => {
       );
 
       const ticketId = transaction.logs[0].args.ticketId;
-      const txResult = await eventVoting.vote(ticketId, pollId, optionId);
+      const txResult = await concertDetailsPollInstance.vote(ticketId, pollId, optionId);
 
       const event = txResult.logs.find((log) => log.event === "Voted");
       // Assert that the event was emitted with the correct values
@@ -156,7 +156,7 @@ contract("EventVoting", (accounts) => {
    it("should close a poll", async () => {
       const pollId = 0; // Assuming we're closing the first poll created
 
-      const txResult = await eventVoting.closePoll(pollId);
+      const txResult = await concertDetailsPollInstance.closePoll(pollId);
       assert.equal(
          txResult.logs[0].args.pollId.toNumber(),
          pollId,

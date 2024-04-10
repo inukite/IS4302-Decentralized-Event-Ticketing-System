@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "./PriorityQueue.sol";
 import "./Ticket.sol";
 import "./LoyaltyPoints.sol";
+import "./FutureConcertPoll.sol";
+import "./Lottery.sol";
 
 contract PresaleMarket {
     Ticket public ticketContract;
@@ -11,6 +13,8 @@ contract PresaleMarket {
     PriorityQueue public priorityQueue;
     LoyaltyPoints public loyaltyPoints;
     uint256 public ticketCounter;
+    FutureConcertPoll public futureConcertPoll;
+    Lottery public lotteryContract;
 
     struct EventDetails {
         uint256 concertId;
@@ -27,15 +31,22 @@ contract PresaleMarket {
     // Mapping from concert ID to list of ticket IDs.
     mapping(uint256 => uint256[]) public concertToTicketIds;
 
+    // Track whether a user is eligible to vote based on ticket redemption
+    mapping(address => bool) public isEligibleToVote;
+
     constructor(
         address _priorityQueueAddress,
         address _loyaltyPointsAddress,
-        address _ticketContractAddress
+        address _ticketContractAddress,
+        address _futureConcertPollAddress,
+        address _lotteryContractAddress
     ) {
         organizer = msg.sender;
         priorityQueue = PriorityQueue(_priorityQueueAddress);
         loyaltyPoints = LoyaltyPoints(_loyaltyPointsAddress);
         ticketContract = Ticket(_ticketContractAddress);
+        futureConcertPoll = FutureConcertPoll(_futureConcertPollAddress);
+        lotteryContract = Lottery(_lotteryContractAddress);
     }
 
     modifier onlyOrganizer() {
@@ -59,6 +70,7 @@ contract PresaleMarket {
     event TicketPurchased(uint256 indexed ticketId, address indexed buyer);
     event CorrectPaymentAmount(uint256 ticketPrice);
     event TicketTransferred(address buyer, uint256 concertId);
+    event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
     // Create an event without immediately creating tickets
     function createEvent(
@@ -150,9 +162,70 @@ contract PresaleMarket {
         ticketContract.transfer(ticketId, msg.sender, ticketPrice);
         emit TicketPurchased(ticketId, msg.sender);
 
-        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Example: award 10 loyalty points per ticket purchase
-        
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); //  Award 10 loyalty points per ticket purchase
+
         priorityQueue.dequeue(); // Remove the buyer with the highest priority after the purchase
+
+        // Lottery: Add the user to the list of participants for the lottery
+        lotteryContract.addParticipant(msg.sender);
+    }
+
+    // Redeem a ticket for an event
+    function redeemInPresaleMarket(
+        uint256 ticketId,
+        bool wantToRegisterAndVote,
+        uint256 concertOptionId,
+        uint256 votePoints
+    ) external {
+        require(
+            ticketContract.getOwner(ticketId) == msg.sender,
+            "You do not own this ticket"
+        );
+
+        // Retrieve ticket details for verification
+        uint256 concertDate = ticketContract.getConcertDate(ticketId);
+
+        // Ensure the event is happening today
+        require(
+            block.timestamp >= concertDate &&
+                block.timestamp < concertDate + 1 days,
+            "This ticket can't be redeemed today"
+        );
+
+        // Check if the ticket has already been redeemed
+        require(
+            !ticketContract.isRedeemed(ticketId),
+            "Ticket has already been redeemed"
+        );
+
+        ticketContract.redeemTicket(ticketId);
+
+        // Award loyalty points
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
+
+        emit TicketRedeemed(ticketId, msg.sender);
+
+        // Voting system below
+        if (wantToRegisterAndVote) {
+            // Ensure the user hasn't already registered to vote on this concert option
+            require(
+                !futureConcertPoll.userVoteRegistration(
+                    msg.sender,
+                    concertOptionId
+                ),
+                "Already registered to vote on this concert option"
+            );
+
+            uint256 userPoints = loyaltyPoints.getPoints(msg.sender);
+            require(userPoints >= votePoints, "Not enough loyalty points");
+            loyaltyPoints.subtractLoyaltyPoints(msg.sender, votePoints);
+
+            // Register the user for voting on the concert option
+            futureConcertPoll.registerToVote(concertOptionId);
+
+            // Assuming the user is now eligible to vote, proceed with casting the vote
+            futureConcertPoll.castVote(concertOptionId, votePoints);
+        }
     }
 
     //Getters
