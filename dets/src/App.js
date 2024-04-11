@@ -9,6 +9,7 @@ import MyTickets from './MyTickets';
 import UpcomingConcerts from './UpcomingConcerts';
 import { UserAddressProvider } from './UserAddressContext';
 import Voting from './Voting';
+import Organizer from './Organizer';
 
 const App = () => {
   return (
@@ -21,6 +22,7 @@ const App = () => {
           <Route path="/mytickets" element={<MyTickets />} />
           <Route path="/upcomingconcerts" element={<UpcomingConcerts />} />
           <Route path="/voting" element={<Voting />} />
+          <Route path="/organizer" element={<Organizer />} />
         </Routes>
         <Footer />
       </BrowserRouter>

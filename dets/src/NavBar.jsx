@@ -82,6 +82,8 @@ const NavBar = () => {
               <Nav.Link href="marketplace">Marketplace</Nav.Link>
               <Nav.Link href="mytickets">My Tickets</Nav.Link>
               <Nav.Link href="voting">Voting</Nav.Link>
+              {/* only show organizer link if user is connected */}
+              {userAddress && <Nav.Link href="organizer">Organizer</Nav.Link>}
             </Nav>
           </Navbar.Collapse>
           <>
