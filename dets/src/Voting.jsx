@@ -8,6 +8,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import CountdownTimer from './CountdownToKaboom';
 
 const UpcomingArtistCard = ({ artist, voteAllocation, onAllocateVotes }) => {
   return (
@@ -112,6 +113,7 @@ const Voting = () => {
 
   return (
     <Container>
+      <CountdownTimer targetDate="2024-06-06T23:59:59" />
       <Row>
         <h2 style={{ color: '#6F4FF2', fontWeight: 'bold', padding: 20 }}>
           Vote for your favourite Artists!
