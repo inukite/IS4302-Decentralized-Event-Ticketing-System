@@ -10,6 +10,9 @@ const NavBar = () => {
   // const [userAddress, setUserAddress] = useState('');
   // const isConnected = Boolean(userAddress); // Determines if a user is connected
 
+  // FOR RYAN:
+  const wantToBeOrganizer = false;
+
   // On component mount, check if the user is connected
   useEffect(() => {
     const connectedAddress = localStorage.getItem('connectedAddress');
@@ -83,7 +86,9 @@ const NavBar = () => {
               <Nav.Link href="mytickets">My Tickets</Nav.Link>
               <Nav.Link href="voting">Voting</Nav.Link>
               {/* only show organizer link if user is connected */}
-              {userAddress && <Nav.Link href="organizer">Organizer</Nav.Link>}
+              {userAddress && wantToBeOrganizer && (
+                <Nav.Link href="organizer">Organizer</Nav.Link>
+              )}
             </Nav>
           </Navbar.Collapse>
           <>
