@@ -146,7 +146,7 @@ const FavouriteArtists = () => {
   const [selectedArtist, setSelectedArtist] = useState(''); // new state for selected artist
   const [tickets, setTickets] = useState([
     // Bruno Mars Tickets
-    ...Array.from({ length: 10 }, (_, i) => ({
+    ...Array.from({ length: 3 }, (_, i) => ({
       id: `BM${i + 1}`,
       title:
         BrunoMarsConcertTitleArray[
@@ -179,7 +179,7 @@ const FavouriteArtists = () => {
     })),
 
     // Taylor Swift Tickets
-    ...Array.from({ length: 10 }, (_, i) => ({
+    ...Array.from({ length: 2 }, (_, i) => ({
       id: `TS${i + 1}`,
       title:
         TaylorSwiftConcertTitleArray[
@@ -211,7 +211,7 @@ const FavouriteArtists = () => {
     })),
 
     // Ed Sheeran Tickets
-    ...Array.from({ length: 10 }, (_, i) => ({
+    ...Array.from({ length: 3 }, (_, i) => ({
       id: `ES${i + 1}`,
       title:
         EdSheeranConcertTitleArray[
@@ -243,7 +243,7 @@ const FavouriteArtists = () => {
     })),
 
     // BlackPink Tickets
-    ...Array.from({ length: 10 }, (_, i) => ({
+    ...Array.from({ length: 3 }, (_, i) => ({
       id: `BP${i + 1}`,
       title:
         BlackPinkConcertTitleArray[
