@@ -3,10 +3,12 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import React, { useEffect } from 'react';
 import { useUserAddress } from './UserAddressContext';
+import { useLocation } from 'react-router-dom'; // Import useLocation
 
 // Example NavBar component
 const NavBar = () => {
   const { userAddress, setUserAddress } = useUserAddress();
+  const location = useLocation(); // Get current location
   // const [userAddress, setUserAddress] = useState('');
   // const isConnected = Boolean(userAddress); // Determines if a user is connected
 
@@ -54,6 +56,9 @@ const NavBar = () => {
     localStorage.removeItem('connectedAddress');
   };
 
+  // Function to determine if the nav link is active
+  const isActive = (path) => location.pathname === path;
+
   return (
     <div>
       <Navbar
@@ -90,19 +95,65 @@ const NavBar = () => {
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav text-center">
             <Nav className="me-auto text-center">
-              <Nav.Link href="/">Home</Nav.Link>
+              <Nav.Link
+                href="/"
+                style={{ color: isActive('/') ? '#7f9bff' : '#000000' }}
+              >
+                Home
+              </Nav.Link>
               {!wantToBeOrganizer && (
-                <Nav.Link href="upcomingconcerts">Upcoming Concerts</Nav.Link>
+                <Nav.Link
+                  href="upcomingconcerts"
+                  style={{
+                    color: isActive('/upcomingconcerts')
+                      ? '#7f9bff'
+                      : '#000000',
+                  }}
+                >
+                  Upcoming Concerts
+                </Nav.Link>
               )}
               {!wantToBeOrganizer && (
-                <Nav.Link href="marketplace">Marketplace</Nav.Link>
+                <Nav.Link
+                  href="marketplace"
+                  style={{
+                    color: isActive('/marketplace') ? '#7f9bff' : '#000000',
+                  }}
+                >
+                  Marketplace
+                </Nav.Link>
               )}
-              <Nav.Link href="mytickets">My Tickets</Nav.Link>
-              {!wantToBeOrganizer && <Nav.Link href="voting">Voting</Nav.Link>}
+              {!wantToBeOrganizer && (
+                <Nav.Link
+                  href="mytickets"
+                  style={{
+                    color: isActive('/mytickets') ? '#7f9bff' : '#000000',
+                  }}
+                >
+                  My Tickets
+                </Nav.Link>
+              )}
+              {!wantToBeOrganizer && (
+                <Nav.Link
+                  href="voting"
+                  style={{
+                    color: isActive('/voting') ? '#7f9bff' : '#000000',
+                  }}
+                >
+                  Voting
+                </Nav.Link>
+              )}
 
               {/* only show organizer link if user is connected */}
               {userAddress && wantToBeOrganizer && (
-                <Nav.Link href="organizer">Organizer</Nav.Link>
+                <Nav.Link
+                  href="organizer"
+                  style={{
+                    color: isActive('/organizer') ? '#7f9bff' : '#000000',
+                  }}
+                >
+                  Organizer
+                </Nav.Link>
               )}
             </Nav>
           </Navbar.Collapse>

@@ -41,7 +41,7 @@ const MyTickets = ({ ticketsStorage }) => {
       artist: 'Taylor Swift',
       date: new Date('5 May 2024'),
       category: `Cat 1`,
-      price: 450,
+      price: 320,
       username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
       action: 'buy',
       imageUrl: TaylorSwiftConcert,

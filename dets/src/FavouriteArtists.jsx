@@ -90,7 +90,6 @@ const TaylorSwiftConcertDatesArray = [
   new Date('2 May 2024'),
   new Date('3 May 2024'),
   new Date('4 May 2024'),
-  new Date('5 May 2024'),
 ];
 
 const EdSheeranConcertDatesArray = [
@@ -267,6 +266,32 @@ const FavouriteArtists = () => {
         starRatingArray[Math.floor(Math.random() * starRatingArray.length)],
       hasBeenPurchased: false,
       concertName: 'BlackPink Born Pink',
+      listedForSale: false,
+      myTicketsReadyToUse: false,
+      myTicketsListedForSale: false,
+      ticketUsed: false,
+      voted: false,
+      numberOfTicketsPurchased: 0,
+    })),
+
+    // Hardcoded Tickets in My Tickets
+    ...Array.from({ length: 1 }, (_, i) => ({
+      id: 'TS20',
+      title: 'Taylor Swift Eras Tour',
+      artist: 'Taylor Swift',
+      date: new Date('5 May 2024'),
+      category: `Cat 1`,
+      price: 320,
+      username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
+      action: 'buy',
+      imageUrl: TaylorSwiftConcert,
+      numberOfTickets: 8,
+      section: 'Section C',
+      seatNumber: 20,
+      venue: 'National Stadium',
+      starRating: '★★★★☆',
+      hasBeenPurchased: false,
+      concertName: 'Taylor Swift Eras Tour',
       listedForSale: false,
       myTicketsReadyToUse: false,
       myTicketsListedForSale: false,
