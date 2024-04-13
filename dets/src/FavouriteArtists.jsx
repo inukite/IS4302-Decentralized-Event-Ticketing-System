@@ -176,6 +176,7 @@ const FavouriteArtists = () => {
       myTicketsListedForSale: false,
       ticketUsed: false,
       voted: false,
+      numberOfTicketsPurchased: 0,
     })),
 
     // Taylor Swift Tickets
@@ -207,6 +208,7 @@ const FavouriteArtists = () => {
       myTicketsListedForSale: false,
       ticketUsed: false,
       voted: false,
+      numberOfTicketsPurchased: 0,
     })),
 
     // Ed Sheeran Tickets
@@ -238,6 +240,7 @@ const FavouriteArtists = () => {
       myTicketsListedForSale: false,
       ticketUsed: false,
       voted: false,
+      numberOfTicketsPurchased: 0,
     })),
 
     // BlackPink Tickets
@@ -269,6 +272,7 @@ const FavouriteArtists = () => {
       myTicketsListedForSale: false,
       ticketUsed: false,
       voted: false,
+      numberOfTicketsPurchased: 0,
     })),
   ]);
 
@@ -292,10 +296,16 @@ const FavouriteArtists = () => {
   };
 
   // Function to update the purchase status
-  const handlePurchase = (ticketId) => {
+  const handlePurchase = (ticketId, numberOfTicketsPurchased) => {
     setTickets(
       tickets.map((ticket) =>
-        ticket.id === ticketId ? { ...ticket, hasBeenPurchased: true } : ticket
+        ticket.id === ticketId
+          ? {
+              ...ticket,
+              hasBeenPurchased: true,
+              numberOfTicketsPurchased: numberOfTicketsPurchased,
+            }
+          : ticket
       )
     );
   };
@@ -343,11 +353,14 @@ const FavouriteArtists = () => {
 
   // Helper function to generate an array of ticket objects
   const generateTicketsWithSeatNumbers = (ticket) => {
-    return Array.from({ length: ticket.numberOfTickets }, (_, index) => ({
-      ...ticket, // spread the original ticket properties
-      id: `${ticket.id}-seat${ticket.seatNumber + index}`, // create a unique ID for each generated ticket
-      seatNumber: ticket.seatNumber + index, // increment the seat number
-    }));
+    return Array.from(
+      { length: ticket.numberOfTicketsPurchased },
+      (_, index) => ({
+        ...ticket, // spread the original ticket properties
+        id: `${ticket.id}-seat${ticket.seatNumber + index}`, // create a unique ID for each generated ticket
+        seatNumber: ticket.seatNumber + index, // increment the seat number
+      })
+    );
   };
 
   return (

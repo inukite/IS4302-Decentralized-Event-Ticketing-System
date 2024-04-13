@@ -1,5 +1,5 @@
 import React from 'react';
-import ProgressBar from '@ramonak/react-progress-bar';
+// import ProgressBar from '@ramonak/react-progress-bar';
 import Col from 'react-bootstrap/Col';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -22,19 +22,16 @@ const LoyalScoreHome = () => {
               <h2 style={{ color: '#6F4FF2', fontWeight: 'bold' }}>
                 My Loyalty Score
               </h2>
-              <p>Collect points to unlock more rewards</p>
             </Col>
             <Col>
-              <div
-                style={{
-                  width: '100%',
-                  height: '50%',
-                  alignContent: 'center',
-                }}
-              >
-                <ProgressBar completed={60} labelSize="18px" />
-              </div>
-              <p>40 more tokens needed</p>
+              <h2 style={{ color: '#6F4FF2', fontWeight: 'bold' }}>54 LP</h2>
+            </Col>
+            <Col></Col>
+          </Row>
+          <Row>
+            <Col></Col>
+            <Col>
+              <p>Collect points to unlock rewards!</p>
             </Col>
             <Col></Col>
           </Row>

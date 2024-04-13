@@ -10,8 +10,18 @@ const NavBar = () => {
   // const [userAddress, setUserAddress] = useState('');
   // const isConnected = Boolean(userAddress); // Determines if a user is connected
 
+  /**************************************************************************** */
+  /**************************************************************************** */
+  /**************************************************************************** */
+  /**************************************************************************** */
+  /**************************************************************************** */
   // FOR RYAN:
   const wantToBeOrganizer = false;
+  /**************************************************************************** */
+  /**************************************************************************** */
+  /**************************************************************************** */
+  /**************************************************************************** */
+  /**************************************************************************** */
 
   // On component mount, check if the user is connected
   useEffect(() => {
@@ -81,10 +91,15 @@ const NavBar = () => {
           <Navbar.Collapse id="basic-navbar-nav text-center">
             <Nav className="me-auto text-center">
               <Nav.Link href="/">Home</Nav.Link>
-              <Nav.Link href="upcomingconcerts">Upcoming Concerts</Nav.Link>
-              <Nav.Link href="marketplace">Marketplace</Nav.Link>
+              {!wantToBeOrganizer && (
+                <Nav.Link href="upcomingconcerts">Upcoming Concerts</Nav.Link>
+              )}
+              {!wantToBeOrganizer && (
+                <Nav.Link href="marketplace">Marketplace</Nav.Link>
+              )}
               <Nav.Link href="mytickets">My Tickets</Nav.Link>
-              <Nav.Link href="voting">Voting</Nav.Link>
+              {!wantToBeOrganizer && <Nav.Link href="voting">Voting</Nav.Link>}
+
               {/* only show organizer link if user is connected */}
               {userAddress && wantToBeOrganizer && (
                 <Nav.Link href="organizer">Organizer</Nav.Link>

@@ -16,6 +16,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [ticketListed, setTicketListed] = useState(false);
+  const [numberOfTicketsPurchased, setNumberOfTicketsPurchased] = useState(0);
 
   // Handle showing and hiding of the modal
   const handleCloseModal = () => setShowModal(false);
@@ -41,6 +42,14 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
       ...prevDetails,
       [name]: value,
     }));
+  };
+
+  const handleChangeForNumberOfTickets = (name, value) => {
+    setTicketDetails((prevDetails) => ({
+      ...prevDetails,
+      [name]: value,
+    }));
+    setNumberOfTicketsPurchased(value);
   };
 
   const handleBuyTicket = () => {
@@ -75,7 +84,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
     // Delay the purchase handling to allow the toast to show
     setTimeout(() => {
       // Call the function passed from the parent component to update the ticket status
-      onPurchase(ticket.id);
+      onPurchase(ticket.id, ticketDetails.numberOfTickets);
     }, 3000); // 500ms delay
 
     // Reset form fields after a slight delay to ensure state update happens after the toast is shown
@@ -1204,7 +1213,12 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                               as="select"
                               value={ticketDetails.numberOfTickets}
                               onChange={(e) =>
-                                handleChange('numberOfTickets', e.target.value)
+                                // handleChange('numberOfTickets', e.target.value);
+                                // setNumberOfTicketsPurchased(e.target.value)
+                                handleChangeForNumberOfTickets(
+                                  'numberOfTickets',
+                                  e.target.value
+                                )
                               }
                             >
                               <option value="">Choose a number</option>
