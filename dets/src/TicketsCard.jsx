@@ -17,6 +17,16 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
   const [toastMessage, setToastMessage] = useState('');
   const [ticketListed, setTicketListed] = useState(false);
   const [numberOfTicketsPurchased, setNumberOfTicketsPurchased] = useState(0);
+  const [showModalForUsingTicket, setShowModalForUsingTicket] = useState(false);
+  const [showToastForUsingTicket, setShowToastForUsingTicket] = useState(false);
+  const [toastMessageForUsingTicket, setToastMessageForUsingTicket] =
+    useState('');
+  const [showModalForEncoreSongVoting, setShowModalForEncoreSongVoting] =
+    useState(false);
+  const [showToastForEncoreSongVoting, setShowToastForEncoreSongVoting] =
+    useState(false);
+  const [toastMessageForEncoreSongVoting, setToastMessageForEncoreSongVoting] =
+    useState('');
 
   // Handle showing and hiding of the modal
   const handleCloseModal = () => setShowModal(false);
@@ -25,6 +35,28 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
       setTicketListed(false);
     } else {
       setShowModal(true);
+    }
+  };
+
+  // For using ticket
+  const handleCloseModalForUsingTicket = () =>
+    setShowModalForUsingTicket(false);
+  const handleShowModalForUsingTicket = () => {
+    if (ticketListed) {
+      setTicketListed(false);
+    } else {
+      setShowModalForUsingTicket(true);
+    }
+  };
+
+  // For voting for encore song
+  const handleCloseModalForEncoreSongVoting = () =>
+    setShowModalForEncoreSongVoting(false);
+  const handleShowModalForEncoreSongVoting = () => {
+    if (ticketListed) {
+      setTicketListed(false);
+    } else {
+      setShowModalForEncoreSongVoting(true);
     }
   };
 
@@ -169,12 +201,14 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
       alert('Please select all options');
       return;
     } else {
-      setToastMessage('Enjoy Your Concert! You have earned 10 LP!');
+      setToastMessageForUsingTicket(
+        'Enjoy Your Concert! You have earned 10 LP!'
+      );
     }
 
     // If validation is successful
-    setShowModal(false); // Close the modal
-    setShowToast(true); // Show success toast
+    setShowModalForUsingTicket(false); // Close the modal
+    setShowToastForUsingTicket(true); // Show success toast
     // setTicketListed(true);
 
     // Delay the purchase handling to allow the toast to show
@@ -214,12 +248,12 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
     //   alert('Please select all options');
     //   return;
     // } else {
-    setToastMessage('Vote submitted! Enjoy!');
+    setToastMessageForEncoreSongVoting('Vote submitted! Enjoy!');
     // }
 
     // If validation is successful
-    setShowModal(false); // Close the modal
-    setShowToast(true); // Show success toast
+    setShowModalForEncoreSongVoting(false); // Close the modal
+    setShowToastForEncoreSongVoting(true); // Show success toast
     // setTicketListed(true);
 
     // Delay the purchase handling to allow the toast to show
@@ -242,6 +276,11 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
   const formatDateWithoutWeekday = (dateString) => {
     const parts = new Date(dateString).toDateString().split(' ');
     return `${parts[2]} ${parts[1]} ${parts[3]}`; // This will format it as "month day year"
+  };
+
+  // handle navigation to the voting page
+  const handleNavigationToVotingPage = () => {
+    window.location.href = '/voting';
   };
 
   // if ticket has been purchased
@@ -472,15 +511,32 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
           style={{ position: 'fixed', zIndex: 9999 }}
         >
           <Toast
-            onClose={() => setShowToast(false)}
-            show={showToast}
+            onClose={() => setShowToastForUsingTicket(false)}
+            show={showToastForUsingTicket}
             delay={5000}
             autohide
           >
             <Toast.Header>
               <strong className="me-auto">Success</strong>
             </Toast.Header>
-            <Toast.Body>{toastMessage}</Toast.Body>
+            <Toast.Body>{toastMessageForUsingTicket}</Toast.Body>
+          </Toast>
+        </ToastContainer>
+        <ToastContainer
+          className="p-3"
+          position="middle-center"
+          style={{ position: 'fixed', zIndex: 9999 }}
+        >
+          <Toast
+            onClose={() => setShowToastForEncoreSongVoting(false)}
+            show={showToastForEncoreSongVoting}
+            delay={5000}
+            autohide
+          >
+            <Toast.Header>
+              <strong className="me-auto">Success</strong>
+            </Toast.Header>
+            <Toast.Body>{toastMessageForEncoreSongVoting}</Toast.Body>
           </Toast>
         </ToastContainer>
         <div className="ticket-card-home">
@@ -539,15 +595,24 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
               <div style={{ marginLeft: 'auto' }}>
                 <Button
                   style={{
+                    backgroundColor: ticket.voted ? ' #FFA500' : '#7f9bff',
+                    marginRight: 10,
+                  }}
+                  onClick={handleShowModalForEncoreSongVoting}
+                >
+                  {ticket.voted ? 'Update Vote' : 'Vote Encore Song'}
+                </Button>
+                <Button
+                  style={{
                     backgroundColor: '#5dd55d',
                   }}
-                  onClick={handleShowModal}
+                  onClick={handleShowModalForUsingTicket}
                 >
                   Use Ticket
                 </Button>
                 <Modal
-                  show={showModal}
-                  onHide={handleCloseModal}
+                  show={showModalForUsingTicket}
+                  onHide={handleCloseModalForUsingTicket}
                   centered
                   size="xl"
                 >
@@ -649,11 +714,120 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                     </Container>
                   </Modal.Body>
                   <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>
+                    <Button
+                      variant="secondary"
+                      onClick={handleCloseModalForUsingTicket}
+                    >
                       Close
                     </Button>
                     <Button variant="primary" onClick={handleUseTicket}>
                       Use Ticket
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+                <Modal
+                  show={showModalForEncoreSongVoting}
+                  onHide={handleCloseModalForEncoreSongVoting}
+                  centered
+                  size="xl"
+                >
+                  <Modal.Body>
+                    <Container>
+                      <Row>
+                        <img
+                          src={ticket.imageUrl}
+                          alt={ticket.name}
+                          style={{ width: '100%', padding: 20 }}
+                        />
+                      </Row>
+                      <Row>
+                        <Col>
+                          <h2 style={{ color: '#6F4FF2', fontWeight: 'bold' }}>
+                            Vote for Encore Song!
+                          </h2>
+                          <Form>
+                            <Form.Group style={{ marginRight: 20 }}>
+                              <Form.Label>Cruel Summer</Form.Label>
+                              <Form.Control
+                                as="select"
+                                value={ticketDetails.ticketDate}
+                                onChange={(e) =>
+                                  handleChange('ticketDate', e.target.value)
+                                }
+                              >
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                              </Form.Control>
+                            </Form.Group>
+                            <Form.Group style={{ marginRight: 20 }}>
+                              <Form.Label>Blank Space</Form.Label>
+                              <Form.Control
+                                as="select"
+                                value={ticketDetails.ticketCategory}
+                                onChange={(e) =>
+                                  handleChange('ticketCategory', e.target.value)
+                                }
+                              >
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                              </Form.Control>
+                            </Form.Group>
+                            <Form.Group style={{ marginRight: 20 }}>
+                              <Form.Label>Love Story</Form.Label>
+                              <Form.Control
+                                as="select"
+                                value={ticketDetails.numberOfTickets}
+                                onChange={(e) =>
+                                  handleChange(
+                                    'numberOfTickets',
+                                    e.target.value
+                                  )
+                                }
+                              >
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                              </Form.Control>
+                            </Form.Group>
+                            <Form.Group style={{ marginRight: 20 }}>
+                              <Form.Label>Lover</Form.Label>
+                              <Form.Control
+                                as="select"
+                                value={ticketDetails.seatSection}
+                                onChange={(e) =>
+                                  handleChange('seatSection', e.target.value)
+                                }
+                              >
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                              </Form.Control>
+                            </Form.Group>
+                            <Form.Group style={{ marginRight: 20 }}>
+                              <Form.Label>Shake It Off</Form.Label>
+                              <Form.Control
+                                as="select"
+                                value={ticketDetails.seatNumber}
+                                onChange={(e) =>
+                                  handleChange('seatNumber', e.target.value)
+                                }
+                              >
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                              </Form.Control>
+                            </Form.Group>
+                          </Form>
+                        </Col>
+                      </Row>
+                    </Container>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      variant="secondary"
+                      onClick={handleCloseModalForEncoreSongVoting}
+                    >
+                      Close
+                    </Button>
+                    <Button variant="primary" onClick={handleVote}>
+                      Submit
                     </Button>
                   </Modal.Footer>
                 </Modal>
@@ -665,7 +839,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
     );
   }
 
-  // if ticket has been used, proceed with voting
+  // if ticket has been used, proceed with redirecting to the voting page
   if (ticket.ticketUsed) {
     return (
       <>
@@ -675,15 +849,32 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
           style={{ position: 'fixed', zIndex: 9999 }}
         >
           <Toast
-            onClose={() => setShowToast(false)}
-            show={showToast}
+            onClose={() => setShowToastForUsingTicket(false)}
+            show={showToastForUsingTicket}
             delay={5000}
             autohide
           >
             <Toast.Header>
               <strong className="me-auto">Success</strong>
             </Toast.Header>
-            <Toast.Body>{toastMessage}</Toast.Body>
+            <Toast.Body>{toastMessageForUsingTicket}</Toast.Body>
+          </Toast>
+        </ToastContainer>
+        <ToastContainer
+          className="p-3"
+          position="middle-center"
+          style={{ position: 'fixed', zIndex: 9999 }}
+        >
+          <Toast
+            onClose={() => setShowToastForEncoreSongVoting(false)}
+            show={showToastForEncoreSongVoting}
+            delay={5000}
+            autohide
+          >
+            <Toast.Header>
+              <strong className="me-auto">Success</strong>
+            </Toast.Header>
+            <Toast.Body>{toastMessageForEncoreSongVoting}</Toast.Body>
           </Toast>
         </ToastContainer>
         <div className="ticket-card-home">
@@ -742,15 +933,24 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
               <div style={{ marginLeft: 'auto' }}>
                 <Button
                   style={{
-                    backgroundColor: ticket.voted ? '#ff5800' : '#7f9bff',
+                    backgroundColor: ticket.voted ? ' #FFA500' : '#7f9bff',
+                    marginRight: 10,
                   }}
-                  onClick={handleShowModal}
+                  onClick={handleShowModalForEncoreSongVoting}
                 >
-                  {ticket.voted ? 'Update Vote' : 'Vote'}
+                  {ticket.voted ? 'Update Vote' : 'Vote Encore Song'}
+                </Button>
+                <Button
+                  style={{
+                    backgroundColor: ticket.ticketUsed ? '#7f9bff' : '#5dd55d',
+                  }}
+                  onClick={handleNavigationToVotingPage}
+                >
+                  Vote Future Concerts
                 </Button>
                 <Modal
-                  show={showModal}
-                  onHide={handleCloseModal}
+                  show={showModalForEncoreSongVoting}
+                  onHide={handleCloseModalForEncoreSongVoting}
                   centered
                   size="xl"
                 >
@@ -766,12 +966,11 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                       <Row>
                         <Col>
                           <h2 style={{ color: '#6F4FF2', fontWeight: 'bold' }}>
-                            Vote for your favourite song!
+                            Vote for Encore Song!
                           </h2>
-                          {/* <h5>Venue: {ticket.venue}</h5>{' '} */}
                           <Form>
                             <Form.Group style={{ marginRight: 20 }}>
-                              <Form.Label>Shiver</Form.Label>
+                              <Form.Label>Cruel Summer</Form.Label>
                               <Form.Control
                                 as="select"
                                 value={ticketDetails.ticketDate}
@@ -784,7 +983,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                               </Form.Control>
                             </Form.Group>
                             <Form.Group style={{ marginRight: 20 }}>
-                              <Form.Label>Shape Of You</Form.Label>
+                              <Form.Label>Blank Space</Form.Label>
                               <Form.Control
                                 as="select"
                                 value={ticketDetails.ticketCategory}
@@ -797,7 +996,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                               </Form.Control>
                             </Form.Group>
                             <Form.Group style={{ marginRight: 20 }}>
-                              <Form.Label>Photograph</Form.Label>
+                              <Form.Label>Love Story</Form.Label>
                               <Form.Control
                                 as="select"
                                 value={ticketDetails.numberOfTickets}
@@ -813,7 +1012,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                               </Form.Control>
                             </Form.Group>
                             <Form.Group style={{ marginRight: 20 }}>
-                              <Form.Label>The A Team</Form.Label>
+                              <Form.Label>Lover</Form.Label>
                               <Form.Control
                                 as="select"
                                 value={ticketDetails.seatSection}
@@ -826,7 +1025,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                               </Form.Control>
                             </Form.Group>
                             <Form.Group style={{ marginRight: 20 }}>
-                              <Form.Label>Supermarket Flowers</Form.Label>
+                              <Form.Label>Shake It Off</Form.Label>
                               <Form.Control
                                 as="select"
                                 value={ticketDetails.seatNumber}
@@ -844,7 +1043,10 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                     </Container>
                   </Modal.Body>
                   <Modal.Footer>
-                    <Button variant="secondary" onClick={handleCloseModal}>
+                    <Button
+                      variant="secondary"
+                      onClick={handleCloseModalForEncoreSongVoting}
+                    >
                       Close
                     </Button>
                     <Button variant="primary" onClick={handleVote}>
