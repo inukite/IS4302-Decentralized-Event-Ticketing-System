@@ -27,6 +27,10 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
     useState(false);
   const [toastMessageForEncoreSongVoting, setToastMessageForEncoreSongVoting] =
     useState('');
+  const [
+    showModalForAskingIfUserWantsToVote,
+    setShowModalForAskingIfUserWantsToVote,
+  ] = useState(false);
 
   // Handle showing and hiding of the modal
   const handleCloseModal = () => setShowModal(false);
@@ -41,6 +45,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
   // For using ticket
   const handleCloseModalForUsingTicket = () =>
     setShowModalForUsingTicket(false);
+
   const handleShowModalForUsingTicket = () => {
     if (ticketListed) {
       setTicketListed(false);
@@ -58,6 +63,16 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
     } else {
       setShowModalForEncoreSongVoting(true);
     }
+  };
+
+  // For asking if user wants to vote
+  const handleShowModalForAskingIfUserWantsToVote = () => {
+    setShowModalForAskingIfUserWantsToVote(true);
+  };
+
+  const handleCloseModalForAskingIfUserWantsToVote = () => {
+    setShowModalForAskingIfUserWantsToVote(false);
+    // handleNavigationToVotingPage();
   };
 
   const [ticketDetails, setTicketDetails] = useState({
@@ -944,7 +959,7 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                   style={{
                     backgroundColor: ticket.ticketUsed ? '#7f9bff' : '#5dd55d',
                   }}
-                  onClick={handleNavigationToVotingPage}
+                  onClick={handleShowModalForAskingIfUserWantsToVote}
                 >
                   Vote Future Concerts
                 </Button>
@@ -1051,6 +1066,37 @@ const TicketCard = ({ ticket, onPurchase, onUsageOfTicket, onVoting }) => {
                     </Button>
                     <Button variant="primary" onClick={handleVote}>
                       Submit
+                    </Button>
+                  </Modal.Footer>
+                </Modal>
+                <Modal
+                  show={showModalForAskingIfUserWantsToVote}
+                  onHide={handleCloseModalForAskingIfUserWantsToVote}
+                  centered
+                  size="xl"
+                >
+                  <Modal.Body>
+                    <Container>
+                      <Row>
+                        <p>
+                          Would you like to vote for which artist comes to
+                          Singapore to perform?
+                        </p>
+                      </Row>
+                    </Container>
+                  </Modal.Body>
+                  <Modal.Footer>
+                    <Button
+                      variant="secondary"
+                      onClick={handleCloseModalForAskingIfUserWantsToVote}
+                    >
+                      Close
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={handleNavigationToVotingPage}
+                    >
+                      Confirm
                     </Button>
                   </Modal.Footer>
                 </Modal>
