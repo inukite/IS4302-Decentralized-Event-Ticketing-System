@@ -45,7 +45,7 @@ const MyTickets = ({ ticketsStorage }) => {
       username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
       action: 'buy',
       imageUrl: TaylorSwiftConcert,
-      numberOfTickets: Math.floor(Math.random() * 10) + 1,
+      numberOfTickets: 1,
       section: 'Section C',
       seatNumber: 23,
       venue: 'National Stadium',

@@ -285,7 +285,7 @@ const FavouriteArtists = () => {
       username: `swiftie4eva${Math.floor(Math.random() * 100000) + 1}`,
       action: 'buy',
       imageUrl: TaylorSwiftConcert,
-      numberOfTickets: 8,
+      numberOfTickets: 4,
       section: 'Section C',
       seatNumber: 20,
       venue: 'National Stadium',
