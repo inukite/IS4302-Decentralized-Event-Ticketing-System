@@ -12,30 +12,42 @@ The purpose of this project is to address issues of fraud and scalping in the ev
 
 - **Ticket Issuance and Management**
   <br>
-  <img src="dets_homepage.png" alt="Homepage" width="1000" height="500">
+  <br>
+  <img src="dets_homepage.png" alt="Homepage" width="1050" height="500">
   <br>
   - Tickets are represented as smart contracts, allowing for secure and transparent handling.
     <br>
+    <br>
 - **Loyalty Points System**
+  <br>
   <br>
   <img src="dets_loyalty_points.png" alt="Loyalty Points" width="800" height="600">
   <br>
 
   - A system to reward frequent attendees, which can be used for voting or accessing special ticket offers.
+    <br>
+    <br>
 
 - **Fraud Prevention and Scalping Reduction**
   <br>
-  <img src="dets_marketplace.png" alt="Marketplace" width="1000" height="500">
+  <br>
+  <img src="dets_marketplace.png" alt="Marketplace" width="1050" height="500">
   <br>
   - Blockchain technology ensures that tickets cannot be duplicated and scalping activities can be controlled.
+    <br>
+    <br>
 - **Voting System**
   <br>
-  <img src="dets_voting.png" alt="Voting For Future Concerts" width="1000" height="500">
   <br>
-  <img src="dets_encore_song.png" alt="Voting For Encore Songs" width="1000" height="500">
+  <img src="dets_voting.png" alt="Voting For Future Concerts" width="1050" height="500">
+  <br>
+  <img src="dets_encore_song.png" alt="Voting For Encore Songs" width="1050" height="500">
   <br>
   - Attendees can vote on concert details such as song choices or encores, directly influencing the event experience. They can also use their loyalty points to vote for upcoming events.
+    <br>
+    <br>
 - **Lottery System**
+  <br>
   - A lottery feature where ticket buyers can participate in a draw, potentially winning free tickets. This aims to enhance engagement and provide additional incentives for ticket purchases on our platform.
 
 ## Technology Stack
