@@ -9,7 +9,9 @@ import "./LoyaltyPoints.sol";
 import "./FutureConcertPoll.sol";
 import "./Lottery.sol";
 
-// TicketMarket handles listing, buying & redeeming of tickets
+/**
+ * @title A marketplace for listing, buying, and redeeming tickets.
+ **/
 contract TicketMarket {
     address private _owner;
     uint256 public commissionFee;
@@ -29,12 +31,6 @@ contract TicketMarket {
         uint256 price,
         uint256 timestamp
     );
-    event TicketTransferred(
-        uint256 indexed id,
-        address from,
-        address to,
-        uint256 price
-    );
     event TicketRedeemed(
         uint256 indexed ticketId,
         address indexed redeemer,
@@ -46,6 +42,14 @@ contract TicketMarket {
         _;
     }
 
+    /**
+     * @notice Initializes a new TicketMarket contract with necessary references and commission fee
+     * @param ticketAddress Address of the Ticket contract
+     * @param loyaltyPointsAddress Address of the LoyaltyPoints contract
+     * @param futureConcertPollAddress Address of the FutureConcertPoll contract
+     * @param lotteryContractAddress Address of the Lottery contract
+     * @param fee Initial commission fee for ticket sales
+     **/
     constructor(
         Ticket ticketAddress,
         LoyaltyPoints loyaltyPointsAddress,
@@ -61,7 +65,11 @@ contract TicketMarket {
         commissionFee = fee;
     }
 
-    // Function to list a ticket for sale with a specified price
+    /**
+     * @notice Lists a ticket for sale at a specified price
+     * @param ticketId The ID of the ticket to list
+     * @param price The price at which to list the ticket
+     **/
     function list(uint256 ticketId, uint256 price) public {
         require(
             price >= (ticketContract.getPrice(ticketId) + commissionFee),
@@ -82,7 +90,10 @@ contract TicketMarket {
         emit TicketListed(ticketId, price);
     }
 
-    // Function to unlist a ticket from the market
+    /**
+     * @notice Removes a ticket from the list of tickets available for sale
+     * @param ticketId The ID of the ticket to unlist
+     **/
     function unlist(uint256 ticketId) public {
         require(
             msg.sender == ticketContract.getOwner(ticketId),
@@ -91,7 +102,6 @@ contract TicketMarket {
 
         listPrice[ticketId] = 0;
 
-        // Remove the ticket from the listedTickets array
         for (uint256 i = 0; i < listedTickets.length; i++) {
             if (listedTickets[i] == ticketId) {
                 listedTickets[i] = listedTickets[listedTickets.length - 1];
@@ -103,8 +113,13 @@ contract TicketMarket {
         emit TicketUnlisted(ticketId);
     }
 
-    // Function for a ticket owner to redeem their ticket 
-    // and optionally register and vote for an upcoming concert
+    /**
+     * @notice Redeems a ticket and optionally registers and votes for an upcoming concert
+     * @param ticketId The ID of the ticket to redeem
+     * @param wantToRegisterAndVote Flag to indicate if the redeemer wants to register and vote
+     * @param concertOptionId The ID of the concert option to vote for
+     * @param votePoints The number of points to use for voting
+     **/
     function redeemInTicketMarket(
         uint256 ticketId,
         bool wantToRegisterAndVote,
@@ -127,7 +142,7 @@ contract TicketMarket {
             "This ticket can't be redeemed today"
         );
 
-        ticketContract.redeemTicket(ticketId); // Redeeming the ticket
+        ticketContract.redeemTicket(ticketId);
         loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding loyalty points for redemption
 
         emit TicketRedeemed(ticketId, msg.sender, block.timestamp);
@@ -142,7 +157,8 @@ contract TicketMarket {
         }
     }
 
-    // Function to buy a listed ticket. Price needs to be >= value + commission fee
+    /// @notice Allows a user to buy a ticket that is listed for sale. Price needs to be >= value + commission fee
+    /// @param ticketId The ID of the ticket to buy
     function buy(uint256 ticketId) public payable {
         require(listPrice[ticketId] != 0, "Ticket must be listed for sale");
         require(msg.value >= listPrice[ticketId], "Insufficient payment");
@@ -164,19 +180,26 @@ contract TicketMarket {
         lotteryContract.addParticipant(msg.sender); // Adding the buyer to the lottery participants
     }
 
-    // Additional getters
+    // Getter functions below
+
+    /// @notice Retrieves the sale price of a ticket
+    /// @param ticketId The ID of the ticket
     function getTicketPrice(uint256 ticketId) public view returns (uint256) {
         return listPrice[ticketId];
     }
 
+    /// @notice Retrieves the current commission fee
     function getCommissionFee() public view returns (uint256) {
         return commissionFee;
     }
 
+    /// @notice Retrieves a list of all tickets currently listed for sale
     function getListedTickets() public view returns (uint256[] memory) {
         return listedTickets;
     }
 
+    /// @notice Provides details of a ticket including its price, owner, and listing status
+    /// @param ticketId The ID of the ticket
     function getTicketDetails(
         uint256 ticketId
     ) public view returns (uint256 price, address owner, bool isListed) {

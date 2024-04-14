@@ -6,6 +6,9 @@ import "./TicketToken.sol";
 import "./PresaleMarket.sol";
 import "./Lottery.sol";
 
+/**
+ * @title A contract for managing event tickets and their lifecycle states
+ **/
 contract Ticket {
     enum TicketState {
         Active,
@@ -29,26 +32,58 @@ contract Ticket {
     }
 
     mapping(uint256 => ticket) public tickets;
-
-    event TicketCreated(uint256 indexed ticketId, address owner);
-    event TicketRedeemed(uint256 ticketId);
-    event TicketFrozen(uint256 ticketId);
-    event TicketBought(uint256 ticketId, address newOwner, uint256 price);
-
     TicketToken public ticketToken;
     uint256 public ticketCounter = 0;
     address public owner;
     address public presaleMarketAddress;
     address public lotteryAddress;
 
+    event TicketCreated(uint256 indexed ticketId, address owner);
+    event TicketRedeemed(uint256 ticketId);
+    event TicketFrozen(uint256 ticketId);
+    event TicketBought(uint256 ticketId, address newOwner, uint256 price);
+
+    /**
+     * @notice Modifier to ensure only the ticket owner can call certain functions
+     **/
+    modifier ownerOnly(uint256 ticketId) {
+        require(tickets[ticketId].owner == msg.sender);
+        _;
+    }
+
+    /**
+     * @notice Modifier to ensure only the ticket owner, presale market, or lottery can call certain functions
+     **/
+    modifier onlyOwnerOrMarketorLottery() {
+        require(
+            msg.sender == owner ||
+                msg.sender == presaleMarketAddress ||
+                msg.sender == lotteryAddress,
+            "Unauthorized"
+        );
+        _;
+    }
+
+    /**
+     * @notice Sets the presale market address authorized to manage tickets
+     * @param _presaleMarketAddress The address to be set as the presale market
+     **/
     function setPresaleMarketAddress(address _presaleMarketAddress) public {
         presaleMarketAddress = _presaleMarketAddress;
     }
 
+    /**
+     * @notice Sets the lottery address authorized to manage tickets
+     * @param _lotteryAddress The address to be set as the lottery
+     **/
     function setLotteryAddress(address _lotteryAddress) public {
         lotteryAddress = _lotteryAddress;
     }
 
+    /**
+     * @notice Constructor sets the ticket token contract address
+     * @param _ticketToken The address of the TicketToken contract
+     **/
     constructor(address _ticketToken) {
         owner = msg.sender;
         ticketToken = TicketToken(_ticketToken);
@@ -67,7 +102,17 @@ contract Ticket {
         _;
     }
 
-    // function to create a new ticket and add to the tickets map
+    /**
+     * @notice Creates a new ticket and stores it in the mapping
+     * @param concertId ID of the concert
+     * @param concertName Name of the concert
+     * @param concertVenue Venue of the concert
+     * @param concertDate Date of the concert
+     * @param ticketSectionNo Section number of the seat
+     * @param ticketSeatNo Seat number
+     * @param price Initial price of the ticket
+     * @return The ID of the newly created ticket
+     **/
     function createTicket(
         uint256 concertId,
         string memory concertName,
@@ -97,21 +142,10 @@ contract Ticket {
         return ticketCounter - 1; // Return the ID of the newly created ticket
     }
 
-    // Modifier to ensure a function is callable only by its owner
-    modifier ownerOnly(uint256 ticketId) {
-        require(tickets[ticketId].owner == msg.sender);
-        _;
-    }
-
-    // Modifier to ensure function can be called by presaleMarket as well
-    modifier onlyOwnerOrMarketorLottery() {
-        require(
-            msg.sender == owner || msg.sender == presaleMarketAddress || msg.sender == lotteryAddress,
-            "Unauthorized"
-        );
-        _;
-    }
-
+    /**
+     * @notice Redeems a ticket, changing its state to Redeemed
+     * @param _ticketId The ID of the ticket to redeem
+     **/
     function redeemTicket(uint256 _ticketId) public validTicketId(_ticketId) {
         ticket storage myTicket = tickets[_ticketId];
 
@@ -126,6 +160,10 @@ contract Ticket {
         emit TicketRedeemed(_ticketId);
     }
 
+    /**
+     * @notice Freezes a ticket, changing its state to Frozen
+     * @param _ticketId The ID of the ticket to freeze
+     **/
     function freezeTicket(
         uint256 _ticketId
     ) external atState(_ticketId, TicketState.Active) validTicketId(_ticketId) {
@@ -133,6 +171,12 @@ contract Ticket {
         emit TicketFrozen(_ticketId);
     }
 
+    /**
+     * @notice Transfers ownership of a ticket to a new owner
+     * @param ticketId The ID of the ticket to transfer
+     * @param newOwner The address of the new owner
+     * @param resellPrice The resale price of the ticket
+     **/
     function transfer(
         uint256 ticketId,
         address newOwner,
@@ -150,14 +194,19 @@ contract Ticket {
         emit TicketBought(ticketId, newOwner, tickets[ticketId].price);
     }
 
-    // Function to check if a ticket has been redeemed
+    /**
+     * @notice Checks if a ticket has been redeemed
+     * @param ticketId The ID of the ticket to check
+     * @return True if the ticket has been redeemed, false otherwise
+     **/
     function isRedeemed(
         uint256 ticketId
     ) public view validTicketId(ticketId) returns (bool) {
         return tickets[ticketId].ticketState == TicketState.Redeemed;
     }
 
-    // Getter Functions for Ticket attributes
+    // Getter Functions for Ticket attributes below
+
     function getTicketId(
         uint256 ticketId
     ) public view validTicketId(ticketId) returns (uint256) {

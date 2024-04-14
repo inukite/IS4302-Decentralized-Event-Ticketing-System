@@ -3,25 +3,29 @@ pragma solidity ^0.8.0;
 
 import "./LoyaltyPoints.sol";
 
+/**
+ * @title A priority queue implementation for managing queue elements based on loyalty points.
+ **/
 contract PriorityQueue {
     struct QueueElement {
-        address addr;
-        uint256 priority;
-        uint256 insertionOrder; // To maintain stability among equal priorities.
+        address addr; // Address of the queue participant
+        uint256 priority; // Loyalty points determine priority in the queue
+        uint256 insertionOrder; // Used to maintain stability among equal priorities
     }
 
-    QueueElement[] private heapArray;
-    uint256 public size;
-    address private organizer; // Added for access control
-    LoyaltyPoints loyaltyPointsContract;
-    uint256 private insertionCounter = 0;
-    address public presaleMarketAddress; // Allow presaleMarket to be an authorised caller
+    QueueElement[] private heapArray; // Array representation of the heap
+    uint256 public size; // Number of elements in the heap
+    address private organizer; // Address of the queue organizer for access control
+    LoyaltyPoints loyaltyPointsContract; // Reference to the LoyaltyPoints contract
+    uint256 private insertionCounter = 0; // Counter to keep track of insertion order
+    address public presaleMarketAddress; // Address of the PresaleMarket, authorized to modify the queue
 
-    // New function to set the PresaleMarket address
-    function setPresaleMarketAddress(
-        address _presaleMarketAddress
-    ) external onlyOrganizer {
-        presaleMarketAddress = _presaleMarketAddress;
+    event ElementEnqueued(address indexed enqueuedAddress);
+    event ElementDequeued(address indexed dequeuedAddress);
+
+    modifier onlyOrganizer() {
+        require(msg.sender == organizer, "Caller is not the organizer");
+        _;
     }
 
     modifier onlyPresaleMarketOrOrganizer() {
@@ -32,17 +36,10 @@ contract PriorityQueue {
         _;
     }
 
-    function setLoyaltyPointsContractAddress(
-        address _addr
-    ) external onlyOrganizer {
-        loyaltyPointsContract = LoyaltyPoints(_addr);
-    }
-
-    modifier onlyOrganizer() {
-        require(msg.sender == organizer, "Caller is not the organizer");
-        _;
-    }
-
+    /**
+     * @notice Initializes the contract with a LoyaltyPoints contract address
+     * @param loyaltyPointsAddress The address of the LoyaltyPoints contract
+     **/
     constructor(address loyaltyPointsAddress) {
         organizer = msg.sender;
         loyaltyPointsContract = LoyaltyPoints(loyaltyPointsAddress);
@@ -52,9 +49,30 @@ contract PriorityQueue {
         size = 0;
     }
 
-    event ElementEnqueued(address indexed enqueuedAddress);
-    event ElementDequeued(address indexed dequeuedAddress);
+    /**
+     * @notice Sets the address of the PresaleMarket contract
+     * @param _presaleMarketAddress The address to be set
+     **/
+    function setPresaleMarketAddress(
+        address _presaleMarketAddress
+    ) external onlyOrganizer {
+        presaleMarketAddress = _presaleMarketAddress;
+    }
 
+    /**
+     * @notice Sets the address of the LoyalyPoints contract
+     * @param _loyaltyPointsContract The address to be set
+     **/
+    function setLoyaltyPointsContractAddress(
+        address _loyaltyPointsContract
+    ) external onlyOrganizer {
+        loyaltyPointsContract = LoyaltyPoints(_loyaltyPointsContract);
+    }
+
+    /**
+     * @notice Enqueues an address with its current loyalty points as priority
+     * @param _addr Address to be enqueued
+     */
     function enqueue(address _addr) public onlyPresaleMarketOrOrganizer {
         uint256 loyaltyPoints = loyaltyPointsContract.getPoints(_addr);
         heapArray.push(
@@ -68,6 +86,11 @@ contract PriorityQueue {
         _bubbleUp(size);
         emit ElementEnqueued(_addr);
     }
+
+    /**
+     * @notice Dequeues the highest priority address from the queue
+     * @return address The address of the dequeued participant
+     **/
     function dequeue() public onlyPresaleMarketOrOrganizer returns (address) {
         require(size > 0, "Queue is empty");
         address highestPriorityAddress = heapArray[1].addr;
@@ -82,11 +105,24 @@ contract PriorityQueue {
         return highestPriorityAddress;
     }
 
-    function popHighestPriorityBuyer() public onlyPresaleMarketOrOrganizer returns (address) {
+    /**
+     * @notice Pops the highest priority buyer from the queue
+     * @return address The address of the highest priority buyer
+     **/
+    function popHighestPriorityBuyer()
+        public
+        onlyPresaleMarketOrOrganizer
+        returns (address)
+    {
         require(size > 0, "Queue is empty");
         return dequeue(); // Use dequeue logic to pop and return the highest priority (loyalty points) buyer
     }
 
+    /**
+     * @notice Provides the highest priority participant without removing them from the queue
+     * @return addr Address of the participant with the highest priority
+     * @return priority Loyalty points of the highest priority participant
+     **/
     function peekHighestPriority()
         public
         view
@@ -96,6 +132,10 @@ contract PriorityQueue {
         return (heapArray[1].addr, heapArray[1].priority);
     }
 
+    /**
+     * @notice Updates the priority of a specific address in the queue
+     * @param _addr Address whose priority needs to be updated
+     **/
     function updatePriority(address _addr) public onlyOrganizer {
         for (uint256 i = 1; i <= size; i++) {
             if (heapArray[i].addr == _addr) {
@@ -118,6 +158,11 @@ contract PriorityQueue {
         }
     }
 
+    /**
+     * @notice Checks if an address is currently in the queue
+     * @param _addr Address to check
+     * @return bool True if the address is in the queue, false otherwise
+     **/
     function isInQueue(address _addr) public view returns (bool) {
         for (uint256 i = 1; i <= size; i++) {
             if (heapArray[i].addr == _addr) {
@@ -127,6 +172,15 @@ contract PriorityQueue {
         return false;
     }
 
+    /**
+     * @notice Checks if the queue is empty
+     * @return bool True if the queue is empty, false otherwise
+     **/
+    function isEmpty() public view returns (bool) {
+        return size == 0;
+    }
+
+    // Private helper functions for managing the heap
     function _bubbleUp(uint256 index) private {
         while (index > 1) {
             uint256 parentIndex = index / 2;
@@ -190,9 +244,5 @@ contract PriorityQueue {
                 break;
             }
         }
-    }
-
-    function isEmpty() public view returns (bool) {
-        return size == 0;
     }
 }

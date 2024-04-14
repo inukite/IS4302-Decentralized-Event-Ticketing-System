@@ -2,6 +2,9 @@
 pragma solidity ^0.8.0;
 import "./Ticket.sol";
 
+/**
+ * @title A contract for managing polls related to concert details
+ **/
 contract ConcertDetailsPoll {
     struct PollOption {
         uint256 optionId;
@@ -37,6 +40,10 @@ contract ConcertDetailsPoll {
     event PollClosed(uint256 indexed pollId);
     event VoteRetracted(uint256 indexed pollId, uint256 indexed ticketId);
 
+    /**
+     * @notice Initializes the contract with the ticket contract's address
+     * @param _ticketContract Address of the ticket contract used for validating ticket states
+     **/
     constructor(address _ticketContract) {
         ticketContract = Ticket(_ticketContract);
     }
@@ -56,7 +63,12 @@ contract ConcertDetailsPoll {
         _;
     }
 
-    // Function to create a new poll with multiple options
+    /**
+     * @notice Creates a new poll related to a concert with multiple options
+     * @param _concertId The ID of the concert
+     * @param _question The question to be answered in the poll
+     * @param _options Array of option texts for the poll
+     **/
     function createPoll(
         uint256 _concertId,
         string memory _question,
@@ -75,7 +87,12 @@ contract ConcertDetailsPoll {
         pollCounter++;
     }
 
-    // Function for ticket holders to vote on a poll option
+    /**
+     * @notice Allows ticket holders to vote on an option in an open poll
+     * @param _ticketId ID of the ticket used to vote
+     * @param _pollId ID of the poll being voted on
+     * @param _optionId ID of the option chosen
+     **/
     function vote(
         uint256 _ticketId,
         uint256 _pollId,
@@ -100,11 +117,41 @@ contract ConcertDetailsPoll {
         emit Voted(_pollId, _ticketId, _optionId);
     }
 
-    // Function to close a poll
+    /**
+     * @notice Closes a poll to further voting
+     * @param _pollId ID of the poll to close
+     **/
     function closePoll(uint256 _pollId) public isValidPoll(_pollId) {
         polls[_pollId].isOpen = false;
         emit PollClosed(_pollId);
     }
+
+    /**
+     * @notice Retracts a vote previously made by a ticket in an open poll
+     * @param _ticketId ID of the ticket retracting the vote
+     * @param _pollId ID of the poll from which to retract the vote
+     **/
+    function retractVote(
+        uint256 _ticketId,
+        uint256 _pollId
+    )
+        public
+        isValidPoll(_pollId)
+        isActiveTicketAndOpenPoll(_ticketId, _pollId)
+    {
+        require(
+            polls[_pollId].ticketVotes[_ticketId] != 0,
+            "No vote to retract"
+        );
+
+        uint256 optionId = polls[_pollId].ticketVotes[_ticketId];
+        polls[_pollId].options[optionId - 1].votes--;
+        polls[_pollId].totalVotes--;
+        delete polls[_pollId].ticketVotes[_ticketId];
+        emit VoteRetracted(_pollId, _ticketId);
+    }
+
+    // Getter functions for detailed poll information below
 
     // Function to get the number of votes for a specific option in a poll
     function getVotesForOption(
@@ -143,25 +190,5 @@ contract ConcertDetailsPoll {
         }
 
         return (concertId, question, optionsText, votes);
-    }
-
-    function retractVote(
-        uint256 _ticketId,
-        uint256 _pollId
-    )
-        public
-        isValidPoll(_pollId)
-        isActiveTicketAndOpenPoll(_ticketId, _pollId)
-    {
-        require(
-            polls[_pollId].ticketVotes[_ticketId] != 0,
-            "No vote to retract"
-        );
-
-        uint256 optionId = polls[_pollId].ticketVotes[_ticketId];
-        polls[_pollId].options[optionId - 1].votes--;
-        polls[_pollId].totalVotes--;
-        delete polls[_pollId].ticketVotes[_ticketId];
-        emit VoteRetracted(_pollId, _ticketId);
     }
 }

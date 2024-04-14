@@ -7,6 +7,9 @@ import "./LoyaltyPoints.sol";
 import "./FutureConcertPoll.sol";
 import "./Lottery.sol";
 
+/**
+ * @title A presale market for concert tickets with priority-based access and integrated loyalty and voting systems.
+ **/
 contract PresaleMarket {
     Ticket public ticketContract;
     address public organizer;
@@ -16,6 +19,7 @@ contract PresaleMarket {
     FutureConcertPoll public futureConcertPoll;
     Lottery public lotteryContract;
 
+    // Structure to store details about each event.
     struct EventDetails {
         uint256 concertId;
         string concertName;
@@ -34,6 +38,9 @@ contract PresaleMarket {
     // Track whether a user is eligible to vote based on ticket redemption
     mapping(address => bool) public isEligibleToVote;
 
+    /**
+     * @dev Constructor to initialize the market with necessary contract addresses.
+     **/
     constructor(
         address _priorityQueueAddress,
         address _loyaltyPointsAddress,
@@ -72,7 +79,10 @@ contract PresaleMarket {
     event TicketTransferred(address buyer, uint256 concertId);
     event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
 
-    // Create an event without immediately creating tickets
+    /**
+     * @notice Creates an event without immediately creating tickets.
+     * @dev Stores event details and emits an event creation log.
+     **/
     function createEvent(
         uint256 concertId,
         string memory concertName,
@@ -99,7 +109,10 @@ contract PresaleMarket {
         );
     }
 
-    // Create ticket and automatically associate tickets with their event
+    /**
+     * @notice Creates a ticket and associates it with an event.
+     * @dev Validates that the event exists before creating a ticket.
+     **/
     function createTicketAndAddToEvent(
         uint256 concertId,
         string memory concertName,
@@ -127,6 +140,10 @@ contract PresaleMarket {
         return newTicketId;
     }
 
+    /**
+     * @notice Releases tickets for an event allowing them to be purchased.
+     * @dev Checks that tickets have not been released and it is within the release period.
+     **/
     function releaseTicket(uint256 concertId) public onlyOrganizer {
         require(
             block.timestamp >= events[concertId].concertDate - 1 weeks,
@@ -143,7 +160,10 @@ contract PresaleMarket {
         eventDetail.ticketsReleased = true;
     }
 
-    // The buyTicket function allowing users with the highest priority to purchase tickets
+    /**
+     * @notice Allows users with the highest priority to purchase tickets.
+     * @dev Ensures only the highest priority buyer can purchase when tickets are released.
+     **/
     function buyTicket(uint256 concertId, uint256 ticketId) external payable {
         require(
             events[concertId].ticketsReleased,
@@ -170,7 +190,10 @@ contract PresaleMarket {
         lotteryContract.addParticipant(msg.sender);
     }
 
-    // Redeem a ticket for an event
+    /**
+     * @notice Redeems a ticket for an event and optionally allows the user to register and vote.
+     * @dev Checks ownership and if the ticket has been redeemed before allowing redemption.
+     **/
     function redeemInPresaleMarket(
         uint256 ticketId,
         bool wantToRegisterAndVote,
@@ -200,7 +223,6 @@ contract PresaleMarket {
 
         ticketContract.redeemTicket(ticketId);
 
-        // Award loyalty points
         loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
 
         emit TicketRedeemed(ticketId, msg.sender);
@@ -228,7 +250,11 @@ contract PresaleMarket {
         }
     }
 
-    //Getters
+    //Getter functions below
+
+    /**
+     * @notice Retrieves detailed information about an event.
+     **/
     function getEventDetails(
         uint256 _concertId
     )
@@ -254,6 +280,9 @@ contract PresaleMarket {
         );
     }
 
+    /**
+     * @notice Retrieves the owner of the ticket for a concert.
+     **/
     function getTicketOwner(uint256 concertId) public view returns (address) {
         require(
             concertToTicketIds[concertId].length > 0,

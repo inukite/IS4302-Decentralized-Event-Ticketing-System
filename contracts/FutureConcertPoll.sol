@@ -3,11 +3,14 @@ pragma solidity ^0.8.0;
 
 import "./LoyaltyPoints.sol";
 
+/**
+ * @title A contract for managing and casting votes for future concert options
+ **/
 contract FutureConcertPoll {
-    LoyaltyPoints public loyaltyPointsContract;
+    LoyaltyPoints public loyaltyPointsContract; // Reference to the LoyaltyPoints contract for managing vote points
     uint256 public maxVotePointsPerUser = 100; // Maximum points a user can spend on voting
-    uint256 private nextConcertOptionId = 1; // Keep track of the next ID to ensure uniqueness
-    address organizer;
+    uint256 private nextConcertOptionId = 1; // Incremental ID to ensure uniqueness among concert options
+    address private organizer; // Organizer's address to control privileged actions
 
     struct ConcertOption {
         uint256 concertOptionId;
@@ -48,9 +51,13 @@ contract FutureConcertPoll {
     // Event emmitted when a vote is casted
     event VoteCasted(address voter, uint256 concertOptionId, uint256 points);
 
+    /**
+     * @notice Constructor to initialize the FutureConcertPoll with a loyalty points contract
+     * @param _loyaltyPointsContract Address of the LoyaltyPoints contract
+     **/
     constructor(LoyaltyPoints _loyaltyPointsContract) {
-        loyaltyPointsContract = _loyaltyPointsContract;
         organizer = msg.sender;
+        loyaltyPointsContract = _loyaltyPointsContract;
     }
 
     modifier onlyOrganizer() {
@@ -61,7 +68,12 @@ contract FutureConcertPoll {
         _;
     }
 
-    // Function for the organizer to add a concert option
+    /**
+     * @notice Allows the organizer to add a new concert option for voting
+     * @param name Name of the concert
+     * @param venue Venue of the concert
+     * @param date Date of the concert
+     **/
     function addConcertOption(
         string memory name,
         string memory venue,
@@ -77,7 +89,10 @@ contract FutureConcertPoll {
         nextConcertOptionId++;
     }
 
-    // Function for users to register to vote on a concert option
+    /**
+     * @notice Registers a user to vote on a specific concert option
+     * @param concertOptionId ID of the concert option to register for
+     **/
     function registerToVote(uint256 concertOptionId) external {
         // Ensure the concert option exists
         require(
@@ -91,8 +106,15 @@ contract FutureConcertPoll {
         emit UserRegisteredToVote(msg.sender, concertOptionId);
     }
 
-    // Function for users to withdraw their registration to vote on a concert option
-    function withdrawVoteRegistration(uint256 concertOptionId, uint256 points) external {
+    /**
+     * @notice Allows a user to retract their vote registration and recover their loyalty points
+     * @param concertOptionId ID of the concert option to withdraw from
+     * @param points Points initially used to vote, which will be returned
+     **/
+    function withdrawVoteRegistration(
+        uint256 concertOptionId,
+        uint256 points
+    ) external {
         require(
             userVoteRegistration[msg.sender][concertOptionId],
             "User is not registered to vote on this concert option"
@@ -107,7 +129,11 @@ contract FutureConcertPoll {
         emit UserWithdrawedToVote(msg.sender, concertOptionId);
     }
 
-    // Function for users to cast votes
+    /**
+     * @notice Casts votes for a concert option using loyalty points
+     * @param concertOptionId ID of the concert option to vote for
+     * @param points Number of points to cast as votes
+     **/
     function castVote(uint256 concertOptionId, uint256 points) external {
         require(
             userVoteRegistration[msg.sender][concertOptionId],
@@ -126,14 +152,23 @@ contract FutureConcertPoll {
         emit VoteCasted(msg.sender, concertOptionId, points);
     }
 
-    // Function to check the total votes for a concert option
+    /**
+     * @notice Retrieves the total votes cast for a specific concert option
+     * @param concertOptionId ID of the concert option
+     * @return Total number of votes cast for the option
+     **/
     function getTotalVotes(
         uint256 concertOptionId
     ) public view returns (uint256) {
         return concertVotes[concertOptionId];
     }
 
-    // Function to check the votes casted by a user for a concert option
+    /**
+     * @notice Retrieves the number of votes cast by a specific user for a concert option
+     * @param user Address of the user
+     * @param concertOptionId ID of the concert option
+     * @return Number of votes cast by the user
+     **/
     function getUserVotes(
         address user,
         uint256 concertOptionId
