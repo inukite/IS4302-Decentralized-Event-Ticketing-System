@@ -39,7 +39,7 @@ The purpose of this project is to address issues of fraud and scalping in the ev
 ### Setting up the Project
 1. **Clone the Repository:**
    ```
-   git clone https://github.com/your-username/IS4302-Decentralized-Event-Ticketing-System.git
+   git clone https://github.com/inukite/IS4302-Decentralized-Event-Ticketing-System.git
    cd IS4302-Decentralized-Event-Ticketing-System
    ```
 
