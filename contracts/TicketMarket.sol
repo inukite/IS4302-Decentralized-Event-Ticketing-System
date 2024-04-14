@@ -9,34 +9,42 @@ import "./LoyaltyPoints.sol";
 import "./FutureConcertPoll.sol";
 import "./Lottery.sol";
 
+// TicketMarket handles listing, buying & redeeming of tickets
 contract TicketMarket {
-    address _owner = msg.sender;
+    address private _owner;
     uint256 public commissionFee;
     Ticket public ticketContract;
     LoyaltyPoints public loyaltyPoints;
     FutureConcertPoll public futureConcertPoll;
     Lottery public lotteryContract;
 
-    // Mapping from ticket ID to listing price
-    mapping(uint256 => uint256) public listPrice;
+    mapping(uint256 => uint256) public listPrice; // Mapping of ticket IDs to their listing price
+    uint256[] private listedTickets; // Array to keep track of all listed ticket IDs
 
-    uint256[] private listedTickets; // To track listed ticket IDs
-
-    // Event emitted when a ticket is listed for sale
     event TicketListed(uint256 ticketId, uint256 price);
     event TicketUnlisted(uint256 ticketId);
-    event TicketSold(uint256 ticketId, address buyer, uint256 price);
-
-    // Event emitted when a ticket is transferred
+    event TicketSold(
+        uint256 indexed ticketId,
+        address indexed buyer,
+        uint256 price,
+        uint256 timestamp
+    );
     event TicketTransferred(
         uint256 indexed id,
         address from,
         address to,
         uint256 price
     );
+    event TicketRedeemed(
+        uint256 indexed ticketId,
+        address indexed redeemer,
+        uint256 timestamp
+    );
 
-    // Event emitted when a ticket is redeemed
-    event TicketRedeemed(uint256 indexed ticketId, address indexed redeemer);
+    modifier onlyOwner() {
+        require(msg.sender == _owner, "Caller is not the owner");
+        _;
+    }
 
     constructor(
         Ticket ticketAddress,
@@ -45,6 +53,7 @@ contract TicketMarket {
         Lottery lotteryContractAddress,
         uint256 fee
     ) {
+        _owner = msg.sender;
         ticketContract = ticketAddress;
         loyaltyPoints = loyaltyPointsAddress;
         futureConcertPoll = futureConcertPollAddress;
@@ -52,13 +61,12 @@ contract TicketMarket {
         commissionFee = fee;
     }
 
-    // List a ticket for sale. Price needs to be >= value + fee
+    // Function to list a ticket for sale with a specified price
     function list(uint256 ticketId, uint256 price) public {
         require(
             price >= (ticketContract.getPrice(ticketId) + commissionFee),
             "Price must be at least ticket price plus commission fee"
         );
-
         require(
             price <= ((ticketContract.getPrice(ticketId) * 6) / 5),
             "Price cannot be more than 20% extra of original price"
@@ -67,29 +75,36 @@ contract TicketMarket {
             msg.sender == ticketContract.getOwner(ticketId),
             "Caller is not ticket owner"
         );
-        emit TicketListed(ticketId, price);
+
         listPrice[ticketId] = price;
-        listedTickets.push(ticketId); // Add ticket ID to the list of listed tickets
+        listedTickets.push(ticketId);
+
+        emit TicketListed(ticketId, price);
     }
 
+    // Function to unlist a ticket from the market
     function unlist(uint256 ticketId) public {
-        require(msg.sender == ticketContract.getOwner(ticketId));
-        listPrice[ticketId] = 0;
-        emit TicketUnlisted(ticketId); // Emit event for ticket unlisting
+        require(
+            msg.sender == ticketContract.getOwner(ticketId),
+            "Caller is not ticket owner"
+        );
 
-        // Find and remove the ticket ID from listedTickets array
+        listPrice[ticketId] = 0;
+
+        // Remove the ticket from the listedTickets array
         for (uint256 i = 0; i < listedTickets.length; i++) {
             if (listedTickets[i] == ticketId) {
-                // Move the last element to the current index
                 listedTickets[i] = listedTickets[listedTickets.length - 1];
-                // Remove the last element
                 listedTickets.pop();
-                break; // Exit the loop once the ticket ID is removed
+                break;
             }
         }
+
+        emit TicketUnlisted(ticketId);
     }
 
-    // Redeem a ticket for an event
+    // Function for a ticket owner to redeem their ticket 
+    // and optionally register and vote for an upcoming concert
     function redeemInTicketMarket(
         uint256 ticketId,
         bool wantToRegisterAndVote,
@@ -100,66 +115,34 @@ contract TicketMarket {
             ticketContract.getOwner(ticketId) == msg.sender,
             "You do not own this ticket"
         );
+        require(
+            !ticketContract.isRedeemed(ticketId),
+            "Ticket has already been redeemed"
+        );
 
-        // Retrieve ticket details for verification
         uint256 concertDate = ticketContract.getConcertDate(ticketId);
-
-        // Ensure the event is happening today
         require(
             block.timestamp >= concertDate &&
                 block.timestamp < concertDate + 1 days,
             "This ticket can't be redeemed today"
         );
 
-        // Check if the ticket has already been redeemed
-        require(
-            !ticketContract.isRedeemed(ticketId),
-            "Ticket has already been redeemed"
-        );
+        ticketContract.redeemTicket(ticketId); // Redeeming the ticket
+        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding loyalty points for redemption
 
-        ticketContract.redeemTicket(ticketId);
+        emit TicketRedeemed(ticketId, msg.sender, block.timestamp);
 
-        // Award loyalty points
-        loyaltyPoints.addLoyaltyPoints(msg.sender, 10); // Awarding 10 loyalty points whenever the user redeems the ticket
-
-        emit TicketRedeemed(ticketId, msg.sender);
-
-
-         if (wantToRegisterAndVote) {
-            // Ensure the user hasn't already registered to vote on this concert option
-            require(
-                !futureConcertPoll.userVoteRegistration(
-                    msg.sender,
-                    concertOptionId
-                ),
-                "Already registered to vote on this concert option"
-            );
-
+        if (wantToRegisterAndVote) {
             uint256 userPoints = loyaltyPoints.getPoints(msg.sender);
             require(userPoints >= votePoints, "Not enough loyalty points");
             loyaltyPoints.subtractLoyaltyPoints(msg.sender, votePoints);
 
-            // Register the user for voting on the concert option
             futureConcertPoll.registerToVote(concertOptionId);
-
-            // Assuming the user is now eligible to vote, proceed with casting the vote
             futureConcertPoll.castVote(concertOptionId, votePoints);
         }
     }
 
-    // Getter functions below
-
-    // Get price of ticket
-    function getTicketPrice(uint256 ticketId) public view returns (uint256) {
-        return listPrice[ticketId];
-    }
-
-    // Get the commission fee
-    function getCommission() public view returns (uint256) {
-        return commissionFee;
-    }
-
-    // Buy the ticket at the requested price
+    // Function to buy a listed ticket. Price needs to be >= value + commission fee
     function buy(uint256 ticketId) public payable {
         require(listPrice[ticketId] != 0, "Ticket must be listed for sale");
         require(msg.value >= listPrice[ticketId], "Insufficient payment");
@@ -169,25 +152,37 @@ contract TicketMarket {
         );
 
         address payable recipient = payable(ticketContract.getOwner(ticketId));
-
         uint256 resellPrice = listPrice[ticketId];
         uint256 amountToTransfer = resellPrice - commissionFee;
         recipient.transfer(amountToTransfer);
 
-        ticketContract.transfer(ticketId, msg.sender, resellPrice);
+        ticketContract.transfer(ticketId, msg.sender, resellPrice); // Transferring the ownership of the ticket
 
-        // Emit event for ticket purchase
-        emit TicketSold(ticketId, msg.sender, resellPrice);
-
-        // Remove the ticket from the listing after purchase
+        emit TicketSold(ticketId, msg.sender, resellPrice, block.timestamp);
         listPrice[ticketId] = 0;
 
-        // Lottery: Add the user to the list of participants for the lottery
-        lotteryContract.addParticipant(msg.sender);
+        lotteryContract.addParticipant(msg.sender); // Adding the buyer to the lottery participants
     }
 
-    // get price of ticket
-    function checkPrice(uint256 id) public view returns (uint256) {
-        return listPrice[id];
+    // Additional getters
+    function getTicketPrice(uint256 ticketId) public view returns (uint256) {
+        return listPrice[ticketId];
+    }
+
+    function getCommissionFee() public view returns (uint256) {
+        return commissionFee;
+    }
+
+    function getListedTickets() public view returns (uint256[] memory) {
+        return listedTickets;
+    }
+
+    function getTicketDetails(
+        uint256 ticketId
+    ) public view returns (uint256 price, address owner, bool isListed) {
+        price = listPrice[ticketId];
+        owner = ticketContract.getOwner(ticketId);
+        isListed = (price > 0);
+        return (price, owner, isListed);
     }
 }
