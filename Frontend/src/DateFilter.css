@@ -1,0 +1,13 @@
+.date-filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #f4f4f8; /* Or any background color of choice */
+}
+
+.selected-date {
+  font-size: 1rem;
+  color: #333;
+  margin-left: auto; /* Push it to the right */
+}

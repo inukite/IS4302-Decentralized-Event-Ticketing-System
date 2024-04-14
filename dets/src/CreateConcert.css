@@ -1,9 +1,0 @@
-.overlay-alert {
-  position: fixed; /* Fixed positioning relative to the viewport */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1050; /* Above everything else */
-  width: auto; /* Set to the width of the content inside */
-  max-width: 80%; /* Don't let it become too wide on large screens */
-}
