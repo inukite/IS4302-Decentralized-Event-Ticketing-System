@@ -13,7 +13,7 @@ The purpose of this project is to address issues of fraud and scalping in the ev
 - **Ticket Issuance and Management**
   <br>
   <br>
-  <img src="dets_homepage.png" alt="Homepage" width="1050" height="500">
+  <img src="./Frontend/src/dets_homepage.png" alt="Homepage" width="1050" height="500">
   <br>
   - Tickets are represented as smart contracts, allowing for secure and transparent handling.
     <br>
@@ -21,7 +21,7 @@ The purpose of this project is to address issues of fraud and scalping in the ev
 - **Loyalty Points System**
   <br>
   <br>
-  <img src="dets_loyalty_points.png" alt="Loyalty Points" width="800" height="600">
+  <img src="./Frontend/src/dets_loyalty_points.png" alt="Loyalty Points" width="800" height="600">
   <br>
 
   - A system to reward frequent attendees, which can be used for voting or accessing special ticket offers.
@@ -31,7 +31,7 @@ The purpose of this project is to address issues of fraud and scalping in the ev
 - **Fraud Prevention and Scalping Reduction**
   <br>
   <br>
-  <img src="dets_marketplace.png" alt="Marketplace" width="1050" height="500">
+  <img src="./Frontend/src/dets_marketplace.png" alt="Marketplace" width="1050" height="500">
   <br>
   - Blockchain technology ensures that tickets cannot be duplicated and scalping activities can be controlled.
     <br>
@@ -39,9 +39,9 @@ The purpose of this project is to address issues of fraud and scalping in the ev
 - **Voting System**
   <br>
   <br>
-  <img src="dets_voting.png" alt="Voting For Future Concerts" width="1050" height="500">
+  <img src="./Frontend/src/dets_voting.png" alt="Voting For Future Concerts" width="1050" height="500">
   <br>
-  <img src="dets_encore_song.png" alt="Voting For Encore Songs" width="1050" height="500">
+  <img src="./Frontend/src/dets_encore_song.png" alt="Voting For Encore Songs" width="1050" height="500">
   <br>
   - Attendees can vote on concert details such as song choices or encores, directly influencing the event experience. They can also use their loyalty points to vote for upcoming events.
     <br>
