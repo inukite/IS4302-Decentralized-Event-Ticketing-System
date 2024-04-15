@@ -157,8 +157,10 @@ contract TicketMarket {
         }
     }
 
-    /// @notice Allows a user to buy a ticket that is listed for sale. Price needs to be >= value + commission fee
-    /// @param ticketId The ID of the ticket to buy
+    /**
+     * @notice Allows a user to buy a ticket that is listed for sale. Price needs to be >= value + commission fee
+     * @param ticketId The ID of the ticket to buy
+     **/
     function buy(uint256 ticketId) public payable {
         require(listPrice[ticketId] != 0, "Ticket must be listed for sale");
         require(msg.value >= listPrice[ticketId], "Insufficient payment");
@@ -182,24 +184,32 @@ contract TicketMarket {
 
     // Getter functions below
 
-    /// @notice Retrieves the sale price of a ticket
-    /// @param ticketId The ID of the ticket
+    /**
+     * @notice Retrieves the sale price of a ticket
+     * @param ticketId The ID of the ticket
+     **/
     function getTicketPrice(uint256 ticketId) public view returns (uint256) {
         return listPrice[ticketId];
     }
 
-    /// @notice Retrieves the current commission fee
+    /**
+     * @notice Retrieves the current commission fee
+     **/
     function getCommissionFee() public view returns (uint256) {
         return commissionFee;
     }
 
-    /// @notice Retrieves a list of all tickets currently listed for sale
+    /**
+     * @notice Retrieves a list of all tickets currently listed for sale
+     **/
     function getListedTickets() public view returns (uint256[] memory) {
         return listedTickets;
     }
 
-    /// @notice Provides details of a ticket including its price, owner, and listing status
-    /// @param ticketId The ID of the ticket
+    /**
+     * @notice Provides details of a ticket including its price, owner, and listing status
+     * @param ticketId The ID of the ticket
+     **/
     function getTicketDetails(
         uint256 ticketId
     ) public view returns (uint256 price, address owner, bool isListed) {
